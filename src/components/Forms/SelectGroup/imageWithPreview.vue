@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, defineProps, defineEmits, onUnmounted } from 'vue'
 
+import { API } from "@/API/";
+
 const props = defineProps<{
   modelValue: string | File | null;
   label: string;
@@ -55,7 +57,7 @@ watch(() => props.modelValue, (newValue) => {
     <div class="mt-4">
       <img
         v-if="typeof props.modelValue === 'string'"
-        :src="imageSrc ? 'http://localhost:4000/images/admin_logistik/'+imageSrc : 'https://via.placeholder.com/150'"
+        :src="imageSrc ? API+'/images/admin_logistik/'+imageSrc : 'https://via.placeholder.com/150'"
         alt="Uploaded Preview"
         class="w-[100px] h-[100px] object-cover rounded"
         :class="props.disabled ? ' ' : 'cursor-pointer'"

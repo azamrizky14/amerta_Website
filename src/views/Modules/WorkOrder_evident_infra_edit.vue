@@ -190,7 +190,7 @@ const submitData = async () => {
           <div class="flex flex-col gap-6 xl:flex-row">
             <div class="lg:w-2/3">
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Id Pelanggan
+                *Id Pelanggan
               </label>
               <input
                 type="text"
@@ -214,7 +214,7 @@ const submitData = async () => {
 
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Nama Pelanggan
+                *Nama Pelanggan
               </label>
               <input
                 type="text"
@@ -270,7 +270,7 @@ const submitData = async () => {
                   v-model="data.label"
                 />
               </div>
-              <div class="w-3/12" v-if="data.qtyKeluar || data.qtyKeluar === ''">
+              <div class="w-3/12" v-if="data.qtyKeluar || data.qtyKeluar === '' || data.qtyKeluar === 0">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
                   Qty. Keluar
                 </label>
