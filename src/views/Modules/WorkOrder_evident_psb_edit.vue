@@ -18,26 +18,24 @@ const route = useRoute();
 const pageTitle = ref('Evident - Edit PSB')
 const pageList = ref (['Work Order', 'Evident', 'PSB', 'Edit'])
 
-
 // Saved Data
 const savedData = ref({
   Tr_teknis_pelanggan_id: "",
   Tr_teknis_pelanggan_nama: "",
+  Tr_teknis_pelanggan_server: "",
   Tr_teknis_user_updated: "",
   Tr_teknis_keterangan: "",
  
-  Tr_teknis_evident_progress: null,
-  Tr_teknis_evident_odp_depan: null,
-  Tr_teknis_evident_odp_dalam: null,
-  Tr_teknis_evident_redaman_ont: null,
-  Tr_teknis_evident_redaman_odp: null,
+  Tr_teknis_redaman_sebelum: null,
+  Tr_teknis_evident_kendala_1: null,
+  Tr_teknis_evident_kendala_2: null,
+  Tr_teknis_evident_kendala_3: null,
+  Tr_teknis_evident_proses_sambung: null,
+  Tr_teknis_redaman_sesudah: null,
+  Tr_teknis_redaman_out_odp: null,
+  Tr_teknis_redaman_pelanggan: null,
   Tr_teknis_evident_marking_dc_start: null,
   Tr_teknis_evident_marking_dc_end: null,
-  Tr_teknis_evident_kertas_psb: null,
-  Tr_teknis_evident_review_google: null,
-  Tr_teknis_evident_speed_test: null,
-  Tr_teknis_evident_pelanggan_dengan_pelanggan: null,
-  Tr_teknis_evident_pelanggan_depan_rumah: null,
 
   Tr_teknis_status: "Y",
   Tr_teknis_domain: domain,
@@ -45,15 +43,14 @@ const savedData = ref({
   Tr_teknis_created: "",
   Tr_teknis_jenis: "PSB",
   Tr_teknis_material_terpakai: [
-    {label: "PS Kecil", qty: ""},
-    {label: "PS Besar", qty: ""},
-    {label: "DC", qty: ""},
-    {label: "ONT", qty: ""},
-    {label: "Pigtail", qty: ""},
-    {label: "Adaptor", qty: ""},
-    {label: "Konektor PAZ", qty: ""},
-    {label: "SPL 1:8", qty: ""},
-    {label: "SPL 1:4", qty: ""}
+    {label: "PS Besar", qtyKeluar: "", qtyKembali: ""},
+    {label: "DC", qtyKeluar: "", qtyKembali: ""},
+    {label: "ONT", snNumber: ""},
+    {label: "Pigtail", qtyKeluar: "", qtyKembali: ""},
+    {label: "Adaptor (12V)", qtyKeluar: "", qtyKembali: ""},
+    {label: "Konektor PAZ", qtyKeluar: "", qtyKembali: ""},
+    {label: "SPL 1:8", qtyKeluar: "", qtyKembali: ""},
+    {label: "SPL 1:4", qtyKeluar: "", qtyKembali: ""}
   ]
 })
 
@@ -72,7 +69,7 @@ const handleButtonClick = async () => {
 const handleAddMaterialTerpakai = async () => {
   await successCreate(null, null, 'top-end')
   materialData.value.push({
-    label: "", qty: ""
+    label: "", qtyKeluar: "", qtyKembali: "",
   })
 }
 const handleRemoveMaterialTerpakai = async (index) => {
@@ -182,8 +179,9 @@ const submitData = async () => {
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="Input Data">
-          <div class="flex flex-col gap-5.5 p-6.5">
-            <div>
+          <div class="flex flex-col gap-2 p-6.5">
+          <div class="flex flex-col gap-6 xl:flex-row">
+            <div class="lg:w-2/3">
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Id Pelanggan
               </label>
@@ -194,6 +192,18 @@ const submitData = async () => {
                 v-model="savedData.Tr_teknis_pelanggan_id"
               />
             </div>
+            <div class="lg:w-1/3">
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Server
+              </label>
+              <input
+                type="text"
+                placeholder="Server"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_pelanggan_server"
+              />
+            </div>
+          </div>
 
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
@@ -224,7 +234,7 @@ const submitData = async () => {
                 Keterangan
               </label>
               <textarea
-                rows="6"
+                rows="3"
                 placeholder="Masukan keterangan disini!"
                 class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="savedData.Tr_teknis_keterangan"
@@ -233,15 +243,15 @@ const submitData = async () => {
           </div>
         </DefaultCard>
         <!-- Input Fields End -->
-
-
+        
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="Input Material Terpakai">
           <div class="p-6.5">
             <div class="flex flex-col gap-2 xl:flex-row" 
              v-for="(data, index) in savedData.Tr_teknis_material_terpakai"
+             v-if="savedData && savedData.Tr_teknis_material_terpakai.length > 0"
              :class="index === 0 ? '' : 'pt-2'"> 
-              <div class="w-8/12">
+              <div class="w-5/12">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
                   Nama Barang
                 </label>
@@ -253,15 +263,37 @@ const submitData = async () => {
                   v-model="data.label"
                 />
               </div>
-              <div class="w-3/12">
+              <div class="w-3/12" v-if="data.qtyKeluar || data.qtyKeluar === ''">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
-                  Qty.
+                  Qty. Keluar
                 </label>
                 <input
                   type="number"
                   placeholder="Qty"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.qty"
+                  v-model="data.qtyKeluar"
+                />
+              </div>
+              <div class="w-3/12" v-if="data.qtyKembali || data.qtyKembali === '' || data.qtyKembali === 0">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
+                  Qty. Kembali
+                </label>
+                <input
+                  type="number"
+                  placeholder="Qty"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="data.qtyKembali"
+                />
+              </div>
+              <div class="w-6/12" v-else>
+                <!-- <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
+                  SN
+                </label> -->
+                <input
+                  type="text"
+                  placeholder="SN"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="data.snNumber"
                 />
               </div>
               <div class="w-1/12 flex items-end pb-2 flex-wrap">

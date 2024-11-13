@@ -15,13 +15,15 @@ const pageTitle = ref('Evident - Detail MT  ')
 const pageList = ref (['Work Order', 'Evident', 'MT ', 'Detail'])
 const oldData = ref([])
 
-
 // Saved Data
 const savedData = ref({
   Tr_teknis_pelanggan_id: "",
   Tr_teknis_pelanggan_nama: "",
+  Tr_teknis_pelanggan_server: "",
   Tr_teknis_user_updated: "",
   Tr_teknis_keterangan: "",
+  Tr_teknis_troule: "",
+  Tr_teknis_action: "",
 
   Tr_teknis_redaman_sebelum: null,
   Tr_teknis_evident_kendala_1: null,
@@ -38,7 +40,19 @@ const savedData = ref({
   Tr_teknis_domain: domain,
   Tr_teknis_tanggal: "",
   Tr_teknis_created: "",
-})
+  Tr_teknis_jenis: "MT",
+  Tr_teknis_material_terpakai: [
+    { label: "PS Besar", qtyKeluar: "", qtyKembali: "" },
+    { label: "DC", qtyKeluar: "", qtyKembali: "" },
+    { label: "ONT", snNumber: "" },
+    { label: "Pigtail", qtyKeluar: "", qtyKembali: "" },
+    { label: "Adaptor (12V)", qtyKeluar: "", qtyKembali: "" },
+    { label: "Konektor PAZ", qtyKeluar: "", qtyKembali: "" },
+    { label: "SPL 1:8", qtyKeluar: "", qtyKembali: "" },
+    { label: "SPL 1:4", qtyKeluar: "", qtyKembali: "" },
+  ],
+});
+
 
 onMounted ( async () => {
   const data = await adminTeknis_GetDataById(route.params.id)
@@ -60,18 +74,32 @@ onMounted ( async () => {
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="List Data">
-          <div class="flex flex-col gap-5.5 p-6.5">
-            <div>
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Id Pelanggan
-              </label>
-              <input
-                disabled
-                type="text"
-                placeholder="Id Pelanggan"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_pelanggan_id"
-              />
+          <div class="flex flex-col gap-2 p-6.5">
+            <div class="flex flex-col gap-6 xl:flex-row">
+              <div class="lg:w-2/3">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Id Pelanggan
+                </label>
+                <input
+                  disabled
+                  type="text"
+                  placeholder="Id Pelanggan"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_pelanggan_id"
+                />
+              </div>
+              <div class="lg:w-1/3">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Server
+                </label>
+                <input
+                  disabled
+                  type="text"
+                  placeholder="Server"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_pelanggan_server"
+                />
+              </div>
             </div>
 
             <div>
@@ -99,6 +127,29 @@ onMounted ( async () => {
                 v-model="savedData.Tr_teknis_user_updated"
               />
             </div>
+
+            <div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Masalah (Trouble)
+              </label>
+              <textarea
+                rows="3"
+                placeholder="Masukan keterangan disini!"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_trouble"
+              ></textarea>
+            </div>
+            <div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Solusi (Action)
+              </label>
+              <textarea
+                rows="3"
+                placeholder="Masukan keterangan disini!"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_action"
+              ></textarea>
+            </div>
             
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
@@ -116,45 +167,80 @@ onMounted ( async () => {
         </DefaultCard>
         <!-- Input Fields End -->
 
-
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Input Material Terpakai">
+        <DefaultCard cardTitle="List Material Terpakai">
           <div class="p-6.5">
-            <div class="flex flex-col gap-2 xl:flex-row" 
-             v-for="(data, index) in savedData.Tr_teknis_material_terpakai"
-             v-if="savedData && savedData.Tr_teknis_material_terpakai"
-             :class="index === 0 ? '' : 'pt-2'"> 
-              <div class="w-8/12">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
+            <div
+              class="flex flex-col gap-2 xl:flex-row"
+              v-for="(data, index) in savedData.Tr_teknis_material_terpakai"
+              v-if="savedData && savedData.Tr_teknis_material_terpakai"
+              :class="index === 0 ? '' : 'pt-2'"
+            >
+              <div class="w-6/12">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
                   Nama Barang
                 </label>
-                <input
+                <!-- <input
                   disabled
                   type="text"
                   placeholder="Nama Barang"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.label"
-                />
+                /> -->
+                <div class="w-full text-black py-3 px-5 font-normal dark:text-white flex justify-between">
+                <span>{{ data.label }}</span>
+                <span>:</span>
+                </div>
               </div>
-              <div class="w-4/12">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
-                  Qty.
+              <div class="w-3/12" v-if="data.qtyKeluar || data.qtyKeluar === ''">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
+                  Qty. Keluar
                 </label>
                 <input
-                disabled
+                  disabled
                   type="number"
                   placeholder="Qty"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.qty"
+                  v-model="data.qtyKeluar"
                 />
               </div>
-            </div>            
-            
+              <div class="w-3/12" v-if="data.qtyKembali || data.qtyKembali === '' || data.qtyKembali === 0">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
+                  Qty. Kembali
+                </label>
+                <input
+                  disabled
+                  type="number"
+                  placeholder="Qty"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="data.qtyKembali"
+                />
+              </div>
+              <div class="w-6/12" v-else>
+                <!-- <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
+                  SN
+                </label> -->
+                <input
+                  disabled
+                  type="text"
+                  placeholder="SN"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="data.snNumber"
+                />
+              </div>
+            </div>
           </div>
-          
         </DefaultCard>
         <!-- Input Fields End -->
-
       </div>
 
       <div class="flex flex-col gap-9">
