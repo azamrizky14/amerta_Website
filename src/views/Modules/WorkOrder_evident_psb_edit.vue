@@ -183,7 +183,7 @@ const submitData = async () => {
           <div class="flex flex-col gap-6 xl:flex-row">
             <div class="lg:w-2/3">
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                *Id Pelanggan
+                Id Pelanggan (Wajib Diisi)
               </label>
               <input
                 type="text"
@@ -207,7 +207,7 @@ const submitData = async () => {
 
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                *Nama Pelanggan
+                Nama Pelanggan (Wajib Diisi)
               </label>
               <input
                 type="text"
@@ -245,7 +245,7 @@ const submitData = async () => {
         <!-- Input Fields End -->
         
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Input Material Terpakai">
+        <DefaultCard cardTitle="Input Material Terpakai" class="hidden">
           <div class="p-6.5">
             <div class="flex flex-col gap-2 xl:flex-row" 
              v-for="(data, index) in savedData.Tr_teknis_material_terpakai"

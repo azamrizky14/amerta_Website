@@ -22,8 +22,6 @@ const savedData = ref({
   Tr_teknis_pelanggan_server: "",
   Tr_teknis_user_updated: "",
   Tr_teknis_keterangan: "",
-  Tr_teknis_troule: "",
-  Tr_teknis_action: "",
 
   Tr_teknis_redaman_sebelum: null,
   Tr_teknis_evident_kendala_1: null,
@@ -101,7 +99,7 @@ onMounted(async () => {
 
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                *Nama Pelanggan
+                Nama Pelanggan (Wajib Diisi)
               </label>
               <input
                 disabled
@@ -124,30 +122,6 @@ onMounted(async () => {
                 v-model="savedData.Tr_teknis_user_updated"
               />
             </div>
-
-            <div>
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Masalah (Trouble)
-              </label>
-              <textarea
-                rows="3"
-                placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_trouble"
-              ></textarea>
-            </div>
-            <div>
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Solusi (Action)
-              </label>
-              <textarea
-                rows="3"
-                placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_action"
-              ></textarea>
-            </div>
-
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Keterangan
@@ -165,7 +139,7 @@ onMounted(async () => {
         <!-- Input Fields End -->
 
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="List Material Terpakai">
+        <DefaultCard cardTitle="List Material Terpakai" class="hidden">
           <div class="p-6.5">
             <div
               class="flex flex-col gap-2 xl:flex-row"
