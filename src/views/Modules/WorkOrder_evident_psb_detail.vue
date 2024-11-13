@@ -103,7 +103,7 @@ onMounted ( async () => {
 
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Nama Pelanggan
+                *Nama Pelanggan
               </label>
               <input
                 disabled

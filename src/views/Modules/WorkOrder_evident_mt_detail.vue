@@ -104,7 +104,7 @@ onMounted ( async () => {
 
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Nama Pelanggan
+                *Nama Pelanggan
               </label>
               <input
                 disabled
@@ -150,7 +150,7 @@ onMounted ( async () => {
                 v-model="savedData.Tr_teknis_action"
               ></textarea>
             </div>
-            
+
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Keterangan
@@ -195,7 +195,7 @@ onMounted ( async () => {
                 <span>:</span>
                 </div>
               </div>
-              <div class="w-3/12" v-if="data.qtyKeluar || data.qtyKeluar === ''">
+              <div class="w-3/12" v-if="data.qtyKeluar || data.qtyKeluar === '' || data.qtyKeluar === 0">
                 <label
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
                   v-if="index === 0"
