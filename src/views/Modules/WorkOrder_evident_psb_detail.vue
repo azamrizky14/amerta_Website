@@ -103,7 +103,7 @@ onMounted ( async () => {
 
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                *Nama Pelanggan
+                Nama Pelanggan (Wajib Diisi)
               </label>
               <input
                 disabled
@@ -144,7 +144,7 @@ onMounted ( async () => {
         <!-- Input Fields End -->
 
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="List Material Terpakai">
+        <DefaultCard cardTitle="List Material Terpakai" class="hidden">
           <div class="p-6.5">
             <div
               class="flex flex-col gap-2 xl:flex-row"

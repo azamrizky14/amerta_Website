@@ -26,6 +26,8 @@ const savedData = ref({
   Tr_teknis_pelanggan_server: "",
   Tr_teknis_user_updated: "",
   Tr_teknis_keterangan: "",
+  Tr_teknis_trouble: "",
+  Tr_teknis_action: "",
  
   Tr_teknis_redaman_sebelum: null,
   Tr_teknis_evident_kendala_1: null,
@@ -184,7 +186,7 @@ const submitData = async () => {
           <div class="flex flex-col gap-6 xl:flex-row">
             <div class="lg:w-2/3">
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                *Id Pelanggan
+                Id Pelanggan (Wajib Diisi)
               </label>
               <input
                 type="text"
@@ -208,7 +210,7 @@ const submitData = async () => {
 
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                *Nama Pelanggan
+                Nama Pelanggan (Wajib Diisi)
               </label>
               <input
                 type="text"
@@ -232,6 +234,29 @@ const submitData = async () => {
             
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Masalah (Trouble)
+              </label>
+              <textarea
+                rows="3"
+                placeholder="Masukan keterangan disini!"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_trouble"
+              ></textarea>
+            </div>
+            <div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Solusi (Action)
+              </label>
+              <textarea
+                rows="3"
+                placeholder="Masukan keterangan disini!"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_action"
+              ></textarea>
+            </div>
+
+            <div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Keterangan
               </label>
               <textarea
@@ -246,7 +271,7 @@ const submitData = async () => {
         <!-- Input Fields End -->
         
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Input Material Terpakai">
+        <DefaultCard cardTitle="Input Material Terpakai" class="hidden">
           <div class="p-6.5">
             <div class="flex flex-col gap-2 xl:flex-row" 
              v-for="(data, index) in savedData.Tr_teknis_material_terpakai"
