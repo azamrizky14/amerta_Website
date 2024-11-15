@@ -7,6 +7,13 @@ export const userInternal_Login = async (data) => {
   return suppData
 }
 
+// Bon & Material
+export const BonMaterial_GetPrefixByTypeAndDate = async (type, date) => {
+  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getBonPrefix/'+ type + '/' +date)
+  var suppData = response.data;
+  return suppData
+}
+
 // Admin Teknisi
 export const adminTeknis_GetDataByDomainAndStatusAndType = async (status, type) => {
   const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdata/'+ domain + '/' + status + '/' + type)
@@ -16,6 +23,12 @@ export const adminTeknis_GetDataByDomainAndStatusAndType = async (status, type) 
 
 export const adminTeknis_GetDataById = async (id) => {
   const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getbyid/'+ id)
+  var suppData = response.data;
+  return suppData
+}
+
+export const adminTeknis_CreateData = async (data) => {
+  const response = await axios.post(API+'/api/Tr_teknis/Trteknis/create', data)
   var suppData = response.data;
   return suppData
 }
