@@ -15,6 +15,12 @@ export const BonMaterial_GetPrefixByTypeAndDate = async (type, date) => {
 }
 
 // Admin Teknisi
+export const adminTeknis_GetDataByDomainAndStatus = async (status) => {
+  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdata/'+ domain + '/' + status)
+  var suppData = response.data;
+  return suppData
+}
+
 export const adminTeknis_GetDataByDomainAndStatusAndType = async (status, type) => {
   const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdata/'+ domain + '/' + status + '/' + type)
   var suppData = response.data;

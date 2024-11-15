@@ -5,12 +5,12 @@ import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import ButtonDynamic from "@/components/Buttons/ButtonDynamic.vue";
 import Swal from "sweetalert2";
 
-import { domain } from "@/API/";
 import { getDateToday } from "@/stores/date";
 import { showLoading, confirmDelete, successCreate, failedCreate } from "@/stores/swal";
 import { adminTeknis_CreateData, BonMaterial_GetPrefixByTypeAndDate } from "@/stores/functionAPI";
 import { mdiPlusCircleOutline, mdiTrashCanOutline } from "@mdi/js";
 import multiselectOption from "@/components/Forms/SelectGroup/multiselectOption.vue";
+import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
 import { useIndexStore } from "@/stores";
 
 import { ref, onMounted } from "vue";
@@ -31,8 +31,14 @@ const options: Option[] = [
   { id: 5, name: "Option 5" },
 ];
 
+const optionsType = [
+  { label: 'PSB', value: 'PSB' },
+  { label: 'MT', value: 'MT' },
+  { label: 'INFRA', value: 'INFRA' }
+]
+
 const pageTitle = ref("Add Bon & Material");
-const pageList = ref(["Work Order", "Evident", "PSB", "Add"]);
+const pageList = ref(["Work Order", "Bon & Material", "Add"]);
 
 // Saved Data
 const savedData = ref({
@@ -48,7 +54,7 @@ const savedData = ref({
   Tr_teknis_closed: "",
 
   Tr_teknis_status: "open", // otomatis
-  Tr_teknis_jenis: "PSB", // otomatis
+  Tr_teknis_jenis: "", // otomatis
   Tr_teknis_deleted: "N", // otomatis
   Tr_teknis_domain: "AMERTA-PASURUAN", // otomatis   
 
@@ -99,7 +105,7 @@ const cancelAdd = async () => {
   });
 
   if (result.isConfirmed) {
-    await router.push("/modules/work-order/evident/psb");
+    await router.push("/modules/work-order/bon-dan-material");
   }
 };
 
@@ -130,6 +136,7 @@ const submitData = async () => {
       
       const prefix = await BonMaterial_GetPrefixByTypeAndDate(fixData.Tr_teknis_jenis, fixData.Tr_teknis_created)
       fixData.Tr_teknis_logistik_id = prefix.nextId
+      fixData.Tr_teknis_jenis = fixData.Tr_teknis_jenis.value
       // console.log(fixData)
       await adminTeknis_CreateData(fixData);
       await successCreate().then(() => {
@@ -155,17 +162,25 @@ const submitData = async () => {
         <DefaultCard cardTitle="Input Data">
           <div class="flex flex-col gap-2 p-6.5">
 
-            <div>
+            <div class="flex flex-col gap-6 xl:flex-row">
+            <div class="lg:w-1/2">
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Jenis Permintaan
+              </label>
+              <SelectGroup placeholder="Pilih Jenis Permintaan" :options="optionsType" v-model="savedData.Tr_teknis_jenis" />
+            </div>
+            <div class="lg:w-1/2">
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Nama Tas
               </label>
               <input
                 type="text"
                 placeholder="Nama Tas"
-                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="savedData.Tr_teknis_item"
               />
             </div>
+          </div>
 
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
@@ -197,7 +212,7 @@ const submitData = async () => {
       </div>
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Input Material Terpakai">
+        <DefaultCard cardTitle="Input Material">
           <div class="p-6.5">
             <div
               class="flex flex-col gap-2 xl:flex-row"
