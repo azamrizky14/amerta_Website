@@ -122,6 +122,44 @@ const routes = [
 
   // Modules
   
+  // BON & Material
+  {
+    path: '/modules/work-order/bon-dan-material',
+    name: 'woBon',
+    component: () => import('@/views/Modules/WorkOrder_bon_dan_material.vue'),
+    meta: {
+      title: 'Bon & Material',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/bon-dan-material/add',
+    name: 'woBonAdd',
+    component: () => import('@/views/Modules/WorkOrder_bon_dan_material_add.vue'),
+    meta: {
+      title: 'Create Bon & Material',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  // {
+  //   path: '/modules/work-order/evident/psb/detail/:id',
+  //   name: 'EvidentPsbDetail',
+  //   component: () => import('@/views/Modules/WorkOrder_evident_psb_detail.vue'),
+  //   meta: {
+  //     title: 'Evident PSB Detail',
+  //     requiresAuth: true // Add this line to protect this route
+  //   }
+  // },
+  // {
+  //   path: '/modules/work-order/evident/psb/edit/:id',
+  //   name: 'EvidentPsbEdit',
+  //   component: () => import('@/views/Modules/WorkOrder_evident_psb_edit.vue'),
+  //   meta: {
+  //     title: 'Evident PSB Edit',
+  //     requiresAuth: true // Add this line to protect this route
+  //   }
+  // },
+  // Evident PSB
   {
     path: '/modules/work-order/evident/psb',
     name: 'evidentPsb',
@@ -158,7 +196,7 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
-  
+  // Evident MT
   {
     path: '/modules/work-order/evident/mt',
     name: 'evidentMt',
@@ -195,7 +233,7 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
-  
+  // Evident INFRA
   {
     path: '/modules/work-order/evident/infra',
     name: 'evidentInfra',

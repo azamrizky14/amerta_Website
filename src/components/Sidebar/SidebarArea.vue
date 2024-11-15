@@ -40,58 +40,14 @@ const groupPages = async (pages) => {
 
   return groups.map(group => {
     const filteredPages = data.filter(page => page.pageCode.startsWith(group.prefix));
-
     const menuItems: any[] = [];
     const groupedPages: Record<string, any> = {};
 
-    // Organize pages based on `pageGroup`
     filteredPages.forEach((page) => {
       const { pageGroup, pageName, pageRoutes } = page;
 
-      // Check if pageGroup has a "/" separator
-      if (pageGroup.includes('/')) {
-        const [mainGroup, subGroup] = pageGroup.split('/');
-
-        // Create a structure for the main group if it doesn't exist
-        if (!groupedPages[mainGroup]) {
-          groupedPages[mainGroup] = {
-            icon: `<svg
-              class="fill-current"
-              width="${page.pageProps.iconWidth}"
-              height="${page.pageProps.iconHeight}"
-              viewBox="${page.pageProps.iconViewBox}"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="${mdiIcons[page.pageIcon]}" />
-            </svg>`,
-            label: mainGroup,
-            route: '#',
-            children: []
-          };
-        }
-
-        // Find or create the sub-group within the main group
-        const mainGroupChildren = groupedPages[mainGroup].children;
-        let subGroupEntry = mainGroupChildren.find((child: any) => child.label === subGroup);
-
-        if (!subGroupEntry) {
-          subGroupEntry = {
-            label: subGroup,
-            route: '#',
-            children: []
-          };
-          mainGroupChildren.push(subGroupEntry);
-        }
-
-        // Add the current page to the sub-group
-        subGroupEntry.children.push({
-          label: pageName,
-          route: pageRoutes || '#'
-        });
-
-      } else {
-        // If no "/", treat as a standalone entry
+      // If `pageGroup` is empty, add it directly to `menuItems` without grouping
+      if (pageGroup === "") {
         menuItems.push({
           icon: `<svg
             class="fill-current"
@@ -106,7 +62,51 @@ const groupPages = async (pages) => {
           label: pageName,
           route: pageRoutes || '#'
         });
+        return;
       }
+
+      // Extract main group and sub-groups
+      const [mainGroup, ...subGroups] = pageGroup.split('/');
+
+      // Create a structure for the main group if it doesn't exist
+      if (!groupedPages[mainGroup]) {
+        groupedPages[mainGroup] = {
+          icon: `<svg
+            class="fill-current"
+            width="${page.pageProps.iconWidth}"
+            height="${page.pageProps.iconHeight}"
+            viewBox="${page.pageProps.iconViewBox}"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="${mdiIcons[page.pageIcon]}" />
+          </svg>`,
+          label: mainGroup,
+          route: '#',
+          children: []
+        };
+      }
+
+      // Handle nested sub-groups
+      let currentGroup = groupedPages[mainGroup];
+      subGroups.forEach((subGroup) => {
+        let existingChild = currentGroup.children.find(child => child.label === subGroup);
+        if (!existingChild) {
+          existingChild = {
+            label: subGroup,
+            route: '#',
+            children: []
+          };
+          currentGroup.children.push(existingChild);
+        }
+        currentGroup = existingChild;
+      });
+
+      // Add the current page to the appropriate group
+      currentGroup.children.push({
+        label: pageName,
+        route: pageRoutes || '#'
+      });
     });
 
     // Add grouped items to the final menuItems array
@@ -118,6 +118,8 @@ const groupPages = async (pages) => {
     };
   }).filter(group => group.menuItems.length > 0);
 };
+
+
 
 
 onClickOutside(target, () => {
