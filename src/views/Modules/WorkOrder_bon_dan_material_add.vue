@@ -5,12 +5,12 @@ import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import ButtonDynamic from "@/components/Buttons/ButtonDynamic.vue";
 import Swal from "sweetalert2";
 
-import { domain } from "@/API/";
 import { getDateToday } from "@/stores/date";
 import { showLoading, confirmDelete, successCreate, failedCreate } from "@/stores/swal";
 import { adminTeknis_CreateData, BonMaterial_GetPrefixByTypeAndDate } from "@/stores/functionAPI";
 import { mdiPlusCircleOutline, mdiTrashCanOutline } from "@mdi/js";
 import multiselectOption from "@/components/Forms/SelectGroup/multiselectOption.vue";
+import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
 import { useIndexStore } from "@/stores";
 
 import { ref, onMounted } from "vue";
@@ -31,8 +31,14 @@ const options: Option[] = [
   { id: 5, name: "Option 5" },
 ];
 
+const optionsType = [
+  { label: 'PSB', value: 'PSB' },
+  { label: 'MT', value: 'MT' },
+  { label: 'INFRA', value: 'INFRA' }
+]
+
 const pageTitle = ref("Add Bon & Material");
-const pageList = ref(["Work Order", "Evident", "PSB", "Add"]);
+const pageList = ref(["Work Order", "Bon & Material", "Add"]);
 
 // Saved Data
 const savedData = ref({
@@ -48,7 +54,7 @@ const savedData = ref({
   Tr_teknis_closed: "",
 
   Tr_teknis_status: "open", // otomatis
-  Tr_teknis_jenis: "PSB", // otomatis
+  Tr_teknis_jenis: "", // otomatis
   Tr_teknis_deleted: "N", // otomatis
   Tr_teknis_domain: "AMERTA-PASURUAN", // otomatis   
 
@@ -99,7 +105,7 @@ const cancelAdd = async () => {
   });
 
   if (result.isConfirmed) {
-    await router.push("/modules/work-order/evident/psb");
+    await router.push("/modules/work-order/bon-dan-material");
   }
 };
 // Array validator untuk field wajib
@@ -162,10 +168,12 @@ const submitData = async () => {
         });
         fixData.Tr_teknis_work_order_tersedia = fixData.Tr_teknis_work_order_tersedia.concat(cleanedArray);
       }
-
-      const prefix = await BonMaterial_GetPrefixByTypeAndDate(fixData.Tr_teknis_jenis, fixData.Tr_teknis_created);
-      fixData.Tr_teknis_logistik_id = prefix.nextId;
-
+      
+      const prefix = await BonMaterial_GetPrefixByTypeAndDate(fixData.Tr_teknis_jenis, fixData.Tr_teknis_created)
+      fixData.Tr_teknis_logistik_id = prefix.nextId
+      fixData.Tr_teknis_jenis = fixData.Tr_teknis_jenis.value
+      // console.log(fixData)
+      
       await adminTeknis_CreateData(fixData);
       await successCreate().then(() => {
         router.push("/modules/work-order/bon-dan-material");
@@ -185,11 +193,32 @@ const submitData = async () => {
     <!-- Breadcrumb End -->
 
     <!-- ====== Form Elements Section Start -->
-<div class="grid grid-cols-1 gap-9 sm:grid-cols-2">
-  <div class="flex flex-col gap-9">
-    <!-- Input Fields Start -->
-    <DefaultCard cardTitle="Input Data">
-      <div class="flex flex-col gap-2 p-6.5">
+    
+    <div class="grid grid-cols-1 gap-9 sm:grid-cols-2">
+      <div class="flex flex-col gap-9">
+        <!-- Input Fields Start -->
+        <DefaultCard cardTitle="Input Data">
+          <div class="flex flex-col gap-2 p-6.5">
+
+            <div class="flex flex-col gap-6 xl:flex-row">
+            <div class="lg:w-1/2">
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Jenis Permintaan
+              </label>
+              <SelectGroup placeholder="Pilih Jenis Permintaan" :options="optionsType" v-model="savedData.Tr_teknis_jenis" />
+            </div>
+            <div class="lg:w-1/2">
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Nama Tas
+              </label>
+              <input
+                type="text"
+                placeholder="Nama Tas"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_item"
+              />
+            </div>
+          </div>
 
         <!-- Nama Tas Input -->
         <div>
@@ -232,55 +261,11 @@ const submitData = async () => {
         </div>
 
       </div>
-    </DefaultCard>
-    <!-- Input Fields End -->
-  </div>
-
-  <!-- Input Material Terpakai Section Start -->
-  <div class="flex flex-col gap-9">
-    <DefaultCard cardTitle="Input Material Terpakai">
-      <div class="p-6.5">
-        <div
-          class="flex flex-col gap-2 xl:flex-row"
-          v-for="(data, index) in materialData"
-          v-if="materialData.length > 0"
-          :class="index === 0 ? '' : 'pt-2'"
-        >
-          <!-- Nama Barang Input -->
-          <div class="w-8/12">
-            <label
-              class="mb-3 block text-sm font-medium text-black dark:text-white"
-              v-if="index === 0"
-            >
-              Nama Barang
-            </label>
-            <input
-              type="text"
-              placeholder="Nama Barang"
-              class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-              v-model="data.label"
-            />
-          </div>
-
-          <!-- Qty Keluar Input -->
-          <div class="w-4/12">
-            <label
-              class="mb-3 block text-sm font-medium text-black dark:text-white"
-              v-if="index === 0"
-            >
-              Qty. Keluar
-            </label>
-            <input
-              type="number"
-              placeholder="Qty"
-              class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-              v-model="data.qtyKeluar"
-            />
-          </div>
-
-          <!-- Add/Remove Buttons -->
-          <div class="w-1/12 flex items-end pb-2 flex-wrap">
-            <!-- Add Material Button -->
+      <div class="flex flex-col gap-9">
+        <!-- Input Fields Start -->
+        <DefaultCard cardTitle="Input Material">
+          <div class="p-6.5">
+          
             <div
               class="flex w-full justify-center mb-5 cursor-pointer font-medium text-blue-600 hover:bg-opacity-90"
               @click="handleAddMaterialTerpakai"

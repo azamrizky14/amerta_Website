@@ -18,7 +18,7 @@ let dataTable = ref([])
 
 
 onMounted( async () => {
-  const data = await adminTeknis_GetDataByDomainAndStatusAndType('Y', 'INFRA')
+  const data = await adminTeknis_GetDataByDomainAndStatusAndType('N', 'INFRA')
   dataTable.value = data
 })
 </script>
