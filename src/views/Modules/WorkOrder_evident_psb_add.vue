@@ -6,17 +6,17 @@ import inputImageWithPreview from '@/components/Forms/SelectGroup/inputImageWith
 import ButtonDynamic from '@/components/Buttons/ButtonDynamic.vue'
 import Swal from 'sweetalert2';
 
-import { domain } from "@/API/";
+import { domain } from "@/API/"
 import { getDateToday } from "@/stores/date"
 import { showLoading, confirmDelete, successCreate, failedCreate } from '@/stores/swal'
 import { adminTeknis_CreateDataWithImages } from '@/stores/functionAPI'
-import { mdiPlusCircleOutline, mdiTrashCanOutline } from '@mdi/js';
+import { mdiPlusCircleOutline, mdiTrashCanOutline } from '@mdi/js'
 
 import { ref, onMounted } from 'vue'
-import router from '@/router';
+import router from '@/router'
 
 const pageTitle = ref('Evident - Add PSB')
-const pageList = ref (['Work Order', 'Evident', 'PSB', 'Add'])
+const pageList = ref(['Work Order', 'Evident', 'PSB', 'Add'])
 
 // Saved Data
 const savedData = ref({
@@ -54,31 +54,30 @@ const savedData = ref({
   ]
 })
 
-const materialData = ref([
-])
+const materialData = ref([ ])
 
-onMounted ( async () => {
+onMounted(async () => {
   const date = await getDateToday('yyyy-MM-dd')
   savedData.value.Tr_teknis_tanggal = date
   savedData.value.Tr_teknis_created = date
-
 })
 
 // Function
 const handleButtonClick = async () => {
   alert('tes')
 }
+
 const handleAddMaterialTerpakai = async () => {
   await successCreate(null, null, 'top-end')
   materialData.value.push({
     label: "", qty: ""
   })
 }
+
 const handleRemoveMaterialTerpakai = async (index) => {
   await confirmDelete(null, null, async () => {
     materialData.value.splice(index, 1)
   })
- 
 }
 
 const cancelAdd = async () => {
@@ -112,20 +111,19 @@ const submitData = async () => {
     if (result.isConfirmed) {
       try {
         showLoading();
-        const fixData = {...savedData.value}
-      //  console.log('data awal:',fixData)
+        const fixData = { ...savedData.value }
+        
+        //  Clean material data if needed
         if (materialData.value && materialData.value.length > 0) {
           const cleanedArray = materialData.value.filter(item => {
-            return Object.values(item).some(value => value !== "");
+            return Object.values(item).some(value => value !== "")
           });
-          fixData.Tr_teknis_material_terpakai =  fixData.Tr_teknis_material_terpakai.concat(cleanedArray)
+          fixData.Tr_teknis_material_terpakai = fixData.Tr_teknis_material_terpakai.concat(cleanedArray)
         }
 
         fixData.Tr_teknis_material_terpakai = JSON.stringify(fixData.Tr_teknis_material_terpakai)
 
-        // console.log('data akhir:',fixData)
         const sendData = new FormData();
-
         Object.keys(fixData).forEach((key) => {
           sendData.append(key, fixData[key]);
         });
@@ -140,7 +138,12 @@ const submitData = async () => {
     }
 }
 
+// Fungsi untuk menghapus gambar
+const removeImage = (field: string) => {
+  savedData.value[field] = null;
+}
 </script>
+
 
 <template>
   <DefaultLayout>
@@ -329,81 +332,183 @@ const submitData = async () => {
 
       </div>
       <div class="flex flex-col gap-9">
-        <!-- Textarea Fields Start -->
-        <DefaultCard cardTitle="Input Images">
-          <div class="grid grid-cols-2">
-            <div class="flex border flex-col items-center p-2 justify-end">
-              <inputImageWithPreview label="Evident Progress" v-model="savedData.Tr_teknis_evident_progress" 
-                @update:file="file => savedData.Tr_teknis_evident_progress = file" />
-            </div>
-            <div class="flex border flex-col items-center p-2 justify-end">              
-              <inputImageWithPreview label="Evident SpeedTest" v-model="savedData.Tr_teknis_evident_speed_test" 
-                @update:file="file => savedData.Tr_teknis_evident_speed_test = file" />
-            </div>
-            
-            <div class="col-span-3 grid grid-cols-2">
-            <div class="flex border flex-col items-center p-2 justify-end"> 
-              <inputImageWithPreview label="Review Google" v-model="savedData.Tr_teknis_evident_review_google" 
-                @update:file="file => savedData.Tr_teknis_evident_review_google = file" />
-            </div>
-            <div class="flex border flex-col items-center p-2 justify-end"> 
-              <inputImageWithPreview label="Kertas Form PSB" v-model="savedData.Tr_teknis_evident_kertas_psb" 
-                @update:file="file => savedData.Tr_teknis_evident_kertas_psb = file" />
-            </div>
-            </div>
-
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">Evident Redaman</p>
-            <div class="flex border flex-col items-center p-2 justify-end"> 
-              <inputImageWithPreview label="ODP" v-model="savedData.Tr_teknis_evident_redaman_odp" 
-                @update:file="file => savedData.Tr_teknis_evident_redaman_odp = file" />
-            </div>
-            <div class="flex border flex-col items-center p-2 justify-end"> 
-              <inputImageWithPreview label="ONT" v-model="savedData.Tr_teknis_evident_redaman_ont" 
-                @update:file="file => savedData.Tr_teknis_evident_redaman_ont = file" />
-            </div>
-            </div>
-            
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">Evident ODP</p>
-            <div class="flex border flex-col items-center p-2 justify-end"> 
-              <inputImageWithPreview label="ODP (Tampak Depan)" v-model="savedData.Tr_teknis_evident_odp_depan" 
-                @update:file="file => savedData.Tr_teknis_evident_odp_depan = file" />
-            </div>
-            <div class="flex border flex-col items-center p-2 justify-end"> 
-              <inputImageWithPreview label="PORT (Tampak Dalam)" v-model="savedData.Tr_teknis_evident_odp_dalam" 
-                @update:file="file => savedData.Tr_teknis_evident_odp_dalam = file" />
-            </div>
-            </div>
-            
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">Evident Customer</p>
-            <div class="flex border flex-col items-center p-2 justify-end"> 
-              <inputImageWithPreview label="Dengan Pelanggan" v-model="savedData.Tr_teknis_evident_pelanggan_dengan_pelanggan" 
-                @update:file="file => savedData.Tr_teknis_evident_pelanggan_dengan_pelanggan = file" />
-            </div>
-            <div class="flex border flex-col items-center p-2 justify-end"> 
-              <inputImageWithPreview label="Depan Rumah Pelanggan" v-model="savedData.Tr_teknis_evident_pelanggan_depan_rumah" 
-                @update:file="file => savedData.Tr_teknis_evident_pelanggan_depan_rumah = file" />
-            </div>
-            </div>
-            
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">Evident Marking Kabel</p>
-            <div class="flex border flex-col items-center p-2 justify-end"> 
-              <inputImageWithPreview label="Start" v-model="savedData.Tr_teknis_evident_marking_dc_start" 
-                @update:file="file => savedData.Tr_teknis_evident_marking_dc_start = file" />
-            </div>
-            <div class="flex border flex-col items-center p-2 justify-end"> 
-              <inputImageWithPreview label="End" v-model="savedData.Tr_teknis_evident_marking_dc_end" 
-                @update:file="file => savedData.Tr_teknis_evident_marking_dc_end = file" />
-            </div>
-            </div>
-          </div>
-        </DefaultCard>
-        <!-- Textarea Fields End -->
-
+  <!-- Textarea Fields Start -->
+  <DefaultCard cardTitle="Input Images">
+    <div class="grid grid-cols-2">
+      <div class="flex border flex-col items-center p-2 justify-end relative">
+        <inputImageWithPreview label="Evident Progress" v-model="savedData.Tr_teknis_evident_progress" 
+          @update:file="file => savedData.Tr_teknis_evident_progress = file" />
+        <!-- Tombol Hapus -->
+        <button 
+          v-if="savedData.Tr_teknis_evident_progress" 
+          @click="removeImage('Tr_teknis_evident_progress')" 
+          class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+        >
+          X
+        </button>
       </div>
+
+      <div class="flex border flex-col items-center p-2 justify-end relative">              
+        <inputImageWithPreview label="Evident SpeedTest" v-model="savedData.Tr_teknis_evident_speed_test" 
+          @update:file="file => savedData.Tr_teknis_evident_speed_test = file" />
+        <!-- Tombol Hapus -->
+        <button 
+          v-if="savedData.Tr_teknis_evident_speed_test" 
+          @click="removeImage('Tr_teknis_evident_speed_test')" 
+          class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+        >
+          X
+        </button>
+      </div>
+
+      <div class="col-span-3 grid grid-cols-2">
+        <div class="flex border flex-col items-center p-2 justify-end relative"> 
+          <inputImageWithPreview label="Review Google" v-model="savedData.Tr_teknis_evident_review_google" 
+            @update:file="file => savedData.Tr_teknis_evident_review_google = file" />
+          <!-- Tombol Hapus -->
+          <button 
+            v-if="savedData.Tr_teknis_evident_review_google" 
+            @click="removeImage('Tr_teknis_evident_review_google')" 
+            class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+          >
+            X
+          </button>
+        </div>
+
+        <div class="flex border flex-col items-center p-2 justify-end relative"> 
+          <inputImageWithPreview label="Kertas Form PSB" v-model="savedData.Tr_teknis_evident_kertas_psb" 
+            @update:file="file => savedData.Tr_teknis_evident_kertas_psb = file" />
+          <!-- Tombol Hapus -->
+          <button 
+            v-if="savedData.Tr_teknis_evident_kertas_psb" 
+            @click="removeImage('Tr_teknis_evident_kertas_psb')" 
+            class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+          >
+            X
+          </button>
+        </div>
+      </div>
+
+      <div class="col-span-3 grid grid-cols-2">
+        <p class="text-black dark:text-white text-center p-2 col-span-2">Evident Redaman</p>
+        <div class="flex border flex-col items-center p-2 justify-end relative"> 
+          <inputImageWithPreview label="ODP" v-model="savedData.Tr_teknis_evident_redaman_odp" 
+            @update:file="file => savedData.Tr_teknis_evident_redaman_odp = file" />
+          <!-- Tombol Hapus -->
+          <button 
+            v-if="savedData.Tr_teknis_evident_redaman_odp" 
+            @click="removeImage('Tr_teknis_evident_redaman_odp')" 
+            class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+          >
+            X
+          </button>
+        </div>
+
+        <div class="flex border flex-col items-center p-2 justify-end relative"> 
+          <inputImageWithPreview label="ONT" v-model="savedData.Tr_teknis_evident_redaman_ont" 
+            @update:file="file => savedData.Tr_teknis_evident_redaman_ont = file" />
+          <!-- Tombol Hapus -->
+          <button 
+            v-if="savedData.Tr_teknis_evident_redaman_ont" 
+            @click="removeImage('Tr_teknis_evident_redaman_ont')" 
+            class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+          >
+            X
+          </button>
+        </div>
+      </div>
+
+      <div class="col-span-3 grid grid-cols-2">
+        <p class="text-black dark:text-white text-center p-2 col-span-2">Evident ODP</p>
+        <div class="flex border flex-col items-center p-2 justify-end relative"> 
+          <inputImageWithPreview label="ODP (Tampak Depan)" v-model="savedData.Tr_teknis_evident_odp_depan" 
+            @update:file="file => savedData.Tr_teknis_evident_odp_depan = file" />
+          <!-- Tombol Hapus -->
+          <button 
+            v-if="savedData.Tr_teknis_evident_odp_depan" 
+            @click="removeImage('Tr_teknis_evident_odp_depan')" 
+            class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+          >
+            X
+          </button>
+        </div>
+
+        <div class="flex border flex-col items-center p-2 justify-end relative"> 
+          <inputImageWithPreview label="PORT (Tampak Dalam)" v-model="savedData.Tr_teknis_evident_odp_dalam" 
+            @update:file="file => savedData.Tr_teknis_evident_odp_dalam = file" />
+          <!-- Tombol Hapus -->
+          <button 
+            v-if="savedData.Tr_teknis_evident_odp_dalam" 
+            @click="removeImage('Tr_teknis_evident_odp_dalam')" 
+            class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+          >
+            X
+          </button>
+        </div>
+      </div>
+
+      <div class="col-span-3 grid grid-cols-2">
+        <p class="text-black dark:text-white text-center p-2 col-span-2">Evident Customer</p>
+        <div class="flex border flex-col items-center p-2 justify-end relative"> 
+          <inputImageWithPreview label="Dengan Pelanggan" v-model="savedData.Tr_teknis_evident_pelanggan_dengan_pelanggan" 
+            @update:file="file => savedData.Tr_teknis_evident_pelanggan_dengan_pelanggan = file" />
+          <!-- Tombol Hapus -->
+          <button 
+            v-if="savedData.Tr_teknis_evident_pelanggan_dengan_pelanggan" 
+            @click="removeImage('Tr_teknis_evident_pelanggan_dengan_pelanggan')" 
+            class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+          >
+            X
+          </button>
+        </div>
+
+        <div class="flex border flex-col items-center p-2 justify-end relative"> 
+          <inputImageWithPreview label="Depan Rumah Pelanggan" v-model="savedData.Tr_teknis_evident_pelanggan_depan_rumah" 
+            @update:file="file => savedData.Tr_teknis_evident_pelanggan_depan_rumah = file" />
+          <!-- Tombol Hapus -->
+          <button 
+            v-if="savedData.Tr_teknis_evident_pelanggan_depan_rumah" 
+            @click="removeImage('Tr_teknis_evident_pelanggan_depan_rumah')" 
+            class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+          >
+            X
+          </button>
+        </div>
+      </div>
+
+      <div class="col-span-3 grid grid-cols-2">
+        <p class="text-black dark:text-white text-center p-2 col-span-2">Evident Marking Kabel</p>
+        <div class="flex border flex-col items-center p-2 justify-end relative"> 
+          <inputImageWithPreview label="Start" v-model="savedData.Tr_teknis_evident_marking_dc_start" 
+            @update:file="file => savedData.Tr_teknis_evident_marking_dc_start = file" />
+          <!-- Tombol Hapus -->
+          <button 
+            v-if="savedData.Tr_teknis_evident_marking_dc_start" 
+            @click="removeImage('Tr_teknis_evident_marking_dc_start')" 
+            class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+          >
+            X
+          </button>
+        </div>
+
+        <div class="flex border flex-col items-center p-2 justify-end relative"> 
+          <inputImageWithPreview label="End" v-model="savedData.Tr_teknis_evident_marking_dc_end" 
+            @update:file="file => savedData.Tr_teknis_evident_marking_dc_end = file" />
+          <!-- Tombol Hapus -->
+          <button 
+            v-if="savedData.Tr_teknis_evident_marking_dc_end" 
+            @click="removeImage('Tr_teknis_evident_marking_dc_end')" 
+            class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+          >
+            X
+          </button>
+        </div>
+      </div>
+    </div>
+  </DefaultCard>
+  <!-- Textarea Fields End -->
+</div>
+
 
       
       <div class="flex flex-col gap-9 col-span-2">
