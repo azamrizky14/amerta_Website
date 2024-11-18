@@ -15,14 +15,20 @@ export const BonMaterial_GetPrefixByTypeAndDate = async (type, date) => {
 }
 
 // Admin Teknisi
-export const adminTeknis_GetDataByDomainAndStatus = async (status) => {
-  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdata/'+ domain + '/' + status)
+export const adminTeknis_GetDataByDomainAndDeleted = async (deleted) => {
+  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdata/'+ domain + '/' + deleted)
   var suppData = response.data;
   return suppData
 }
 
-export const adminTeknis_GetDataByDomainAndStatusAndType = async (status, type) => {
-  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdata/'+ domain + '/' + status + '/' + type)
+export const adminTeknis_GetDataByDomainAndDeletedAndType = async (deleted, type) => {
+  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdata/'+ domain + '/' + deleted + '/' + type)
+  var suppData = response.data;
+  return suppData
+}
+
+export const adminTeknis_GetDataByDomainAndDeletedAndTypeAndStatus = async (deleted, type, status) => {
+  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdata/'+ domain + '/' + deleted + '/' + type + '/' + status)
   var suppData = response.data;
   return suppData
 }
@@ -41,6 +47,12 @@ export const adminTeknis_CreateData = async (data) => {
 
 export const adminTeknis_CreateDataWithImages = async (data) => {
   const response = await axios.post(API+'/api/Tr_teknis/Trteknis/createimage', data)
+  var suppData = response.data;
+  return suppData
+}
+
+export const adminTeknis_CreateDataEvidentWithImages = async (data) => {
+  const response = await axios.put(API+'/api/Tr_teknis/Trteknis/updateWorkOrder', data)
   var suppData = response.data;
   return suppData
 }

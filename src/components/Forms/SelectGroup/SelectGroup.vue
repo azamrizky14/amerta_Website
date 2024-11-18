@@ -1,56 +1,65 @@
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, watch } from 'vue'
 
+// Define the Option interface
 interface Option {
   label: string
-  value: string
+  [key: string]: any // Support extra fields
 }
 
 // Define props and emits
 const props = defineProps<{
-  // label: string,
   options: Option[],
-  modelValue: string,
-  placeholder: string,
+  modelValue: string | Option,
+  placeholder?: string
 }>()
+
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string): void
+  (e: 'update:modelValue', value: Option): void
+  (e: 'option-changed', value: Option): void // New custom event
 }>()
 
-// Local state for the selected option
-const selectedOption = ref<string>(props.modelValue)
+// Local state for the selected option, using `label` instead of `value`
+const selectedLabel = ref(
+  typeof props.modelValue === 'string'
+    ? props.modelValue
+    : props.modelValue?.label || ''
+)
 
-// Watch for changes in `modelValue` and update `selectedOption`
-watch(() => props.modelValue, (newValue) => {
-  selectedOption.value = newValue
-})
+// Watch for changes in `modelValue` prop to sync `selectedLabel`
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    selectedLabel.value = typeof newValue === 'string' ? newValue : newValue?.label || ''
+  },
+  { immediate: true }
+)
 
-// Update the parent when `selectedOption` changes
+// Update both `modelValue` and emit events when the selection changes
 const updateSelection = () => {
-  emit('update:modelValue', selectedOption.value)
+  const selectedOption = props.options.find(option => option.label === selectedLabel.value) || { label: '' }
+  emit('update:modelValue', selectedOption)
+  emit('option-changed', selectedOption)
 }
 </script>
 
 <template>
   <div>
-    <!-- <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-      <span v-if="props.label">{{ props.label }}</span>
-      <span v-else>Select Option</span>
-    </label> -->
     <div class="relative z-20 bg-white dark:bg-form-input">
       <select
-        v-model="selectedOption"
+        v-model="selectedLabel"
         @change="updateSelection"
-        class="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input"
+        class="w-full appearance-none rounded border-[1.5px] border-stroke bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
       >
+        <!-- Placeholder option -->
         <option value="" disabled>
-          <span v-if="props.placeholder">{{ props.placeholder }}</span>
-          <span v-else>Select an option</span>
+          {{ props.placeholder || 'Select an option' }}
         </option>
+        <!-- Dynamic options using `label` as value -->
         <option
           v-for="option in props.options"
-          :key="option.value"
-          :value="option.value"
+          :key="option.label"
+          :value="option.label"
         >
           {{ option.label }}
         </option>

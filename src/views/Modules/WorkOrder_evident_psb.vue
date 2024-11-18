@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import BreadcrumbDefault from '@/components/Breadcrumbs/BreadcrumbDefault.vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import { adminTeknis_GetDataByDomainAndStatusAndType } from '@/stores/functionAPI'
+import { adminTeknis_GetDataByDomainAndDeletedAndType } from '@/stores/functionAPI'
 
 const pageTitle = ref('Evident - PSB')
 const pageList = ref (['Work Order', 'Evident', 'PSB'])
@@ -19,7 +19,7 @@ let dataTable = ref([])
 
 
 onMounted( async () => {
-  const data = await adminTeknis_GetDataByDomainAndStatusAndType('N', 'PSB')
+  const data = await adminTeknis_GetDataByDomainAndDeletedAndType('N', 'PSB')
   dataTable.value = data
 })
 </script>
@@ -130,7 +130,7 @@ onMounted( async () => {
               <p class=" text-xs text-black dark:text-white">{{ item.Tr_teknis_user_created }}</p>
             </td>
             <td class="py-1 px-4 border">
-              <h5 class="font-medium text-black text-xs dark:text-white">{{ item.Tr_teknis_user_updated }}</h5>
+              <h5 class="font-medium text-black text-xs dark:text-white text-center">{{ item.Tr_teknis_team.length }}</h5>
               <!-- <p class="text-xs">{{ item.picId }}</p> -->
             </td>
             <td class="py-1 px-4 border">
