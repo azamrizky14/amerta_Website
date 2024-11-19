@@ -90,7 +90,7 @@ const handleRemoveMaterialTerpakai = async (index) => {
 
 // Function to handle option change
 const handleOptionChange = (selected: { label: string; value: string }) => {
-  console.log('Selected option changed:', selected)
+  console.log("Selected option changed:", selected);
   // Perform any additional actions here
   materialData.value.splice(0, materialData.value.length);
   if (selected.Tr_teknis_work_order_tersedia) {
@@ -103,6 +103,27 @@ const handleOptionChange = (selected: { label: string; value: string }) => {
         qty: "",
       });
     });
+
+    // Step 2: Merge all Tr_teknis_work_order_terpakai_material and reduce qtySisa accordingly
+    if (
+      selected.Tr_teknis_work_order_terpakai &&
+      selected.Tr_teknis_work_order_terpakai.length > 0
+    ) {
+      const mergedMaterials = selected.Tr_teknis_work_order_terpakai.flatMap(
+        (item) => item.Tr_teknis_work_order_terpakai_material || []
+      );
+
+      // Deduct the qty from qtySisa in materialData if labels match
+      mergedMaterials.forEach((material) => {
+        const existingItem = materialData.value.find(
+          (item) => item.label === material.label
+        );
+        if (existingItem) {
+          existingItem.qtySisa -= material.qty; // Reduce qtySisa based on the merged qty
+          if (existingItem.qtySisa < 0) existingItem.qtySisa = 0; // Ensure qtySisa doesn't go below 0
+        }
+      });
+    }
   }
   // console.log('saved data: ', materialData.value)
 };
@@ -148,10 +169,28 @@ const submitData = async () => {
           return Object.values(item).some((value) => value !== "");
         });
         fixData.Tr_teknis_work_order_terpakai_material = cleanedArray;
-        fixData.Tr_teknis_work_order_terpakai_material = fixData.Tr_teknis_work_order_terpakai_material.map(x => ({
-          label: x.label,
-          qty: x.qty
-        }))
+        fixData.Tr_teknis_work_order_terpakai_material = fixData.Tr_teknis_work_order_terpakai_material.map(
+          (x) => {
+            // Check if label is "ONT" and dataSN is not empty
+            if (x.label === "ONT" && x.snNumber) {
+              return {
+                label: x.label,
+                qty: 1,
+                snNumber: x.snNumber
+              };
+            } else if (x.label === "ONT" && !x.snNumber) {
+              return {
+                label: x.label,
+                qty: 0,
+              };
+            } else {
+              return {
+                label: x.label,
+                qty: x.qty,
+              };
+            }
+          }
+        );
       }
 
       // Ensure the Tr_teknis_work_order_terpakai is stringified for proper parsing on the server
@@ -318,14 +357,11 @@ const removeImage = (field: string) => {
                   disabled
                   type="text"
                   placeholder="Nama Barang"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.label"
                 />
               </div>
-              <div
-                class="w-3/12"
-                v-if="data.qtySisa || data.qtySisa === '' || data.qtySisa === 0"
-              >
+              <div class="w-3/12" v-if="data.label !== 'ONT'">
                 <label
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
                   v-if="index === 0"
@@ -336,11 +372,11 @@ const removeImage = (field: string) => {
                   disabled
                   type="number"
                   placeholder="Qty"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-4 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.qtySisa"
                 />
               </div>
-              <div class="w-3/12" v-if="data.qty || data.qty === '' || data.qty === 0">
+              <div class="w-3/12" v-if="data.label !== 'ONT'">
                 <label
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
                   v-if="index === 0"
@@ -348,17 +384,22 @@ const removeImage = (field: string) => {
                   Qty. Dipakai
                 </label>
                 <input
+                  :disabled="!data.qtySisa"
                   type="number"
                   placeholder="Qty"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-4 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.qty"
                 />
               </div>
               <div class="w-6/12" v-else>
-                <!-- <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
                   SN
-                </label> -->
+                </label>
                 <input
+                  :disabled="!data.qtySisa"
                   type="text"
                   placeholder="SN"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
