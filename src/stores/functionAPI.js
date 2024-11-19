@@ -27,6 +27,12 @@ export const adminTeknis_GetDataByDomainAndDeletedAndType = async (deleted, type
   return suppData
 }
 
+export const adminTeknis_GetDataEvidentByType = async (deleted, type) => {
+  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdataEvident/'+ domain + '/' + deleted + '/' + type)
+  var suppData = response.data;
+  return suppData
+}
+
 export const adminTeknis_GetDataByDomainAndDeletedAndTypeAndStatus = async (deleted, type, status) => {
   const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdata/'+ domain + '/' + deleted + '/' + type + '/' + status)
   var suppData = response.data;
