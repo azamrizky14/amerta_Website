@@ -40,7 +40,8 @@ export const successCreate  = async (title, text, position) => {
         text: text || '',
         timer: 1500,
         icon: 'success',
-        showConfirmButton: false
+        showConfirmButton: false,
+        toast: true
       })
 }
 export const successEdit  = async (title, text) => {

@@ -124,18 +124,18 @@ const dataError = ref([]); // Array untuk menyimpan error
 // Validasi qtyKeluar tidak boleh kurang dari 1
 const validateQtyKeluar = (index) => {
   // Hanya lakukan validasi jika qtyKeluar tidak kosong
-  if (materialData.value[index].qtyKeluar !== "" && materialData.value[index].qtyKeluar < 1) {
+  if (materialData.value[index].qty !== "" && materialData.value[index].qty < 1) {
     Swal.fire({
       title: 'Error!',
       text: 'Minimal jumlah input adalah 1',
       icon: 'error',
       position: 'top-end',
-      timer: 2000,
+      timer: 1000,
       showConfirmButton: false,
       toast: true
     }).then(() => {
       // Setelah SweetAlert muncul, ganti nilai qtyKeluar menjadi 1
-      materialData.value[index].qtyKeluar = 1;
+      materialData.value[index].qty = 1;
     });
   }
 };
@@ -256,20 +256,7 @@ const submitData = async () => {
             </div>
 
             <!-- Qty Keluar Input -->
-            <div class="w-4/12">
-              <label
-                class="mb-3 block text-sm font-medium text-black dark:text-white"
-                v-if="index === 0"
-              >
-                Qty. Keluar
-              </label>
-              <input
-                type="number"
-                placeholder="Qty"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="data.qtyKeluar"
-                @change="validateQtyKeluar(index)"
-              />
+            <div>
               
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
@@ -295,6 +282,7 @@ const submitData = async () => {
                 v-model="savedData.Tr_teknis_keterangan"
               ></textarea>
             </div>
+          </div>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->
@@ -335,6 +323,8 @@ const submitData = async () => {
                   placeholder="Qty"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.qty"
+                  
+                @change="validateQtyKeluar(index)"
                 />
               </div>
               <div class="w-1/12 flex items-end pb-2 flex-wrap">
