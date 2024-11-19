@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import BreadcrumbDefault from '@/components/Breadcrumbs/BreadcrumbDefault.vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import { adminTeknis_GetDataByDomainAndStatusAndType } from '@/stores/functionAPI'
+import { adminTeknis_GetDataByDomainAndDeletedAndType } from '@/stores/functionAPI'
 
 const pageTitle = ref('Evident - INFRA')
 const pageList = ref (['Work Order', 'Evident', 'INFRA'])
@@ -18,7 +18,7 @@ let dataTable = ref([])
 
 
 onMounted( async () => {
-  const data = await adminTeknis_GetDataByDomainAndStatusAndType('Y', 'INFRA')
+  const data = await adminTeknis_GetDataByDomainAndDeletedAndType('N', 'INFRA')
   dataTable.value = data
 })
 </script>
