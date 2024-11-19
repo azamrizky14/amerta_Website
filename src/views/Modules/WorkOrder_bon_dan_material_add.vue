@@ -87,6 +87,7 @@ const handleAddMaterialTerpakai = async () => {
   await successCreate(null, null, "top-end");
   materialData.value.push({ label: "", qty: "" });
 };
+
 const handleRemoveMaterialTerpakai = async (index) => {
   await confirmDelete(null, null, async () => {
     materialData.value.splice(index, 1);
@@ -109,6 +110,7 @@ const cancelAdd = async () => {
     await router.push("/modules/work-order/bon-dan-material");
   }
 };
+
 // Array validator untuk field wajib
 const dataValidator = ref([
   { key: "Tr_teknis_item", label: "Nama Tas" },
@@ -118,6 +120,27 @@ const dataValidator = ref([
 ]);
 
 const dataError = ref([]); // Array untuk menyimpan error
+
+// Validasi qtyKeluar tidak boleh kurang dari 1
+const validateQtyKeluar = (index) => {
+  // Hanya lakukan validasi jika qtyKeluar tidak kosong
+  if (materialData.value[index].qtyKeluar !== "" && materialData.value[index].qtyKeluar < 1) {
+    Swal.fire({
+      title: 'Error!',
+      text: 'Minimal jumlah input adalah 1',
+      icon: 'error',
+      position: 'top-end',
+      timer: 2000,
+      showConfirmButton: false,
+      toast: true
+    }).then(() => {
+      // Setelah SweetAlert muncul, ganti nilai qtyKeluar menjadi 1
+      materialData.value[index].qtyKeluar = 1;
+    });
+  }
+};
+
+
 
 const submitData = async () => {
   // Clear previous errors
@@ -140,6 +163,9 @@ const submitData = async () => {
     if (!item.qty || String(item.qty).trim() === "") {
       dataError.value.push(`Material ${index + 1}: Qty. Keluar tidak boleh kosong!`);
     }
+    
+    // Tambahkan validasi qtyKeluar tidak boleh kurang dari 1
+    validateQtyKeluar(index);
   });
 
   // Jika ada error, tampilkan di halaman dan hentikan submit
@@ -229,6 +255,22 @@ const submitData = async () => {
               </div>
             </div>
 
+            <!-- Qty Keluar Input -->
+            <div class="w-4/12">
+              <label
+                class="mb-3 block text-sm font-medium text-black dark:text-white"
+                v-if="index === 0"
+              >
+                Qty. Keluar
+              </label>
+              <input
+                type="number"
+                placeholder="Qty"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="data.qtyKeluar"
+                @change="validateQtyKeluar(index)"
+              />
+              
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Teknisi
