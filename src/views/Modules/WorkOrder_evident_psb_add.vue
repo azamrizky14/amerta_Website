@@ -145,7 +145,53 @@ const cancelAdd = async () => {
   }
 };
 
+// Validators for required fields
+const dataValidator = ref([
+  { key: "logistikData", label: "Kode Bon Material" },
+  { key: "Tr_teknis_pelanggan_id", label: "Id Pelanggan" },
+  { key: "Tr_teknis_pelanggan_server", label: "Server" },
+  { key: "Tr_teknis_pelanggan_nama", label: "Nama Pelanggan" },
+]);
+
+const dataError = ref([]);
+
+// Helper function for validation
+const validateForm = () => {
+  // Clear previous errors
+  dataError.value = [];
+
+  // Validate each field
+  dataValidator.value.forEach((validator) => {
+    if (
+      (validator.key === "logistikData" && !logistikData.value) || // For logistikData
+      (!savedData.value[validator.key] && validator.key !== "logistikData") // For other fields in savedData
+    ) {
+      // Add error message if validation fails
+      dataError.value.push(`${validator.label} tidak boleh kosong!`);
+    }
+  });
+
+  // Return true if no errors, false otherwise
+  return dataError.value.length === 0;
+};
+
 const submitData = async () => {
+  // Validate form before submission
+  const isValid = validateForm();
+
+  // If validation fails, show errors
+  if (!isValid) {
+    // Swal.fire({
+    //   title: "Validasi Gagal",
+    //   html: `<ul>${dataError.value
+    //     .map((error) => `<li>${error}</li>`)
+    //     .join("")}</ul>`,
+    //   icon: "error",
+    // });
+    return; // Stop the submission process
+  }
+
+  // If form is valid, continue with submission
   const result = await Swal.fire({
     title: "Add Data?",
     text: "",
@@ -651,6 +697,13 @@ const removeImage = (field: string) => {
       <div class="flex flex-col gap-9 col-span-2">
         <!-- Input Fields Start -->
         <DefaultCard>
+          <div v-if="dataError.length > 0" class="mt-4 mb-4">
+            <ul>
+              <li v-for="(error, index) in dataError" :key="index" class="ml-5 text-red">
+                <b>- {{ error }}</b>
+              </li>
+            </ul>
+          </div>
           <div class="pb-6 px-4 grid grid-cols-2 gap-2">
             <button
               @click="cancelAdd"
