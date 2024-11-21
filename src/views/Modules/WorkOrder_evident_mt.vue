@@ -2,24 +2,26 @@
 import { ref, onMounted } from 'vue'
 import BreadcrumbDefault from '@/components/Breadcrumbs/BreadcrumbDefault.vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import { adminTeknis_GetDataByDomainAndDeletedAndType } from '@/stores/functionAPI'
+import { adminTeknis_GetDataEvidentByType } from '@/stores/functionAPI'
 
 const pageTitle = ref('Evident - MT')
 const pageList = ref (['Work Order', 'Evident', 'MT'])
 const dataHeader = ref([
   {name: 'No.', class: 'py-2 pl-3'},
-  {name: 'Date', class: 'min-w-[125px] py-2 px-4'},
-  {name: 'Cust. Id', class: 'min-w-[100px] py-2 px-4'},
-  {name: 'Cust. Name', class: 'min-w-[220px] py-2 px-4 xl:pl-11'},
-  {name: 'PIC', class: 'min-w-[100px] py-2 px-4'},
-  {name: 'Status', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Tgl. Dibuat', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'No. Logistik', class: 'min-w-[150px] py-2 px-4'},
+  {name: 'Id. User', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Nama. User', class: 'min-w-[150px] py-2 px-4'},
+  {name: 'Server', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Tr Teknis', class: 'min-w-[150px] py-2 px-4'},
 ])
 let dataTable = ref([])
 
 
 onMounted( async () => {
-  const data = await adminTeknis_GetDataByDomainAndDeletedAndType('N', 'MT')
+  const data = await adminTeknis_GetDataEvidentByType('N', 'MT')
   dataTable.value = data
+  console.log('tes',dataTable)
 })
 </script>
 
@@ -116,33 +118,28 @@ onMounted( async () => {
         </thead>
         <tbody>
           <tr v-for="(item, index) in dataTable" :key="index" class="border">
-            <td class="pl-3 text-sm border">
+            <td class="pl-3 text-xs border">
               {{ index+1 }}
             </td>
             <td class="py-1 px-4 border">
-              <p class="text-black dark:text-white text-sm text-center">{{ item.Tr_teknis_created }}</p>
+              <p class="text-black dark:text-white text-xs text-center">{{ item.Tr_teknis_created }}</p>
             </td>
             <td class="py-1 px-4 border">
-              <p class="text-black dark:text-white text-sm text-center">{{ item.Tr_teknis_pelanggan_id }}</p>
+              <p class="text-black dark:text-white text-xs text-center">{{ item.Tr_teknis_logistik_id }}</p>
             </td>
             <td class="py-1 px-4 border">
-              <p class="text-black dark:text-white">{{ item.Tr_teknis_pelanggan_nama }}</p>
+              <p class=" text-xs text-black dark:text-white">{{ item.Tr_teknis_pelanggan_id }}</p>
             </td>
             <td class="py-1 px-4 border">
-              <h5 class="font-medium text-black dark:text-white">{{ item.Tr_teknis_user_updated }}</h5>
-              <!-- <p class="text-sm">{{ item.picId }}</p> -->
+              <h5 class="font-medium text-black text-xs dark:text-white">{{ item.Tr_teknis_pelanggan_nama }}</h5>
+              <!-- <p class="text-xs">{{ item.picId }}</p> -->
             </td>
             <td class="py-1 px-4 text-center border">
-              <p
-                class="inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium"
-                :class="{
-                  'bg-warning text-warning': item.status === 'Pending',
-                  'bg-danger text-danger': item.status === 'Unpaid',
-                  'bg-success text-success': item.status === 'Paid'
-                }"
-              >
-                {{ item.status }}
-              </p>
+              <h5 class="font-medium text-black text-xs dark:text-white">{{ item.Tr_teknis_pelanggan_server }}</h5>
+              <!-- <p class="text-xs">{{ item.picId }}</p> -->
+            </td>
+            <td class="py-1 px-4 border">
+              <h5 class="font-medium text-black text-xs dark:text-white">{{ item.Tr_teknis_user_updated }}</h5>
             </td>
             <td class="py-1 px-4">
               <div class="flex items-center space-x-3.5 d-flex justify-center">              

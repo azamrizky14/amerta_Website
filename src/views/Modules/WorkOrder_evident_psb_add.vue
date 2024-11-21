@@ -181,13 +181,6 @@ const submitData = async () => {
 
   // If validation fails, show errors
   if (!isValid) {
-    // Swal.fire({
-    //   title: "Validasi Gagal",
-    //   html: `<ul>${dataError.value
-    //     .map((error) => `<li>${error}</li>`)
-    //     .join("")}</ul>`,
-    //   icon: "error",
-    // });
     return; // Stop the submission process
   }
 

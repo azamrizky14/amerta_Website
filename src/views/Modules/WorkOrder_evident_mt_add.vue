@@ -1,22 +1,27 @@
 <script setup lang="ts">
-import BreadcrumbDefault from '@/components/Breadcrumbs/BreadcrumbDefault.vue'
-import DefaultCard from '@/components/Forms/DefaultCard.vue'
-import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import inputImageWithPreview from '@/components/Forms/SelectGroup/inputImageWithPreview.vue'
-import ButtonDynamic from '@/components/Buttons/ButtonDynamic.vue'
-import Swal from 'sweetalert2';
+import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
+import DefaultCard from "@/components/Forms/DefaultCard.vue";
+import DefaultLayout from "@/layouts/DefaultLayout.vue";
+import inputImageWithPreview from "@/components/Forms/SelectGroup/inputImageWithPreview.vue";
+import ButtonDynamic from "@/components/Buttons/ButtonDynamic.vue";
+import Swal from "sweetalert2";
+import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
+import multiselectReadOnly from "@/components/Forms/SelectGroup/multiselectReadOnly.vue";
 
 import { domain } from "@/API/";
-import { getDateToday } from "@/stores/date"
-import { showLoading, confirmDelete, successCreate, failedCreate } from '@/stores/swal'
-import { adminTeknis_CreateDataWithImages } from '@/stores/functionAPI'
-import { mdiPlusCircleOutline, mdiTrashCanOutline } from '@mdi/js';
+import { getDateToday } from "@/stores/date";
+import { showLoading, confirmDelete, successCreate, failedCreate } from "@/stores/swal";
+import {
+  adminTeknis_CreateDataEvidentWithImages,
+  adminTeknis_GetDataByDomainAndDeletedAndTypeAndStatus,
+} from "@/stores/functionAPI";
+import { mdiPlusCircleOutline, mdiTrashCanOutline } from "@mdi/js";
 
-import { ref, onMounted } from 'vue'
-import router from '@/router';
+import { ref, onMounted } from "vue";
+import router from "@/router";
 
-const pageTitle = ref('Evident - Add MT')
-const pageList = ref(['Work Order', 'Evident', 'MT', 'Add'])
+const pageTitle = ref("Evident - Add MT");
+const pageList = ref(["Work Order", "Evident", "MT", "Add"]);
 
 // Saved Data
 const savedData = ref({
@@ -25,6 +30,8 @@ const savedData = ref({
   Tr_teknis_pelanggan_server: "",
   Tr_teknis_user_updated: "",
   Tr_teknis_keterangan: "",
+  Tr_teknis_logistik_id: "",
+  Tr_teknis_jenis: "MT",
   Tr_teknis_trouble: "",
   Tr_teknis_action: "",
   
@@ -39,59 +46,92 @@ const savedData = ref({
   Tr_teknis_evident_marking_dc_start: null,
   Tr_teknis_evident_marking_dc_end: null,
 
-  Tr_teknis_status: "Y",
-  Tr_teknis_domain: domain,
   Tr_teknis_tanggal: "",
   Tr_teknis_created: "",
-  Tr_teknis_jenis: "MT",
-  Tr_teknis_material_terpakai: [
-    {label: "PS Besar", qtyKeluar: "", qtyKembali: ""},
-    {label: "DC", qtyKeluar: "", qtyKembali: ""},
-    {label: "ONT", snNumber: ""},
-    {label: "Pigtail", qtyKeluar: "", qtyKembali: ""},
-    {label: "Adaptor (12V)", qtyKeluar: "", qtyKembali: ""},
-    {label: "Konektor PAZ", qtyKeluar: "", qtyKembali: ""},
-    {label: "SPL 1:8", qtyKeluar: "", qtyKembali: ""},
-    {label: "SPL 1:4", qtyKeluar: "", qtyKembali: ""}
-  ]
-})
+  Tr_teknis_work_order_terpakai_material: [],
+});
 
-const materialData = ref([])
+const materialData = ref([]);
+const logistikData = ref(null);
+const optionsType = ref([]);
+
+// const optionsType = [
+//   { label: "PSB", value: "PSB" },
+//   { label: "MT", value: "MT" },
+//   { label: "INFRA", value: "INFRA" },
+// ];
 
 onMounted(async () => {
-  const date = await getDateToday('yyyy-MM-dd')
-  savedData.value.Tr_teknis_tanggal = date
-  savedData.value.Tr_teknis_created = date
-})
+  const options = await adminTeknis_GetDataByDomainAndDeletedAndTypeAndStatus(
+    "N",
+    "MT",
+    "open"
+  );
+  options.forEach((option) => {
+    option.label = option.Tr_teknis_logistik_id + " - " + option.Tr_teknis_item;
+  });
+  optionsType.value = options;
+  // console.log('halo: ',options)
+  const date = await getDateToday("yyyy-MM-dd");
+  savedData.value.Tr_teknis_tanggal = date;
+  savedData.value.Tr_teknis_created = date;
+});
 
-// Function to handle image removal
-const removeImage = (field: string) => {
-  // Set the field value to null to remove the image
-  savedData.value[field] = null;
-}
-
-// Other functions
+// Function
 const handleButtonClick = async () => {
-  alert('tes')
-}
+  alert("tes");
+};
 
-const handleAddMaterialTerpakai = async () => {
-  await successCreate(null, null, 'top-end')
-  materialData.value.push({
-    label: "", qtyKeluar: "", qtyKembali: "",
-  })
-}
-
-const handleRemoveMaterialTerpakai = async (index: number) => {
+const handleRemoveMaterialTerpakai = async (index) => {
   await confirmDelete(null, null, async () => {
-    materialData.value.splice(index, 1)
-  })
-}
+    materialData.value.splice(index, 1);
+  });
+};
+
+// Function to handle option change
+const handleOptionChange = (selected: { label: string; value: string }) => {
+  console.log("Selected option changed:", selected);
+  // Perform any additional actions here
+  materialData.value.splice(0, materialData.value.length);
+  if (selected.Tr_teknis_work_order_tersedia) {
+    savedData.value.Tr_teknis_logistik_id = selected.Tr_teknis_logistik_id;
+    // console.log('berhasil')
+    selected.Tr_teknis_work_order_tersedia.forEach((data) => {
+      materialData.value.push({
+        label: data.label,
+        qtySisa: data.qty,
+        qty: "",
+      });
+    });
+
+    // Step 2: Merge all Tr_teknis_work_order_terpakai_material and reduce qtySisa accordingly
+    if (
+      selected.Tr_teknis_work_order_terpakai &&
+      selected.Tr_teknis_work_order_terpakai.length > 0
+    ) {
+      const mergedMaterials = selected.Tr_teknis_work_order_terpakai.flatMap(
+        (item) => item.Tr_teknis_work_order_terpakai_material || []
+      );
+
+      // Deduct the qty from qtySisa in materialData if labels match
+      mergedMaterials.forEach((material) => {
+        const existingItem = materialData.value.find(
+          (item) => item.label === material.label
+        );
+        if (existingItem) {
+          existingItem.qtySisa -= material.qty; // Reduce qtySisa based on the merged qty
+          if (existingItem.qtySisa < 0) existingItem.qtySisa = 0; // Ensure qtySisa doesn't go below 0
+        }
+      });
+    }
+  }
+  // console.log('saved data: ', materialData.value)
+};
 
 const cancelAdd = async () => {
   const result = await Swal.fire({
     title: "Cancel Create?",
-    text: "Are you sure to cancel adding data?",
+    text: "are you sure to cancel add data?",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#FF0000",
@@ -101,11 +141,52 @@ const cancelAdd = async () => {
   });
 
   if (result.isConfirmed) {
-    await router.push('/modules/work-order/evident/mt');
+    await router.push("/modules/work-order/evident/mt");
   }
-}
+};
+
+// Validators for required fields
+const dataValidator = ref([
+  { key: "logistikData", label: "Kode Bon Material" },
+  { key: "Tr_teknis_pelanggan_id", label: "Id Pelanggan" },
+  { key: "Tr_teknis_pelanggan_server", label: "Server" },
+  { key: "Tr_teknis_pelanggan_nama", label: "Nama Pelanggan" },
+  { key: "Tr_teknis_trouble", label: "Masalah" },
+  { key: "Tr_teknis_action", label: "Solusi" },
+]);
+
+const dataError = ref([]);
+
+// Helper function for validation
+const validateForm = () => {
+  // Clear previous errors
+  dataError.value = [];
+
+  // Validate each field
+  dataValidator.value.forEach((validator) => {
+    if (
+      (validator.key === "logistikData" && !logistikData.value) || // For logistikData
+      (!savedData.value[validator.key] && validator.key !== "logistikData") // For other fields in savedData
+    ) {
+      // Add error message if validation fails
+      dataError.value.push(`${validator.label} tidak boleh kosong!`);
+    }
+  });
+
+  // Return true if no errors, false otherwise
+  return dataError.value.length === 0;
+};
 
 const submitData = async () => {
+  // Validate form before submission
+  const isValid = validateForm();
+
+  // If validation fails, show errors
+  if (!isValid) {
+    return; // Stop the submission process
+  }
+
+  // If form is valid, continue with submission
   const result = await Swal.fire({
     title: "Add Data?",
     text: "",
@@ -119,33 +200,85 @@ const submitData = async () => {
   if (result.isConfirmed) {
     try {
       showLoading();
-      const fixData = { ...savedData.value }
+
+      // Clone the savedData to avoid mutating the original
+      const fixData = { ...savedData.value };
+
+      // Clean material data if needed
       if (materialData.value && materialData.value.length > 0) {
-        const cleanedArray = materialData.value.filter(item => {
-          return Object.values(item).some(value => value !== "");
+        const cleanedArray = materialData.value.filter((item) => {
+          return Object.values(item).some((value) => value !== "");
         });
-        fixData.Tr_teknis_material_terpakai = fixData.Tr_teknis_material_terpakai.concat(cleanedArray)
+        fixData.Tr_teknis_work_order_terpakai_material = cleanedArray;
+        fixData.Tr_teknis_work_order_terpakai_material = fixData.Tr_teknis_work_order_terpakai_material.map(
+          (x) => {
+            // Check if label is "ONT" and dataSN is not empty
+            if (x.label === "ONT" && x.snNumber) {
+              return {
+                label: x.label,
+                qty: 1,
+                snNumber: x.snNumber
+              };
+            } else if (x.label === "ONT" && !x.snNumber) {
+              return {
+                label: x.label,
+                qty: 0,
+              };
+            } else {
+              return {
+                label: x.label,
+                qty: x.qty,
+              };
+            }
+          }
+        );
       }
 
-      fixData.Tr_teknis_material_terpakai = JSON.stringify(fixData.Tr_teknis_material_terpakai)
+      // Ensure the Tr_teknis_work_order_terpakai is stringified for proper parsing on the server
+      if (
+        fixData.Tr_teknis_work_order_terpakai &&
+        Array.isArray(fixData.Tr_teknis_work_order_terpakai)
+      ) {
+        fixData.Tr_teknis_work_order_terpakai = JSON.stringify(
+          fixData.Tr_teknis_work_order_terpakai
+        );
+      }
 
       const sendData = new FormData();
 
+      // Append all fields to FormData
       Object.keys(fixData).forEach((key) => {
-        sendData.append(key, fixData[key]);
+        if (Array.isArray(fixData[key])) {
+          sendData.append(key, JSON.stringify(fixData[key])); // Ensure arrays are stringified
+        } else {
+          sendData.append(key, fixData[key]);
+        }
       });
 
-      await adminTeknis_CreateDataWithImages(sendData)
+      // Handle file uploads if necessary
+      const files = document.querySelector('input[type="file"]').files;
+      if (files && files.length > 0) {
+        for (let i = 0; i < files.length; i++) {
+          sendData.append("images", files[i]);
+        }
+      }
+
+      await adminTeknis_CreateDataEvidentWithImages(sendData);
+
       await successCreate().then(() => {
-        router.push('/modules/work-order/evident/mt')
+        router.push("/modules/work-order/evident/mt");
       });
     } catch (error) {
       await failedCreate(error);
     }
   }
-}
-</script>
+};
 
+// Fungsi untuk menghapus gambar
+const removeImage = (field: string) => {
+  savedData.value[field] = null;
+};
+</script>
 
 <template>
   <DefaultLayout>
@@ -159,30 +292,60 @@ const submitData = async () => {
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="Input Data">
           <div class="flex flex-col gap-2 p-6.5">
-          <div class="flex flex-col gap-6 xl:flex-row">
-            <div class="lg:w-2/3">
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Id Pelanggan (Wajib Diisi)
-              </label>
-              <input
-                type="text"
-                placeholder="Id Pelanggan"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_pelanggan_id"
-              />
+            <div class="flex flex-col gap-6 xl:flex-row">
+              <div class="w-full">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Kode Bon Material
+                </label>
+                <SelectGroup
+                  placeholder="Pilih Bon & Material"
+                  :options="optionsType"
+                  v-model="logistikData"
+                  @option-changed="handleOptionChange"
+                />
+              </div>
             </div>
-            <div class="lg:w-1/3">
+
+            <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Server
+                Teknisi
               </label>
-              <input
-                type="text"
-                placeholder="Server"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_pelanggan_server"
-              />
+              <div>
+                <multiselectReadOnly
+                  :options="
+                    logistikData && logistikData.Tr_teknis_team
+                      ? logistikData.Tr_teknis_team
+                      : logistikData
+                  "
+                  placeholder="Pilih Teknisi..."
+                />
+              </div>
             </div>
-          </div>
+
+            <div class="flex flex-col gap-6 xl:flex-row">
+              <div class="lg:w-2/3">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Id Pelanggan (Wajib Diisi)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Id Pelanggan"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_pelanggan_id"
+                />
+              </div>
+              <div class="lg:w-1/3">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Server
+                </label>
+                <input
+                  type="text"
+                  placeholder="Server"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_pelanggan_server"
+                />
+              </div>
+            </div>
 
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
@@ -196,18 +359,6 @@ const submitData = async () => {
               />
             </div>
 
-            <div>
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                PIC
-              </label>
-              <input
-                type="text"
-                placeholder="Person in charge"
-                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
-                v-model="savedData.Tr_teknis_user_updated"
-              />
-            </div>
-            
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Masalah (Trouble)
@@ -245,118 +396,86 @@ const submitData = async () => {
           </div>
         </DefaultCard>
         <!-- Input Fields End -->
-        
+
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Input Material Terpakai" class="hidden">
+        <DefaultCard
+          cardTitle="Input Material Terpakai"
+          @handle-click="handleAddMaterialTerpakai"
+          v-if="logistikData"
+        >
           <div class="p-6.5">
-            <div class="flex flex-col gap-2 xl:flex-row" 
-             v-for="(data, index) in savedData.Tr_teknis_material_terpakai"
-             v-if="savedData && savedData.Tr_teknis_material_terpakai.length > 0"
-             :class="index === 0 ? '' : 'pt-2'"> 
-              <div class="w-5/12">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
+            <div
+              class="flex flex-col gap-2 xl:flex-row"
+              v-for="(data, index) in materialData"
+              v-if="materialData && materialData.length > 0"
+              :class="index === 0 ? '' : 'pt-2'"
+            >
+              <div class="w-6/12">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
                   Nama Barang
                 </label>
                 <input
                   disabled
                   type="text"
                   placeholder="Nama Barang"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.label"
                 />
               </div>
-              <div class="w-3/12" v-if="data.qtyKeluar || data.qtyKeluar === '' || data.qtyKeluar === 0">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
-                  Qty. Keluar
+              <div class="w-3/12" v-if="data.label !== 'ONT'">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
+                  Qty. Tersisa
                 </label>
                 <input
+                  disabled
                   type="number"
                   placeholder="Qty"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.qtyKeluar"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-4 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="data.qtySisa"
                 />
               </div>
-              <div class="w-3/12" v-if="data.qtyKembali || data.qtyKembali === '' || data.qtyKembali === 0">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
-                  Qty. Kembali
+              <div class="w-3/12" v-if="data.label !== 'ONT'">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
+                  Qty. Dipakai
                 </label>
                 <input
+                  :disabled="!data.qtySisa"
                   type="number"
                   placeholder="Qty"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.qtyKembali"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-4 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="data.qty"
                 />
               </div>
               <div class="w-6/12" v-else>
-                <!-- <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
                   SN
-                </label> -->
+                </label>
                 <input
+                  :disabled="!data.qtySisa"
                   type="text"
                   placeholder="SN"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.snNumber"
                 />
               </div>
-              <div class="w-1/12 flex items-end pb-2 flex-wrap">
-                <div class="flex w-full justify-center  mb-5 cursor-pointer font-medium text-blue-600 hover:bg-opacity-90"
-                @click="handleAddMaterialTerpakai" v-if="index === 0">
-                  <svg
-                class="fill-current"
-                width="20"
-                height="20"
-                viewBox="0 0 22 22"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path :d="mdiPlusCircleOutline" />
-              </svg>
-                </div>
-                <ButtonDynamic
-                  disabled
-                  :icon="mdiTrashCanOutline"
-                  label=""
-                  buttonClass="flex w-full justify-center p-2 cursor-pointer rounded bg-red-500 text-gray-50 hover:bg-red-600"
-                  @click="handleButtonClick"
-                />
-              </div>
             </div>
-
-            <div class="flex flex-col gap-2 pt-2 xl:flex-row" v-for="(data, index) in materialData" v-if="materialData.length > 0">
-              <div class="w-8/12">
-                <input
-                  type="text"
-                  placeholder="Nama Barang"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.label"
-                />
-              </div>
-              <div class="w-3/12">
-                <input
-                  type="number"
-                  placeholder="Qty"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.qty"
-                />
-              </div>
-              <div class="w-1/12 flex pb-2 items-end">
-                <ButtonDynamic
-                  :icon="mdiTrashCanOutline"
-                  label=""
-                  buttonClass="flex w-full justify-center p-2 cursor-pointer rounded bg-red-500 text-gray-50 hover:bg-red-600"
-                  @click="handleRemoveMaterialTerpakai(index)"
-                />
-              </div>
-            </div>
-            
-            
           </div>
-          
         </DefaultCard>
         <!-- Input Fields End -->
-
       </div>
-
+      
       <div class="flex flex-col gap-9">
   <!-- Textarea Fields Start -->
   <DefaultCard cardTitle="Input Images">
@@ -507,27 +626,32 @@ const submitData = async () => {
   <!-- Textarea Fields End -->
 </div>
 
-
-      
       <div class="flex flex-col gap-9 col-span-2">
         <!-- Input Fields Start -->
         <DefaultCard>
+          <div v-if="dataError.length > 0" class="mt-4 mb-4">
+            <ul>
+              <li v-for="(error, index) in dataError" :key="index" class="ml-5 text-red">
+                <b>- {{ error }}</b>
+              </li>
+            </ul>
+          </div>
           <div class="pb-6 px-4 grid grid-cols-2 gap-2">
-            
-            <button @click="cancelAdd"
-                class="flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90"
-              >
-                Cancel
-              </button>
-            <button @click="submitData"
-                class="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-              >
-                Add Data
-              </button>
+            <button
+              @click="cancelAdd"
+              class="flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90"
+            >
+              Cancel
+            </button>
+            <button
+              @click="submitData"
+              class="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+            >
+              Add Data
+            </button>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->
-
       </div>
     </div>
     <!-- ====== Form Elements Section End -->
