@@ -3,23 +3,22 @@ import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import inputImageWithPreview from "@/components/Forms/SelectGroup/inputImageWithPreview.vue";
-import ButtonDynamic from "@/components/Buttons/ButtonDynamic.vue";
 import Swal from "sweetalert2";
 import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
 import multiselectReadOnly from "@/components/Forms/SelectGroup/multiselectReadOnly.vue";
 
-import { domain } from "@/API/";
+import { useIndexStore } from '@/stores'
 import { getDateToday } from "@/stores/date";
 import { showLoading, confirmDelete, successCreate, failedCreate } from "@/stores/swal";
 import {
   adminTeknis_CreateDataEvidentWithImages,
   adminTeknis_GetDataByDomainAndDeletedAndTypeAndStatus,
 } from "@/stores/functionAPI";
-import { mdiPlusCircleOutline, mdiTrashCanOutline } from "@mdi/js";
 
 import { ref, onMounted } from "vue";
 import router from "@/router";
 
+const indexStore = useIndexStore()
 const pageTitle = ref("Evident - Add INFRA");
 const pageList = ref(["Work Order", "Evident", "INFRA", "Add"]);
 
@@ -73,6 +72,7 @@ onMounted(async () => {
   const date = await getDateToday("yyyy-MM-dd");
   savedData.value.Tr_teknis_tanggal = date;
   savedData.value.Tr_teknis_created = date;
+  savedData.value.Tr_teknis_user_updated = indexStore.user.userName
 });
 
 // Function
@@ -209,13 +209,13 @@ const submitData = async () => {
         fixData.Tr_teknis_work_order_terpakai_material = fixData.Tr_teknis_work_order_terpakai_material.map(
           (x) => {
             // Check if label is "ONT" and dataSN is not empty
-            if (x.label === "ONT" && x.snNumber) {
+            if (x.label.includes("ONT") && x.snNumber) {
               return {
                 label: x.label,
                 qty: 1,
                 snNumber: x.snNumber
               };
-            } else if (x.label === "ONT" && !x.snNumber) {
+            } else if (x.label.includes("ONT") && !x.snNumber) {
               return {
                 label: x.label,
                 qty: 0,
@@ -398,7 +398,7 @@ const removeImage = (field: string) => {
                   v-model="data.label"
                 />
               </div>
-              <div class="w-3/12" v-if="data.label !== 'ONT'">
+              <div class="w-3/12" v-if="!data.label.includes('ONT')">
                 <label
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
                   v-if="index === 0"
@@ -413,7 +413,7 @@ const removeImage = (field: string) => {
                   v-model="data.qtySisa"
                 />
               </div>
-              <div class="w-3/12" v-if="data.label !== 'ONT'">
+              <div class="w-3/12" v-if="!data.label.includes('ONT')">
                 <label
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
                   v-if="index === 0"

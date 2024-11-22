@@ -7,13 +7,11 @@ import Swal from "sweetalert2";
 
 import { useRoute } from "vue-router";
 import { getDateToday } from "@/stores/date";
-import { showLoading, confirmDelete, successCreate, failedCreate } from "@/stores/swal";
+import { showLoading, successCreate, failedCreate } from "@/stores/swal";
 import {
   adminTeknis_UpdateData,
   adminTeknis_GetDataById,
-  BonMaterial_GetPrefixByTypeAndDate,
 } from "@/stores/functionAPI";
-import { mdiPlusCircleOutline, mdiTrashCanOutline } from "@mdi/js";
 import multiselectReadOnly from "@/components/Forms/SelectGroup/multiselectReadOnly.vue";
 import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
 import { useIndexStore } from "@/stores";
@@ -110,6 +108,8 @@ onMounted(async () => {
   }
   
   savedData.value.Tr_teknis_user_closed = indexStore.user.userName
+  const date = await getDateToday("yyyy-MM-dd");
+  savedData.value.Tr_teknis_closed = date
 });
 
 // Array validator untuk field wajib
