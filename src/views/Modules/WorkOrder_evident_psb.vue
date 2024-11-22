@@ -12,8 +12,8 @@ const dataHeader = ref([
   {name: 'No. Logistik', class: 'min-w-[150px] py-2 px-4'},
   {name: 'Id. User', class: 'min-w-[100px] py-2 px-4'},
   {name: 'Nama. User', class: 'min-w-[150px] py-2 px-4'},
-  {name: 'Server', class: 'min-w-[100px] py-2 px-4'},
-  {name: 'Tr Teknis', class: 'min-w-[150px] py-2 px-4'},
+  {name: 'Server', class: 'min-w-[75px] py-2 px-4'},
+  {name: 'Admin Teknis', class: 'min-w-[150px] py-2 px-4'},
 ])
 let dataTable = ref([])
 

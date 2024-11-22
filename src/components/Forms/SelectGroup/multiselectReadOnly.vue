@@ -10,6 +10,7 @@ interface Option {
 const props = defineProps<{
   options: Option[];
   placeholder: String;
+  disabled?: boolean;
 }>();
 
 const searchQuery = ref('');
@@ -26,6 +27,7 @@ const filteredOptions = computed(() =>
   <div class="relative w-full" ref="dropdownRef">
     <!-- Selected Items -->
     <div
+      :class="props.disabled?'bg-whiter':''"
       class="border-[1.5px] rounded-lg p-3 text-black bg-transparent transition focus:border-primary dark:text-white dark:bg-form-input"
     >
       <div class="flex flex-wrap gap-2">

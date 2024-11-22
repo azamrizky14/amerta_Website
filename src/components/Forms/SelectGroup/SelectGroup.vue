@@ -11,7 +11,8 @@ interface Option {
 const props = defineProps<{
   options: Option[],
   modelValue: string | Option,
-  placeholder?: string
+  placeholder?: string,
+  disabled: boolean,
 }>()
 
 const emit = defineEmits<{
@@ -47,12 +48,15 @@ const updateSelection = () => {
   <div>
     <div class="relative z-20 bg-white dark:bg-form-input">
       <select
+        :disabled="props.disabled"
         v-model="selectedLabel"
         @change="updateSelection"
+        :class="props.disabled? 'bg-whiter ' : ''"
         class="w-full appearance-none rounded border-[1.5px] border-stroke bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
       >
         <!-- Placeholder option -->
-        <option value="" disabled>
+        <option value="" disabled
+          class="text-black">
           {{ props.placeholder || 'Select an option' }}
         </option>
         <!-- Dynamic options using `label` as value -->
@@ -60,6 +64,7 @@ const updateSelection = () => {
           v-for="option in props.options"
           :key="option.label"
           :value="option.label"
+          class="text-black"
         >
           {{ option.label }}
         </option>

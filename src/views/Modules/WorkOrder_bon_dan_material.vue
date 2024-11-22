@@ -145,8 +145,8 @@ onMounted( async () => {
               <p
                 class="inline-flex rounded-full bg-opacity-10 py-1 px-3 text-xs font-medium"
                 :class="{
-                  'bg-warning text-warning': item.Tr_teknis_status === 'closed',
-                  'bg-danger text-danger': item.Tr_teknis_status === 'pending',
+                  'bg-warning text-warning': item.Tr_teknis_status === 'pending',
+                  'bg-danger text-danger': item.Tr_teknis_status === 'closed',
                   'bg-success text-success': item.Tr_teknis_status === 'open'
                 }"
               >
@@ -155,7 +155,7 @@ onMounted( async () => {
             </td>
             <td class="py-1 px-4">
               <div class="flex items-center space-x-3.5 d-flex justify-center">              
-                <router-link class="hover:text-primary" :to="'/modules/work-order/evident/psb/detail/'+item._id">
+                <router-link class="hover:text-primary" :to="'/modules/work-order/bon-dan-material/detail/'+item._id">
                   <svg
                     class="fill-current"
                     width="18"
@@ -175,7 +175,7 @@ onMounted( async () => {
                   </svg>
                 </router-link>
 
-                <router-link class="hover:text-primary" :to="'/modules/work-order/evident/psb/edit/'+item._id">
+                <router-link :class="item.Tr_teknis_status === 'closed' ? 'cursor-default opacity-50' : 'hover:text-primary'" class="" :to="item.Tr_teknis_status !== 'closed' ? '/modules/work-order/bon-dan-material/closing/'+item._id : ''">
                 
                   <svg
                     class="fill-current"
