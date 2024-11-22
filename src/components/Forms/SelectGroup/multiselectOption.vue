@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 
 interface Option {
@@ -10,27 +10,29 @@ interface Option {
 const props = defineProps<{
   options: Option[];
   modelValue: Option[];
-  placeholder: String;
+  placeholder?: string;
+  value?: string; // Parent prop for the search query
+  disabled?: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Option[]): void;
 }>();
 
-const searchQuery = ref('');
+const searchQuery = ref(props.value || ''); // Initialize with the prop value
 const isOpen = ref(false);
 const selectedOptions = ref<Option[]>([...props.modelValue]);
 
 // Filter options based on the search query
 const filteredOptions = computed(() =>
-  props.options.filter(option =>
+  props.options.filter((option) =>
     option.name.toLowerCase().includes(searchQuery.value.toLowerCase())
   )
 );
 
 // Toggle selection of an option
 const toggleSelection = (option: Option) => {
-  const index = selectedOptions.value.findIndex(o => o.id === option.id);
+  const index = selectedOptions.value.findIndex((o) => o.id === option.id);
   if (index > -1) {
     selectedOptions.value.splice(index, 1);
   } else {
@@ -41,7 +43,7 @@ const toggleSelection = (option: Option) => {
 
 // Check if an option is selected
 const isSelected = (option: Option) =>
-  selectedOptions.value.some(o => o.id === option.id);
+  selectedOptions.value.some((o) => o.id === option.id);
 
 // Handle closing the dropdown when clicking outside
 const dropdownRef = ref(null);
@@ -54,6 +56,7 @@ onClickOutside(dropdownRef, () => {
   <div class="relative w-full" ref="dropdownRef">
     <!-- Selected Items -->
     <div
+      :class="props.disabled ? 'bg-whiter' : ''"
       class="border-[1.5px] rounded-lg p-3 cursor-pointer text-black bg-transparent transition focus:border-primary dark:text-white dark:bg-form-input"
       @click="isOpen = !isOpen"
     >
@@ -68,8 +71,8 @@ onClickOutside(dropdownRef, () => {
           </span>
         </template>
         <span v-else class="text-gray-500">
-            <span v-if="props.placeholder">{{ props.placeholder }}</span>
-            <span v-else>Select options...</span>
+          <span v-if="props.placeholder">{{ props.placeholder }}</span>
+          <span v-else>Select options...</span>
         </span>
       </div>
     </div>

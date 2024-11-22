@@ -141,15 +141,24 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
-  // {
-  //   path: '/modules/work-order/evident/psb/detail/:id',
-  //   name: 'EvidentPsbDetail',
-  //   component: () => import('@/views/Modules/WorkOrder_evident_psb_detail.vue'),
-  //   meta: {
-  //     title: 'Evident PSB Detail',
-  //     requiresAuth: true // Add this line to protect this route
-  //   }
-  // },
+  {
+    path: '/modules/work-order/bon-dan-material/detail/:id',
+    name: 'woBonDetail',
+    component: () => import('@/views/Modules/WorkOrder_bon_dan_material_detail.vue'),
+    meta: {
+      title: 'Detail Bon & Material',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/bon-dan-material/closing/:id',
+    name: 'woBonClosing',
+    component: () => import('@/views/Modules/WorkOrder_bon_dan_material_closing.vue'),
+    meta: {
+      title: 'Closing Bon & Material',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
   // {
   //   path: '/modules/work-order/evident/psb/edit/:id',
   //   name: 'EvidentPsbEdit',
