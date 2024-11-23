@@ -19,7 +19,6 @@ const steps = ref([]);
 
 // Navigate to a specific step
 const goToStep = (stepIndex: number) => {
-  console.log("step", stepIndex, steps.value.length);
   if (stepIndex >= 0 && stepIndex < steps.value.length) {
     currentStep.value = stepIndex;
   }
@@ -41,9 +40,28 @@ const previousStep = () => {
 
 onMounted(async () => {
   const data = await adminTeknis_GetDataById(route.params.id);
-  steps.value = data.Tr_teknis_work_order_terpakai;
-  console.log("tes", steps.value);
+
+  // Merge Tr_teknis_work_order_terpakai with Tr_teknis_work_order_kembali
+  const mergedData = {
+    ...data,  // Spread the original data into the merged object
+    Tr_teknis_work_order_terpakai: data.Tr_teknis_work_order_terpakai.map(item => ({
+      ...item, // Copy the properties of each item in Tr_teknis_work_order_terpakai
+    }))
+  };
+
+  // If Tr_teknis_work_order_kembali exists, merge it with Tr_teknis_work_order_terpakai
+  if (data.Tr_teknis_work_order_kembali && data.Tr_teknis_work_order_kembali.length > 0) {
+    mergedData.Tr_teknis_work_order_terpakai.push({
+      ...mergedData, // Add the full data object (as is) to Tr_teknis_work_order_terpakai
+      Tr_teknis_work_order_kembali: data.Tr_teknis_work_order_kembali
+    });
+  }
+
+  // Set steps.value to the merged array
+  steps.value = mergedData.Tr_teknis_work_order_terpakai;
+
 });
+
 </script>
 
 <template>
@@ -66,7 +84,7 @@ onMounted(async () => {
                 "
                 @click="goToStep(index)"
               >
-                {{ index + 1 }}
+                {{ step.Tr_teknis_work_order_kembali ? 'C' : index + 1 }}
               </button>
             </div>
             <div
@@ -84,8 +102,8 @@ onMounted(async () => {
           v-if="steps && steps.length > 0"
         >
           <!-- Dynamically display the content of the active step -->
-
-          <div class="flex flex-col gap-6 xl:flex-row">
+          <!-- Data Steps -->
+          <div class="flex flex-col gap-6 xl:flex-row" v-if="!steps[currentStep].Tr_teknis_work_order_kembali">
             <div class="lg:w-1/2">
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Tgl. Dibuat
@@ -112,7 +130,7 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div class="flex flex-col gap-6 xl:flex-row">
+          <div class="flex flex-col gap-6 xl:flex-row" v-if="!steps[currentStep].Tr_teknis_work_order_kembali">
             <div class="lg:w-1/2">
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Id Pelanggan
@@ -139,7 +157,7 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div>
+          <div v-if="!steps[currentStep].Tr_teknis_work_order_kembali">
             <label class="mb-3 block text-sm font-medium text-black dark:text-white">
               Nama Pelanggan
             </label>
@@ -152,7 +170,7 @@ onMounted(async () => {
             />
           </div>
 
-          <div>
+          <div v-if="!steps[currentStep].Tr_teknis_work_order_kembali">
             <label class="mb-3 block text-sm font-medium text-black dark:text-white">
               Keterangan
             </label>
@@ -164,13 +182,58 @@ onMounted(async () => {
               v-model="steps[currentStep].Tr_teknis_keterangan"
             ></textarea>
           </div>
+          <!-- End Data Steps -->
+
+          <!-- Data Closing -->
+          <template v-else>
+            <div class="flex flex-col gap-6 xl:flex-row">
+            <div class="lg:w-1/2">
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Tgl. Closing
+              </label>
+              <input
+                disabled
+                type="date"
+                placeholder="Tgl. Dibuat"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="steps[currentStep].Tr_teknis_closed"
+              />
+            </div>
+            <div class="lg:w-1/2">
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Di Closing Oleh
+              </label>
+              <input
+                disabled
+                type="text"
+                placeholder="Dibuat Oleh"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="steps[currentStep].Tr_teknis_user_closed"
+              />
+            </div>
+          </div>
+          
+          <div>
+            <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+              Catatan Closing
+            </label>
+            <textarea
+              disabled
+              rows="3"
+              placeholder="Masukan keterangan disini!"
+              class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+              v-model="steps[currentStep].Tr_teknis_keterangan_closing"
+            ></textarea>
+          </div>
+          </template>
+          <!-- End Data Closing -->
           <!-- Form Inputs based on step -->
         </div>
       </div>
     </div>
 
     <DefaultCard cardTitle="Material Terpakai">
-      <div class="p-6.5">
+      <div class="p-6.5" v-if="steps[currentStep] && !steps[currentStep].Tr_teknis_work_order_kembali">
         <div
           class="flex flex-col gap-2 xl:flex-row"
           v-for="(data, index) in steps[currentStep]
@@ -204,7 +267,64 @@ onMounted(async () => {
               Qty. Dipakai
             </label>
             <input
-              v-if="data.label === 'ONT' && data.qty === 1"
+              v-if="data.label.includes('ONT') && data.qty === 1"
+              disabled
+              type="text"
+              placeholder="SN Number"
+              class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+              v-model="data.snNumber"
+              @change="validateQtyKeluar(index)"
+            />
+            <input
+              v-else
+              disabled
+              type="number"
+              placeholder="Qty"
+              class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+              v-model="data.qty"
+              @change="validateQtyKeluar(index)"
+            />
+          </div>
+        </div>
+        <div v-else>
+          Material Masih belum Digunakan!
+        </div>
+      </div>
+      <div class="p-6.5" v-else>
+        <div
+          class="flex flex-col gap-2 xl:flex-row"
+          v-for="(data, index) in steps[currentStep]
+            .Tr_teknis_work_order_kembali"
+          v-if="
+            steps.length > 0 &&
+            steps[currentStep].Tr_teknis_work_order_kembali.length > 0
+          "
+          :class="index === 0 ? '' : 'pt-2'"
+        >
+          <div class="w-7/12">
+            <label
+              class="mb-3 block text-sm font-medium text-black dark:text-white"
+              v-if="index === 0"
+            >
+              Nama Barang
+            </label>
+            <input
+              disabled
+              type="text"
+              placeholder="Nama Barang"
+              class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+              v-model="data.label"
+            />
+          </div>
+          <div class="w-5/12">
+            <label
+              class="mb-3 block text-sm font-medium text-black dark:text-white"
+              v-if="index === 0"
+            >
+              Qty. Dipakai
+            </label>
+            <input
+              v-if="data.label.includes('ONT') && data.qty === 1"
               disabled
               type="text"
               placeholder="SN Number"

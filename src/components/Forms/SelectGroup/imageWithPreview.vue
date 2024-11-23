@@ -31,7 +31,6 @@ onUnmounted(() => {
 watch(() => props.modelValue, (newValue) => {
   if (newValue instanceof File) {
     imageSrc.value = URL.createObjectURL(newValue);  // Create preview URL for File
-    console.log('type of', typeof imageSrc.value)
   } else {
     imageSrc.value = newValue as string | null;  // Use URL or reset to placeholder
   }

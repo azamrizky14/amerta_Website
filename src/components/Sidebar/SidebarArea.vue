@@ -5,7 +5,6 @@ import { useSidebarStore } from '@/stores/sidebar'
 import { onClickOutside } from '@vueuse/core'
 import { ref, onMounted } from 'vue'
 import SidebarItem from './SidebarItem.vue'
-import { getUtilByName } from '@/stores/functionAPI'
 
 const target = ref(null)
 
@@ -15,7 +14,7 @@ const pageData = ref([])
 
 onMounted( async () => {
   if (indexStore.user.userAccess) {
-  const data = await getUtilByName('page')
+  const data = await indexStore.getUtilByName('page');
   if (indexStore.user.userAccess[0] === 'all') {
     pageData.value = data.utilData
   } else {
@@ -24,7 +23,6 @@ onMounted( async () => {
 
     const newData = await groupPages(filteredPages)
     pageData.value = newData
-    console.log(pageData.value)
   }
   }
 })
