@@ -39,6 +39,12 @@ export const adminTeknis_GetDataByDomainAndDeletedAndTypeAndStatus = async (dele
   return suppData
 }
 
+export const adminTeknis_GetDataEvidentById = async (logistik, id) => {
+  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getEvidentbyid/'+ logistik + '/' + id)
+  var suppData = response.data;
+  return suppData
+}
+
 export const adminTeknis_GetDataById = async (id) => {
   const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getbyid/'+ id)
   var suppData = response.data;

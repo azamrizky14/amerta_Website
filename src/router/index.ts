@@ -188,7 +188,7 @@ const routes = [
     }
   },
   {
-    path: '/modules/work-order/evident/psb/detail/:id',
+    path: '/modules/work-order/evident/psb/detail/:logistikType/:logistikDate/:logistikNumber/:id',
     name: 'EvidentPsbDetail',
     component: () => import('@/views/Modules/WorkOrder_evident_psb_detail.vue'),
     meta: {
@@ -225,7 +225,7 @@ const routes = [
     }
   },
   {
-    path: '/modules/work-order/evident/mt/detail/:id',
+    path: '/modules/work-order/evident/mt/detail/:logistikType/:logistikDate/:logistikNumber/:id',
     name: 'EvidentMtDetail',
     component: () => import('@/views/Modules/WorkOrder_evident_mt_detail.vue'),
     meta: {
@@ -262,7 +262,7 @@ const routes = [
     }
   },
   {
-    path: '/modules/work-order/evident/infra/detail/:id',
+    path: '/modules/work-order/evident/infra/detail/:logistikType/:logistikDate/:logistikNumber/:id',
     name: 'EvidentInfraDetail',
     component: () => import('@/views/Modules/WorkOrder_evident_infra_detail.vue'),
     meta: {
