@@ -21,7 +21,6 @@ let dataTable = ref([])
 onMounted( async () => {
   const data = await adminTeknis_GetDataEvidentByType('N', 'MT')
   dataTable.value = data
-  console.log('tes',dataTable)
 })
 </script>
 

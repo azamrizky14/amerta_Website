@@ -169,7 +169,6 @@ const cancelClose = async () => {
 };
 
 const submitData = async () => {
-  console.log(route.params.id)
   // Clear previous errors
   dataError.value.splice(0, dataError.value.length);
 
@@ -208,7 +207,6 @@ const submitData = async () => {
         
       }))
 
-      console.log(fixData)
       
       await adminTeknis_UpdateData(fixData, route.params.id);
       await successCreate().then(() => {
@@ -296,6 +294,18 @@ const submitData = async () => {
                   placeholder="Masukan keterangan disini!"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_teknis_keterangan"
+                ></textarea>
+              </div>
+                     
+            <div>
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Catatan Closing
+                </label>
+                <textarea
+                  rows="3"
+                  placeholder="Masukan keterangan disini!"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_keterangan_closing"
                 ></textarea>
               </div>
           </div>
@@ -386,7 +396,7 @@ const submitData = async () => {
               @click="submitData"
               class="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
             >
-              Add Data
+              Closing Data
             </button>
           </div>
         </DefaultCard>

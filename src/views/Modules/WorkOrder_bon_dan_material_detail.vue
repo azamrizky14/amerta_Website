@@ -96,6 +96,12 @@ onMounted(async () => {
     const mergedMaterials = savedData.value.Tr_teknis_work_order_terpakai.flatMap(
       (item) => item.Tr_teknis_work_order_terpakai_material || []
     );
+    
+    if (savedData.value.Tr_teknis_work_order_kembali) {
+      savedData.value.Tr_teknis_work_order_kembali.forEach(element => {
+        mergedMaterials.push(element)
+      });
+    }
 
     // Deduct the qty from qtySisa in materialData if labels match
     mergedMaterials.forEach((material) => {
@@ -241,7 +247,6 @@ const submitData = async () => {
       );
       fixData.Tr_teknis_logistik_id = prefix.nextId;
       fixData.Tr_teknis_jenis = fixData.Tr_teknis_jenis.value;
-      // console.log(fixData)
 
       await adminTeknis_CreateData(fixData);
       await successCreate().then(() => {

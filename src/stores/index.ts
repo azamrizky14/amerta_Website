@@ -1,20 +1,19 @@
-    // src/stores/index.ts
-import { defineStore } from 'pinia'
-import { reactive } from 'vue'
+import { defineStore } from 'pinia';
+import { reactive, ref } from 'vue';
+import { getUtilByName as fetchUtilByName } from './functionAPI';
 
 interface User {
-    [key: string]: any; // Allow any string key
-    _id: string;
-    companyCode: string[];
-    email: string;
-    hierarchyCode: string;
-    userRole: string;
-    userName: string;
-    userAccess: string[];
-    token: string;
-    loginTime: string;
-  }
-  
+  [key: string]: any; // Allow any string key
+  _id: string;
+  companyCode: string[];
+  email: string;
+  hierarchyCode: string;
+  userRole: string;
+  userName: string;
+  userAccess: string[];
+  token: string;
+  loginTime: string;
+}
 
 interface Company {
   _id: string;
@@ -28,7 +27,8 @@ interface Company {
 }
 
 export const useIndexStore = defineStore('index', () => {
-  const dataUser: User | null = JSON.parse(localStorage.getItem('user') || 'null')
+  // State untuk user
+  const dataUser: User | null = JSON.parse(localStorage.getItem('user') || 'null');
   const user = reactive<User>({
     _id: dataUser?._id || '',
     companyCode: dataUser?.companyCode || [],
@@ -39,37 +39,38 @@ export const useIndexStore = defineStore('index', () => {
     userAccess: dataUser?.userAccess || [],
     token: dataUser?.token || '',
     loginTime: dataUser?.loginTime || ''
-  })
+  });
 
   function setUser(userData: Partial<User>) {
-    Object.assign(user, userData)
-    localStorage.setItem('user', JSON.stringify(user))
+    Object.assign(user, userData);
+    localStorage.setItem('user', JSON.stringify(user));
   }
 
   function setToken(token: string) {
-    user.token = token
-    localStorage.setItem('token', token)
+    user.token = token;
+    localStorage.setItem('token', token);
   }
 
   function setLoginTime(time: string) {
-    user.loginTime = time
-    localStorage.setItem('loginTime', time)
+    user.loginTime = time;
+    localStorage.setItem('loginTime', time);
   }
 
   function clearUser() {
     Object.keys(user).forEach(key => {
       if (Array.isArray(user[key])) {
-        user[key] = []
+        user[key] = [];
       } else {
-        user[key] = ''
+        user[key] = '';
       }
-    })
-    localStorage.removeItem('user')
-    localStorage.removeItem('token')
-    localStorage.removeItem('loginTime')
+    });
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('loginTime');
   }
 
-  const dataCompany: Company | null = JSON.parse(localStorage.getItem('company') || 'null')
+  // State untuk company
+  const dataCompany: Company | null = JSON.parse(localStorage.getItem('company') || 'null');
   const company = reactive<Company>({
     _id: dataCompany?._id || '',
     companyCode: dataCompany?.companyCode || [],
@@ -79,32 +80,59 @@ export const useIndexStore = defineStore('index', () => {
     companyPage: dataCompany?.companyPage || [],
     companyLogo: dataCompany?.companyLogo || '',
     logoName: dataCompany?.logoName || ''
-  })
+  });
 
   function setCompany(companyData: Partial<Company>) {
-    Object.assign(company, companyData)
-    localStorage.setItem('company', JSON.stringify(company))
+    Object.assign(company, companyData);
+    localStorage.setItem('company', JSON.stringify(company));
   }
 
   function clearCompany() {
     Object.keys(company).forEach(key => {
       if (Array.isArray(company[key])) {
-        company[key] = []
+        company[key] = [];
       } else {
-        company[key] = ''
+        company[key] = '';
       }
-    })
-    localStorage.removeItem('company')
+    });
+    localStorage.removeItem('company');
+  }
+
+  // State dan logika untuk util
+  const utilData = ref<any>(null);
+  const lastUpdated = ref<number | null>(null);
+
+  async function getUtilByName(data: string) {
+    const now = Date.now();
+
+    // Check if the last update was less than 1 hour ago
+    if (lastUpdated.value && now - lastUpdated.value < 3600000) {
+      console.log('Using cached utility data.');
+      return utilData.value;
+    }
+
+    console.log('Fetching new utility data...');
+    try {
+      const response = await fetchUtilByName(data); // Use the imported function
+      utilData.value = response;
+      lastUpdated.value = now;
+    } catch (error) {
+      console.error('Failed to fetch utility data:', error);
+    }
+
+    return utilData.value;
   }
 
   return {
     user,
     company,
-    setCompany,
+    utilData,
     setUser,
+    setCompany,
     setToken,
     setLoginTime,
     clearUser,
-    clearCompany
-  }
-})
+    clearCompany,
+    getUtilByName
+  };
+});

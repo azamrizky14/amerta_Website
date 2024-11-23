@@ -70,7 +70,6 @@ onMounted(async () => {
     option.label = option.Tr_teknis_logistik_id + " - " + option.Tr_teknis_item;
   });
   optionsType.value = options;
-  // console.log('halo: ',options)
   const date = await getDateToday("yyyy-MM-dd");
   savedData.value.Tr_teknis_tanggal = date;
   savedData.value.Tr_teknis_created = date;
@@ -90,12 +89,10 @@ const handleRemoveMaterialTerpakai = async (index) => {
 
 // Function to handle option change
 const handleOptionChange = (selected: { label: string; value: string }) => {
-  console.log("Selected option changed:", selected);
   // Perform any additional actions here
   materialData.value.splice(0, materialData.value.length);
   if (selected.Tr_teknis_work_order_tersedia) {
     savedData.value.Tr_teknis_logistik_id = selected.Tr_teknis_logistik_id;
-    // console.log('berhasil')
     selected.Tr_teknis_work_order_tersedia.forEach((data) => {
       materialData.value.push({
         label: data.label,
@@ -125,7 +122,6 @@ const handleOptionChange = (selected: { label: string; value: string }) => {
       });
     }
   }
-  // console.log('saved data: ', materialData.value)
 };
 
 const cancelAdd = async () => {

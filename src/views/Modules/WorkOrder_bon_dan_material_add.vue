@@ -48,6 +48,7 @@ const savedData = ref({
   Tr_teknis_item: "", // wajib
   Tr_teknis_team: [],
   Tr_teknis_keterangan: "",
+  Tr_teknis_keterangan_closing: "",
 
   Tr_teknis_logistik_id: "",
   Tr_teknis_user_created: "", // otomatis
@@ -79,7 +80,6 @@ onMounted(async () => {
   savedData.value.Tr_teknis_created = date;
   savedData.value.Tr_teknis_user_created = indexStore.user.userName;
 
-  console.log(savedData.value);
 });
 
 // Function
@@ -205,7 +205,6 @@ const submitData = async () => {
       );
       fixData.Tr_teknis_logistik_id = prefix.nextId;
       fixData.Tr_teknis_jenis = fixData.Tr_teknis_jenis.value;
-      // console.log(fixData)
 
       await adminTeknis_CreateData(fixData);
       await successCreate().then(() => {
