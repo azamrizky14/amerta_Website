@@ -87,3 +87,11 @@ export const getUtilByName = async (data) => {
   var suppData = response.data;
   return suppData
 }
+
+// User Internal
+export const getAllUsers = async (data) => {
+  const response = await axios.get(API+'/api/userInternal/')
+  var suppData = response.data;
+  return suppData
+}
+
