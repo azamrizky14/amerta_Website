@@ -51,7 +51,7 @@ watch(() => props.modelValue, (newValue) => {
     <label :for="label" class="px-4 py-2 rounded transition text-center" :class="props.disabled ? ' ' : 'cursor-pointer'">
       {{ label }}
     </label>
-
+    
     <!-- Image preview with placeholder support and click to change -->
     <div class="mt-4">
       <img
@@ -59,14 +59,15 @@ watch(() => props.modelValue, (newValue) => {
         :src="imageSrc ? API+'/images/admin_logistik/'+imageSrc : 'https://via.placeholder.com/150'"
         alt="Uploaded Preview"
         class="w-[100px] h-[100px] object-cover rounded"
-        :class="props.disabled ? ' ' : 'cursor-pointer'"
+        :class="props.disabled ? 'cursor-default' : 'cursor-pointer'"
         @click="$refs.fileInput.click()"
       />
       <img
         v-else
         :src="imageSrc || 'https://via.placeholder.com/150'"
         alt="Uploaded Preview"
-        class="w-[100px] h-[100px] object-cover rounded cursor-pointer"
+        :class="props.disabled ? 'cursor-default' : 'cursor-pointer'"
+        class="w-[100px] h-[100px] object-cover rounded"
         @click="$refs.fileInput.click()"
       />
     </div>

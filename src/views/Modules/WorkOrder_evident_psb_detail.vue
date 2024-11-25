@@ -67,9 +67,16 @@ const optionsType = ref([]);
 // ];
 
 onMounted(async () => {
- const data=await adminTeknis_GetDataEvidentById(route.params.logistikType+'/'+route.params.logistikDate+'/'+route.params.logistikNumber,route.params.id)
- console.log(data)
- savedData.value=data
+  const data = await adminTeknis_GetDataEvidentById(
+    route.params.logistikType +
+      "/" +
+      route.params.logistikDate +
+      "/" +
+      route.params.logistikNumber,
+    route.params.id
+  );
+  console.log(data);
+  savedData.value = data;
 });
 
 // Function
@@ -210,7 +217,7 @@ const submitData = async () => {
               return {
                 label: x.label,
                 qty: 1,
-                snNumber: x.snNumber
+                snNumber: x.snNumber,
               };
             } else if (x.label === "ONT" && !x.snNumber) {
               return {
@@ -285,34 +292,33 @@ const removeImage = (field: string) => {
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="Input Data">
           <div class="flex flex-col gap-2 p-6.5">
-
             <div class="flex flex-col gap-6 xl:flex-row">
               <div class="w-full">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                   Kode Bon Material
-              </label>
-              <input
-                disabled
-                type="text"
-                placeholder="Nama Tas"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_logistik_id"
-              />
+                </label>
+                <input
+                  disabled
+                  type="text"
+                  placeholder="Nama Tas"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_logistik_id"
+                />
               </div>
             </div>
 
             <div>
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Teknisi
-                </label>
-                <div>
-                  <multiselectReadOnly
-                    disabled
-                    :options="savedData.Tr_teknis_team"
-                    placeholder="Pilih Teknisi..."
-                  />
-                </div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Teknisi
+              </label>
+              <div>
+                <multiselectReadOnly
+                  disabled
+                  :options="savedData.Tr_teknis_team"
+                  placeholder="Pilih Teknisi..."
+                />
               </div>
+            </div>
 
             <div class="flex flex-col gap-6 xl:flex-row">
               <div class="lg:w-2/3">
@@ -320,7 +326,7 @@ const removeImage = (field: string) => {
                   Id Pelanggan (Wajib Diisi)
                 </label>
                 <input
-                disabled
+                  disabled
                   type="text"
                   placeholder="Id Pelanggan"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -332,7 +338,7 @@ const removeImage = (field: string) => {
                   Server
                 </label>
                 <input
-                disabled
+                  disabled
                   type="text"
                   placeholder="Server"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -346,7 +352,7 @@ const removeImage = (field: string) => {
                 Nama Pelanggan (Wajib Diisi)
               </label>
               <input
-              disabled
+                disabled
                 type="text"
                 placeholder="Nama Pelanggan"
                 class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
@@ -359,7 +365,7 @@ const removeImage = (field: string) => {
                 Keterangan
               </label>
               <textarea
-              disabled
+                disabled
                 rows="3"
                 placeholder="Masukan keterangan disini!"
                 class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -454,58 +460,61 @@ const removeImage = (field: string) => {
           <div class="grid grid-cols-2">
             <div class="flex border flex-col items-center p-2 justify-end relative">
               <ImageWithPreview
-              disabled
+                disabled
                 label="Evident Progress"
-                v-model="savedData.Tr_teknis_evident_progress"
-                @update:file="(file) => (savedData.Tr_teknis_evident_progress = file)"
+                v-if="savedData.Tr_teknis_work_order_images"
+                v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_progress"
+                @update:file="
+                  (file) =>
+                    (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_progress = file)
+                "
               />
             </div>
 
             <div class="flex border flex-col items-center p-2 justify-end relative">
               <ImageWithPreview
-              disabled
+                disabled
                 label="Evident SpeedTest"
-                v-model="savedData.Tr_teknis_evident_speed_test"
-                @update:file="(file) => (savedData.Tr_teknis_evident_speed_test = file)"
+                v-if="savedData.Tr_teknis_work_order_images"
+                v-model="
+                  savedData.Tr_teknis_work_order_images.Tr_teknis_evident_speed_test
+                "
+                @update:file="
+                  (file) =>
+                    (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_speed_test = file)
+                "
               />
-              <!-- Tombol Hapus -->
-              <button
-                v-if="savedData.Tr_teknis_evident_speed_test"
-                @click="removeImage('Tr_teknis_evident_speed_test')"
-                class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-              >
-                X
-              </button>
             </div>
 
             <div class="col-span-3 grid grid-cols-2">
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <ImageWithPreview
-                disabled
+                  disabled
                   label="Review Google"
-                  v-model="savedData.Tr_teknis_evident_review_google"
+                  v-if="savedData.Tr_teknis_work_order_images"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_review_google
+                  "
                   @update:file="
-                    (file) => (savedData.Tr_teknis_evident_review_google = file)
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_review_google = file)
                   "
                 />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_review_google"
-                  @click="removeImage('Tr_teknis_evident_review_google')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
               </div>
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <ImageWithPreview
-                disabled
+                  disabled
                   label="Kertas Form PSB"
-                  v-model="savedData.Tr_teknis_evident_kertas_psb"
-                  @update:file="(file) => (savedData.Tr_teknis_evident_kertas_psb = file)"
+                  v-if="savedData.Tr_teknis_work_order_images"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kertas_psb
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kertas_psb = file)
+                  "
                 />
-                
               </div>
             </div>
 
@@ -515,40 +524,32 @@ const removeImage = (field: string) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <ImageWithPreview
-                disabled
+                  disabled
                   label="ODP"
-                  v-model="savedData.Tr_teknis_evident_redaman_odp"
+                  v-if="savedData.Tr_teknis_work_order_images"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_redaman_odp
+                  "
                   @update:file="
-                    (file) => (savedData.Tr_teknis_evident_redaman_odp = file)
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_redaman_odp = file)
                   "
                 />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_redaman_odp"
-                  @click="removeImage('Tr_teknis_evident_redaman_odp')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
               </div>
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <ImageWithPreview
-                disabled
+                  disabled
                   label="ONT"
-                  v-model="savedData.Tr_teknis_evident_redaman_ont"
+                  v-if="savedData.Tr_teknis_work_order_images"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_redaman_ont
+                  "
                   @update:file="
-                    (file) => (savedData.Tr_teknis_evident_redaman_ont = file)
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_redaman_ont = file)
                   "
                 />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_redaman_ont"
-                  @click="removeImage('Tr_teknis_evident_redaman_ont')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
               </div>
             </div>
 
@@ -558,36 +559,32 @@ const removeImage = (field: string) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <ImageWithPreview
-                disabled
+                  disabled
                   label="ODP (Tampak Depan)"
-                  v-model="savedData.Tr_teknis_evident_odp_depan"
-                  @update:file="(file) => (savedData.Tr_teknis_evident_odp_depan = file)"
+                  v-if="savedData.Tr_teknis_work_order_images"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_odp_depan
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_odp_depan = file)
+                  "
                 />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_odp_depan"
-                  @click="removeImage('Tr_teknis_evident_odp_depan')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
               </div>
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <ImageWithPreview
-                disabled
+                  disabled
                   label="PORT (Tampak Dalam)"
-                  v-model="savedData.Tr_teknis_evident_odp_dalam"
-                  @update:file="(file) => (savedData.Tr_teknis_evident_odp_dalam = file)"
+                  v-if="savedData.Tr_teknis_work_order_images"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_odp_dalam
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_odp_dalam = file)
+                  "
                 />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_odp_dalam"
-                  @click="removeImage('Tr_teknis_evident_odp_dalam')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
               </div>
             </div>
 
@@ -597,41 +594,34 @@ const removeImage = (field: string) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <ImageWithPreview
-                disabled
+                  disabled
                   label="Dengan Pelanggan"
-                  v-model="savedData.Tr_teknis_evident_pelanggan_dengan_pelanggan"
+                  v-if="savedData.Tr_teknis_work_order_images"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_pelanggan_dengan_pelanggan
+                  "
                   @update:file="
                     (file) =>
-                      (savedData.Tr_teknis_evident_pelanggan_dengan_pelanggan = file)
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_pelanggan_dengan_pelanggan = file)
                   "
                 />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_pelanggan_dengan_pelanggan"
-                  @click="removeImage('Tr_teknis_evident_pelanggan_dengan_pelanggan')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
               </div>
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <ImageWithPreview
-                disabled
+                  disabled
                   label="Depan Rumah Pelanggan"
-                  v-model="savedData.Tr_teknis_evident_pelanggan_depan_rumah"
+                  v-if="savedData.Tr_teknis_work_order_images"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_pelanggan_depan_rumah
+                  "
                   @update:file="
-                    (file) => (savedData.Tr_teknis_evident_pelanggan_depan_rumah = file)
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_pelanggan_depan_rumah = file)
                   "
                 />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_pelanggan_depan_rumah"
-                  @click="removeImage('Tr_teknis_evident_pelanggan_depan_rumah')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
               </div>
             </div>
 
@@ -641,40 +631,32 @@ const removeImage = (field: string) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <ImageWithPreview
-                disabled
+                  disabled
                   label="Start"
-                  v-model="savedData.Tr_teknis_evident_marking_dc_start"
+                  v-if="savedData.Tr_teknis_work_order_images"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_marking_dc_start
+                  "
                   @update:file="
-                    (file) => (savedData.Tr_teknis_evident_marking_dc_start = file)
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_start = file)
                   "
                 />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_marking_dc_start"
-                  @click="removeImage('Tr_teknis_evident_marking_dc_start')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
               </div>
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <ImageWithPreview
-                disabled
-                  label="End"
-                  v-model="savedData.Tr_teknis_evident_marking_dc_end"
+                  disabled
+                  v-if="savedData.Tr_teknis_work_order_images"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_end
+                  "
                   @update:file="
-                    (file) => (savedData.Tr_teknis_evident_marking_dc_end = file)
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_end = file)
                   "
                 />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_marking_dc_end"
-                  @click="removeImage('Tr_teknis_evident_marking_dc_end')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
               </div>
             </div>
           </div>
