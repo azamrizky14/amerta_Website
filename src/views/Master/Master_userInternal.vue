@@ -2,25 +2,24 @@
 import { ref, onMounted } from 'vue'
 import BreadcrumbDefault from '@/components/Breadcrumbs/BreadcrumbDefault.vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import { adminTeknis_GetDataEvidentByType } from '@/stores/functionAPI'
-import {  mdiEyeOutline, mdiMagnify, mdiRefresh, mdiPlusCircleOutline } from '@mdi/js';
+import { getAllUsers } from '@/stores/functionAPI'
+import { mdiTrashCanOutline, mdiEyeOutline, mdiSquareEditOutline, mdiMagnify, mdiRefresh, mdiPlusCircleOutline } from '@mdi/js';
 
-const pageTitle = ref('Evident - PSB')
-const pageList = ref (['Work Order', 'Evident', 'PSB'])
+const pageTitle = ref('Master - User Internal')
+const pageList = ref (['Master', 'User Internal'])
 const dataHeader = ref([
   {name: 'No.', class: 'py-2 pl-3'},
-  {name: 'Tgl. Dibuat', class: 'min-w-[100px] py-2 px-4'},
-  {name: 'No. Logistik', class: 'min-w-[150px] py-2 px-4'},
-  {name: 'Id. User', class: 'min-w-[100px] py-2 px-4'},
-  {name: 'Nama. User', class: 'min-w-[150px] py-2 px-4'},
-  {name: 'Server', class: 'min-w-[75px] py-2 px-4'},
-  {name: 'Admin Teknis', class: 'min-w-[150px] py-2 px-4'},
+  {name: 'Nama User', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Email', class: 'min-w-[150px] py-2 px-4'},
+  {name: 'No. Telp', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Gender', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Role', class: 'min-w-[100px] py-2 px-4'},
 ])
 let dataTable = ref([])
 
 
 onMounted( async () => {
-  const data = await adminTeknis_GetDataEvidentByType('N', 'PSB')
+  const data = await getAllUsers()
   dataTable.value = data
 })
 </script>
@@ -64,8 +63,8 @@ onMounted( async () => {
             </div>
             <div class="right-data flex items-center flex-row-reverse">
               <!-- Add Button -->
-              <router-link to="/modules/work-order/evident/psb/add" class="px-1">
-                <svg 
+              <router-link to="/modules/work-order/evident/infra/add" class="px-1">
+              <svg 
                 class="fill-current hover:text-primary"
                 width="22"
                 height="22"
@@ -78,7 +77,7 @@ onMounted( async () => {
               <!-- Refresh Button -->
               </router-link>
               <button class="px-1">
-                <svg 
+              <svg 
                 class="fill-current hover:text-primary"
                 width="24"
                 height="24"
@@ -108,42 +107,63 @@ onMounted( async () => {
               {{ index+1 }}
             </td>
             <td class="py-1 px-4 border">
-              <p class="text-black dark:text-white text-xs text-center">{{ item.Tr_teknis_created }}</p>
+              <p class="text-black dark:text-white text-xs ">{{ item.userName }}</p>
             </td>
             <td class="py-1 px-4 border">
-              <p class="text-black dark:text-white text-xs text-center">{{ item.Tr_teknis_logistik_id }}</p>
+              <p class="text-black dark:text-white text-xs ">{{ item.email }}</p>
             </td>
             <td class="py-1 px-4 border">
-              <p class=" text-xs text-black dark:text-white">{{ item.Tr_teknis_pelanggan_id }}</p>
+              <p class=" text-xs text-black dark:text-white">{{ item.userPhone }}</p>
             </td>
             <td class="py-1 px-4 border">
-              <h5 class="font-medium text-black text-xs dark:text-white">{{ item.Tr_teknis_pelanggan_nama }}</h5>
+              <h5 class="font-medium text-black text-xs dark:text-white text-center">{{ item.userGender }}</h5>
               <!-- <p class="text-xs">{{ item.picId }}</p> -->
             </td>
             <td class="py-1 px-4 text-center border">
-              <h5 class="font-medium text-black text-xs dark:text-white">{{ item.Tr_teknis_pelanggan_server }}</h5>
+              <h5 class="font-medium text-black text-xs dark:text-white text-left">{{ item.userRole }}</h5>
               <!-- <p class="text-xs">{{ item.picId }}</p> -->
-            </td>
-            <td class="py-1 px-4 border">
-              <h5 class="font-medium text-black text-xs dark:text-white">{{ item.Tr_teknis_user_updated }}</h5>
             </td>
             <td class="py-1 px-4">
               <div class="flex items-center space-x-3.5 d-flex justify-center">              
-                <router-link class="hover:text-primary" :to="'/modules/work-order/evident/psb/detail/'+item.Tr_teknis_logistik_id+'/'+item._id">
-                  <svg
-                    class="fill-current"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      :d="mdiEyeOutline"  
-                      fill=""
-                    />
-                  </svg>
-                </router-link>
+                
+                <router-link :class="item.Tr_teknis_status === 'closed' ? 'cursor-default opacity-50' : 'hover:text-primary'" class="" :to="'/modules/work-order/evident/infra/detail/'+item.Tr_teknis_logistik_id+'/'+item._id">
+                <svg
+                  class="fill-current"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                <path fill-rule="evenodd" clip-rule="evenodd" :d="mdiEyeOutline" fill="#"/>
+                </svg>
+              </router-link>
+
+              <router-link :class="item.Tr_teknis_status === 'closed' ? 'cursor-default opacity-50' : 'hover:text-primary'" class="" :to="item.Tr_teknis_status !== 'closed' ? '/modules/work-order/bon-dan-material/closing/'+item._id : ''">
+                <svg
+                  class="fill-current"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                <path fill-rule="evenodd" clip-rule="evenodd" :d="mdiSquareEditOutline" fill="#"/>
+                </svg>
+              </router-link>
+
+              <router-link :class="item.Tr_teknis_status === 'closed' ? 'cursor-default opacity-50' : 'hover:text-primary'" class="" :to="item.Tr_teknis_status !== 'closed' ? '/modules/work-order/bon-dan-material/closing/'+item._id : ''">
+                <svg
+                  class="fill-current"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                <path fill-rule="evenodd" clip-rule="evenodd" :d="mdiTrashCanOutline" fill="#"/>
+                </svg>
+              </router-link>
 
               </div>
             </td>
