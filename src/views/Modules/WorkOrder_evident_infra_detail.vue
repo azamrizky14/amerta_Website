@@ -451,7 +451,7 @@ const removeImage = (field: string) => {
 
       <div class="flex flex-col gap-9">
         <!-- Textarea Fields Start -->
-        <DefaultCard cardTitle="Input Images">
+        <DefaultCard cardTitle="Input Gambar">
           <div class="grid grid-cols-2">
             <!-- Redaman Sebelum -->
             <div class="col-span-3 grid grid-cols-2">

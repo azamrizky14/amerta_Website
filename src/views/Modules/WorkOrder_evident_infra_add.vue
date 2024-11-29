@@ -19,8 +19,8 @@ import { ref, onMounted } from "vue";
 import router from "@/router";
 
 const indexStore = useIndexStore()
-const pageTitle = ref("Evident - Add INFRA");
-const pageList = ref(["Work Order", "Evident", "INFRA", "Add"]);
+const pageTitle = ref("Evident - Tambah INFRA");
+const pageList = ref(["Work Order", "Evident", "INFRA", "Tambah"]);
 
 // Saved Data
 const savedData = ref({
@@ -124,14 +124,14 @@ const handleOptionChange = (selected: { label: string; value: string }) => {
 
 const cancelAdd = async () => {
   const result = await Swal.fire({
-    title: "Cancel Create?",
-    text: "are you sure to cancel add data?",
+    title: "Batalkan?",
+    text: "anda yakin membatalkan tambah data?",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#FF0000",
     cancelButtonColor: "#",
-    confirmButtonText: "Cancel",
-    cancelButtonText: "Back",
+    confirmButtonText: "Batalkan",
+    cancelButtonText: "Kembali",
   });
 
   if (result.isConfirmed) {
@@ -148,6 +148,25 @@ const dataValidator = ref([
 ]);
 
 const dataError = ref([]);
+
+// Validasi qtyKeluar tidak boleh kurang dari 1
+const validateQtyKeluar = (index, qtySisa) => {
+  // Hanya lakukan validasi jika qtyKeluar tidak kosong
+  if (materialData.value[index].qty !== "" && (materialData.value[index].qty < 0 || materialData.value[index].qty > qtySisa)) {
+    Swal.fire({
+      title: 'Error!',
+      text: 'Jumlah input harus antara 0 - '+qtySisa,
+      icon: 'error',
+      position: 'top-end',
+      timer: 1000,
+      showConfirmButton: false,
+      toast: true
+    }).then(() => {
+      // Setelah SweetAlert muncul, ganti nilai qtyKeluar menjadi 1
+      materialData.value[index].qty = 0;
+    });
+  }
+};
 
 // Helper function for validation
 const validateForm = () => {
@@ -180,13 +199,14 @@ const submitData = async () => {
 
   // If form is valid, continue with submission
   const result = await Swal.fire({
-    title: "Add Data?",
+    title: "Tambah Data?",
     text: "",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#10B981",
     cancelButtonColor: "#d33",
-    confirmButtonText: "Add!",
+    confirmButtonText: "Tambah!",
+    cancelButtonText: "Batal",
   });
 
   if (result.isConfirmed) {
@@ -201,23 +221,33 @@ const submitData = async () => {
         const cleanedArray = materialData.value.filter((item) => {
           return Object.values(item).some((value) => value !== "");
         });
-        fixData.Tr_teknis_work_order_terpakai_material = cleanedArray;
+        fixData.Tr_teknis_work_order_terpakai_material = cleanedArray.sort((a, b) => {
+          const aHasONT = a.label.includes("(ONT)");
+          const bHasONT = b.label.includes("(ONT)");
+
+          if (aHasONT && !bHasONT) return 1; // Move `a` after `b`
+          if (!aHasONT && bHasONT) return -1; // Keep `a` before `b`
+          return 0; // Maintain order otherwise
+        });
         fixData.Tr_teknis_work_order_terpakai_material = fixData.Tr_teknis_work_order_terpakai_material.map(
           (x) => {
             // Check if label is "ONT" and dataSN is not empty
             if (x.label.includes("ONT") && x.snNumber) {
               return {
+                qtySisa: x.qtySisa - 1,
                 label: x.label,
                 qty: 1,
-                snNumber: x.snNumber
+                snNumber: x.snNumber,
               };
             } else if (x.label.includes("ONT") && !x.snNumber) {
               return {
+                qtySisa: x.qtySisa,
                 label: x.label,
                 qty: 0,
               };
             } else {
               return {
+                qtySisa: x.qtySisa - x.qty,
                 label: x.label,
                 qty: x.qty,
               };
@@ -394,7 +424,7 @@ const removeImage = (field: string) => {
                   v-model="data.label"
                 />
               </div>
-              <div class="w-3/12" v-if="!data.label.includes('ONT')">
+              <div class="w-3/12">
                 <label
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
                   v-if="index === 0"
@@ -409,34 +439,21 @@ const removeImage = (field: string) => {
                   v-model="data.qtySisa"
                 />
               </div>
-              <div class="w-3/12" v-if="!data.label.includes('ONT')">
+              <div class="w-3/12">
                 <label
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
                   v-if="index === 0"
                 >
                   Qty. Dipakai
-                </label>
+                </label> 
                 <input
                   :disabled="!data.qtySisa"
+                  min="0"
                   type="number"
                   placeholder="Qty"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-4 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.qty"
-                />
-              </div>
-              <div class="w-6/12" v-else>
-                <label
-                  class="mb-3 block text-sm font-medium text-black dark:text-white"
-                  v-if="index === 0"
-                >
-                  SN
-                </label>
-                <input
-                  :disabled="!data.qtySisa"
-                  type="text"
-                  placeholder="SN"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.snNumber"
+                @change="validateQtyKeluar(index, data.qtySisa)"
                 />
               </div>
             </div>
@@ -447,7 +464,7 @@ const removeImage = (field: string) => {
       
 <div class="flex flex-col gap-9">
   <!-- Textarea Fields Start -->
-  <DefaultCard cardTitle="Input Images">
+  <DefaultCard cardTitle="Input Gambar">
     <div class="grid grid-cols-2">
       
       <!-- Redaman Sebelum -->
@@ -563,13 +580,13 @@ const removeImage = (field: string) => {
               @click="cancelAdd"
               class="flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90"
             >
-              Cancel
+              Batalkan
             </button>
             <button
               @click="submitData"
               class="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
             >
-              Add Data
+              Tambah Data
             </button>
           </div>
         </DefaultCard>

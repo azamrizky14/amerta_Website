@@ -133,12 +133,12 @@ const getData = async () => {
 const dataError = ref([]); // Array untuk menyimpan error
 
 // Validasi qtyKeluar tidak boleh kurang dari 1
-const validateQtyKeluar = (index) => {
+const validateQtyKeluar = (index, qtySisa) => {
   // Hanya lakukan validasi jika qtyKeluar tidak kosong
-  if (savedData.value.Tr_teknis_work_order_kembali[index].qty !== "" && savedData.value.Tr_teknis_work_order_kembali[index].qty < 1) {
+  if (savedData.value.Tr_teknis_work_order_kembali[index].qty !== "" && (savedData.value.Tr_teknis_work_order_kembali[index].qty < 0 || savedData.value.Tr_teknis_work_order_kembali[index].qty > qtySisa)) {
     Swal.fire({
       title: "Error!",
-      text: "Minimal jumlah input adalah 1",
+      text: 'Jumlah input harus antara 0 - '+qtySisa,
       icon: "error",
       position: "top-end",
       timer: 1000,
@@ -146,7 +146,7 @@ const validateQtyKeluar = (index) => {
       toast: true,
     }).then(() => {
       // Setelah SweetAlert muncul, ganti nilai qtyKeluar menjadi 1
-      savedData.value.Tr_teknis_work_order_kembali[index].qty = 1;
+      savedData.value.Tr_teknis_work_order_kembali[index].qty = 0;
     });
   }
 };
@@ -204,7 +204,6 @@ const submitData = async () => {
       fixData.Tr_teknis_work_order_kembali = fixData.Tr_teknis_work_order_kembali.map(x => ({
         label: x.label,
         qty: x.qty ? x.qty : 0
-        
       }))
 
       
@@ -314,7 +313,7 @@ const submitData = async () => {
       </div>
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="List Material">
+        <DefaultCard cardTitle="List Material Kembali">
           <div class="p-6.5">
             <div
               class="flex flex-col gap-2 xl:flex-row"
@@ -366,7 +365,7 @@ const submitData = async () => {
                   placeholder="Qty"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.qty"
-                  @change="validateQtyKeluar(index)"
+                  @change="validateQtyKeluar(index, data.qtySisa)"
                 />
               </div>
             </div>

@@ -383,7 +383,7 @@ const submitData = async () => {
 
       <div class="flex flex-col gap-9">
         <!-- Textarea Fields Start -->
-        <DefaultCard cardTitle="Input Images">
+        <DefaultCard cardTitle="Input Gambar">
           <div class="grid grid-cols-2" v-if="savedData">
           
             <div class="col-span-3 grid grid-cols-2">

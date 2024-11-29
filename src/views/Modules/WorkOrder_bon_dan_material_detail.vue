@@ -361,7 +361,7 @@ const submitData = async () => {
               v-if="savedData.Tr_teknis_work_order_tersedia.length > 0"
               :class="index === 0 ? '' : 'pt-2'"
             >
-              <div class="w-6/12">
+              <div class="w-7/12">
                 <label
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
                   v-if="index === 0"
@@ -376,7 +376,7 @@ const submitData = async () => {
                   v-model="data.label"
                 />
               </div>
-              <div class="w-3/12">
+              <div class="w-5/12">
                 <label
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
                   v-if="index === 0"
@@ -389,22 +389,6 @@ const submitData = async () => {
                   placeholder="Qty"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.qty"
-                  @change="validateQtyKeluar(index)"
-                />
-              </div>
-              <div class="w-3/12">
-                <label
-                  class="mb-3 block text-sm font-medium text-black dark:text-white"
-                  v-if="index === 0"
-                >
-                  Qty. Tersisa
-                </label>
-                <input
-                  disabled
-                  type="number"
-                  placeholder="Qty"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.qtySisa"
                   @change="validateQtyKeluar(index)"
                 />
               </div>
@@ -434,7 +418,7 @@ const submitData = async () => {
               to="/modules/work-order/bon-dan-material"
               class="col-span-2 flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90"
             >
-              Back
+              Kembali
             </router-link>
           </div>
         </DefaultCard>
