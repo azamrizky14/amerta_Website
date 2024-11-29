@@ -98,30 +98,57 @@ export const useIndexStore = defineStore('index', () => {
     localStorage.removeItem('company');
   }
 
-  // State dan logika untuk util
-  const utilData = ref<any>(null);
-  const lastUpdated = ref<number | null>(null);
+// State dan logika untuk util
+const utilData = ref<any>(
+  sessionStorage.getItem('utilData') ? JSON.parse(sessionStorage.getItem('utilData') as string) : null
+);
+const lastUpdatedSidebar = ref<number | null>(
+  sessionStorage.getItem('lastUpdatedSidebar') ? Number(sessionStorage.getItem('lastUpdatedSidebar')) : null
+);
 
-  async function getUtilByName(data: string) {
-    const now = Date.now();
+async function getUtilPage() {
+  const now = Date.now();
 
-    // Check if the last update was less than 1 hour ago
-    if (lastUpdated.value && now - lastUpdated.value < 3600000) {
-      console.log('Using cached utility data.');
-      return utilData.value;
-    }
-
-    console.log('Fetching new utility data...');
-    try {
-      const response = await fetchUtilByName(data); // Use the imported function
-      utilData.value = response;
-      lastUpdated.value = now;
-    } catch (error) {
-      console.error('Failed to fetch utility data:', error);
-    }
-
+  // Check if the cached data is still valid
+  if (lastUpdatedSidebar.value !== null && now - lastUpdatedSidebar.value < 3600000) {
+    console.log('Using cached sidebar data.');
     return utilData.value;
   }
+
+  console.log('Fetching new sidebar data...');
+  try {
+    const response = await fetchUtilByName('page'); // Fetch new data
+    utilData.value = response;
+    lastUpdatedSidebar.value = now; // Update the timestamp
+
+    // Persist the updated timestamp and data to sessionStorage
+    sessionStorage.setItem('lastUpdatedSidebar', String(now));
+    sessionStorage.setItem('utilData', JSON.stringify(response));
+
+  } catch (error) {
+    console.error('Failed to fetch sidebar data:', error);
+  }
+
+  return utilData.value;
+}
+
+async function refreshUtilPage() {
+  const now = Date.now();
+  try {
+    const response = await fetchUtilByName('page'); // Fetch new data
+    utilData.value = response;
+    lastUpdatedSidebar.value = now; // Update the timestamp
+
+    // Persist the updated timestamp and data to sessionStorage
+    sessionStorage.setItem('lastUpdatedSidebar', String(now));
+    sessionStorage.setItem('utilData', JSON.stringify(response));
+
+  } catch (error) {
+    console.error('Failed to fetch sidebar data:', error);
+  }
+
+  return utilData.value;
+}
 
   return {
     user,
@@ -133,6 +160,7 @@ export const useIndexStore = defineStore('index', () => {
     setLoginTime,
     clearUser,
     clearCompany,
-    getUtilByName
+    getUtilPage,
+    refreshUtilPage
   };
 });

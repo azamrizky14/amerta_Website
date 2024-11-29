@@ -45,6 +45,7 @@ const logCredentials = async () => {
         indexStore.setToken(loginData.token);
         const currentTime = new Date().toISOString();
         indexStore.setLoginTime(currentTime);
+        indexStore.refreshUtilPage()
         Swal.fire({
           title: "Success",
           text: "Logged in successfully!",

@@ -357,7 +357,7 @@ const submitData = async () => {
 
       <div class="flex flex-col gap-9">
         <!-- Textarea Fields Start -->
-        <DefaultCard cardTitle="Input Images">
+        <DefaultCard cardTitle="Input Gambar">
           <div class="grid grid-cols-2" v-if="savedData">
             <div class="flex border flex-col items-center p-2 justify-end">
               <imageWithPreview label="Evident Progress" v-model="savedData.Tr_teknis_evident_progress" 

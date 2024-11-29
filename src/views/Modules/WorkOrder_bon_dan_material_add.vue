@@ -40,8 +40,8 @@ const optionsType = [
   { label: "INFRA", value: "INFRA" },
 ];
 
-const pageTitle = ref("Add Bon & Material");
-const pageList = ref(["Work Order", "Bon & Material", "Add"]);
+const pageTitle = ref("Tambah Bon & Material");
+const pageList = ref(["Work Order", "Bon & Material", "Tambah"]);
 
 // Saved Data
 const savedData = ref({
@@ -96,14 +96,14 @@ const handleRemoveMaterialTerpakai = async (index) => {
 
 const cancelAdd = async () => {
   const result = await Swal.fire({
-    title: "Cancel Create?",
-    text: "are you sure to cancel add data?",
+    title: "Batalkan?",
+    text: "anda yakin membatalkan tambah data?",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#FF0000",
     cancelButtonColor: "#",
-    confirmButtonText: "Cancel",
-    cancelButtonText: "Back",
+    confirmButtonText: "Batalkan",
+    cancelButtonText: "Kembali",
   });
 
   if (result.isConfirmed) {
@@ -175,13 +175,14 @@ const submitData = async () => {
 
   // Jika tidak ada error, lanjutkan dengan SweetAlert konfirmasi
   const result = await Swal.fire({
-    title: "Add Data?",
-    text: "Apakah Anda yakin ingin menambahkan data ini?",
+    title: "Tambah Data?",
+    text: "",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#10B981",
     cancelButtonColor: "#d33",
-    confirmButtonText: "Add!",
+    confirmButtonText: "Tambah!",
+    cancelButtonText: "Batal",
   });
 
   if (result.isConfirmed) {
@@ -193,6 +194,14 @@ const submitData = async () => {
       if (materialData.value && materialData.value.length > 0) {
         const cleanedArray = materialData.value.filter((item) => {
           return Object.values(item).some((value) => value !== "");
+        });
+        fixData.Tr_teknis_work_order_terpakai_material = cleanedArray.sort((a, b) => {
+          const aHasONT = a.label.toLowerCase().includes('ont');
+          const bHasONT = b.label.toLowerCase().includes('ont');
+
+          if (aHasONT && !bHasONT) return 1; // Move `a` after `b`
+          if (!aHasONT && bHasONT) return -1; // Keep `a` before `b`
+          return 0; // Maintain order otherwise
         });
         fixData.Tr_teknis_work_order_tersedia = fixData.Tr_teknis_work_order_tersedia.concat(
           cleanedArray
@@ -303,6 +312,12 @@ const submitData = async () => {
                 >
                   Nama Barang
                 </label>
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-else-if="data.label.toLowerCase().includes('ont')"
+                >
+                  ONT
+                </label>
                 <input
                   type="text"
                   placeholder="Nama Barang"
@@ -372,13 +387,13 @@ const submitData = async () => {
               @click="cancelAdd"
               class="flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90"
             >
-              Cancel
+              Batalkan
             </button>
             <button
               @click="submitData"
               class="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
             >
-              Add Data
+              Tambah Data
             </button>
           </div>
         </DefaultCard>
