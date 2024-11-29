@@ -63,7 +63,7 @@ onMounted( async () => {
             </div>
             <div class="right-data flex items-center flex-row-reverse">
               <!-- Add Button -->
-              <router-link to="/modules/work-order/evident/infra/add" class="px-1">
+              <router-link to="/modules/master/user-internal/add" class="px-1">
               <svg 
                 class="fill-current hover:text-primary"
                 width="22"
