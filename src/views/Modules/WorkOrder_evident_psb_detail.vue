@@ -24,8 +24,8 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 
-const pageTitle = ref("Evident - Add PSB");
-const pageList = ref(["Work Order", "Evident", "PSB", "Add"]);
+const pageTitle = ref("Evident - Detail PSB");
+const pageList = ref(["Work Order", "Evident", "PSB", "Detail"]);
 
 // Saved Data
 const savedData = ref({
@@ -290,7 +290,7 @@ const removeImage = (field: string) => {
     <div class="grid grid-cols-1 gap-9 sm:grid-cols-2">
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Input Data">
+        <DefaultCard cardTitle="Detail Data">
           <div class="flex flex-col gap-2 p-6.5">
             <div class="flex flex-col gap-6 xl:flex-row">
               <div class="w-full">
@@ -378,15 +378,14 @@ const removeImage = (field: string) => {
 
         <!-- Input Fields Start -->
         <DefaultCard
-          cardTitle="Input Material Terpakai"
+          cardTitle="Detail Material Terpakai"
           @handle-click="handleAddMaterialTerpakai"
-          v-if="logistikData"
         >
           <div class="p-6.5">
             <div
               class="flex flex-col gap-2 xl:flex-row"
-              v-for="(data, index) in materialData"
-              v-if="materialData && materialData.length > 0"
+              v-for="(data, index) in savedData.Tr_teknis_work_order_terpakai_material"
+              v-if="savedData && savedData.Tr_teknis_work_order_terpakai_material.length > 0"
               :class="index === 0 ? '' : 'pt-2'"
             >
               <div class="w-6/12">
@@ -396,6 +395,12 @@ const removeImage = (field: string) => {
                 >
                   Nama Barang
                 </label>
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-else-if="data.label.toLowerCase().includes('ont')"
+                >
+                  ONT
+                </label>
                 <input
                   disabled
                   type="text"
@@ -404,7 +409,22 @@ const removeImage = (field: string) => {
                   v-model="data.label"
                 />
               </div>
-              <div class="w-3/12" v-if="data.label !== 'ONT'">
+              <div class="w-3/12" v-if="!data.label.toLowerCase().includes('ont')">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
+                  Qty. Dipakai
+                </label>
+                <input
+                  disabled
+                  type="number"
+                  placeholder="Qty"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-4 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="data.qty"
+                />
+              </div>
+              <div class="w-3/12" v-if="!data.label.toLowerCase().includes('ont')">
                 <label
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
                   v-if="index === 0"
@@ -419,30 +439,15 @@ const removeImage = (field: string) => {
                   v-model="data.qtySisa"
                 />
               </div>
-              <div class="w-3/12" v-if="data.label !== 'ONT'">
-                <label
-                  class="mb-3 block text-sm font-medium text-black dark:text-white"
-                  v-if="index === 0"
-                >
-                  Qty. Dipakai
-                </label>
-                <input
-                  :disabled="!data.qtySisa"
-                  type="number"
-                  placeholder="Qty"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-4 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.qty"
-                />
-              </div>
               <div class="w-6/12" v-else>
                 <label
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
-                  v-if="index === 0"
+                  v-if="index === 0 || data.label.toLowerCase().includes('ont')"
                 >
-                  SN
+                  Serial Number
                 </label>
                 <input
-                  :disabled="!data.qtySisa"
+                  disabled
                   type="text"
                   placeholder="SN"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -456,7 +461,7 @@ const removeImage = (field: string) => {
       </div>
       <div class="flex flex-col gap-9">
         <!-- Textarea Fields Start -->
-        <DefaultCard cardTitle="Input Images">
+        <DefaultCard cardTitle="Detail Gambar">
           <div class="grid grid-cols-2">
             <div class="flex border flex-col items-center p-2 justify-end relative">
               <ImageWithPreview

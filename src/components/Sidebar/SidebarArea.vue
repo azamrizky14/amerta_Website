@@ -14,7 +14,7 @@ const pageData = ref([])
 
 onMounted( async () => {
   if (indexStore.user.userAccess) {
-  const data = await indexStore.getUtilByName('page');
+  const data = await indexStore.getUtilPage();
   if (indexStore.user.userAccess[0] === 'all') {
     pageData.value = data.utilData
   } else {
@@ -42,6 +42,7 @@ const groupPages = async (pages) => {
     const groupedPages: Record<string, any> = {};
 
     filteredPages.forEach((page) => {
+      console.log('page',page)
       const { pageGroup, pageName, pageRoutes } = page;
 
       // If `pageGroup` is empty, add it directly to `menuItems` without grouping

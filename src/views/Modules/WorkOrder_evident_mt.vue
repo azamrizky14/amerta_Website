@@ -98,7 +98,7 @@ onMounted( async () => {
           {{ data.name }}
           </th>
           <th class="py-2 px-4 font-medium text-black dark:text-white text-center">
-            Action
+            Opsi
           </th>
           </tr>
         </thead>
