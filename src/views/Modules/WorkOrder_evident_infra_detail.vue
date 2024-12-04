@@ -24,8 +24,8 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 
-const pageTitle = ref("Evident - Add INFRA");
-const pageList = ref(["Work Order", "Evident", "INFRA", "Add"]);
+const pageTitle = ref("Evident - Detail INFRA");
+const pageList = ref(["Work Order", "Evident", "INFRA", "Detail"]);
 
 // Saved Data
 const savedData = ref({
@@ -36,6 +36,8 @@ const savedData = ref({
   Tr_teknis_keterangan: "",
   Tr_teknis_logistik_id: "",
   Tr_teknis_jenis: "INFRA",
+  Tr_teknis_trouble: "",
+  Tr_teknis_action: "",
   Tr_teknis_team: [],
 
   Tr_teknis_redaman_sebelum: null,
@@ -60,7 +62,7 @@ const optionsType = ref([]);
 
 // const optionsType = [
 //   { label: "PSB", value: "PSB" },
-//   { label: "MT", value: "MT" },
+//   { label: "INFRA", value: "INFRA" },
 //   { label: "INFRA", value: "INFRA" },
 // ];
 
@@ -74,7 +76,11 @@ onMounted(async () => {
     route.params.id
   );
   console.log(data);
+  if (data.Tr_teknis_team) {
+    data.Tr_teknis_team = data.Tr_teknis_team.map((x,i) => ({id: i, name: x}))
+  }
   savedData.value = data;
+  
 });
 
 // Function
@@ -151,6 +157,8 @@ const dataValidator = ref([
   { key: "Tr_teknis_pelanggan_id", label: "Id Pelanggan" },
   { key: "Tr_teknis_pelanggan_server", label: "Server" },
   { key: "Tr_teknis_pelanggan_nama", label: "Nama Pelanggan" },
+  { key: "Tr_teknis_trouble", label: "Masalah" },
+  { key: "Tr_teknis_action", label: "Solusi" },
 ]);
 
 const dataError = ref([]);
@@ -288,10 +296,10 @@ const removeImage = (field: string) => {
     <div class="grid grid-cols-1 gap-9 sm:grid-cols-2">
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Input Data">
+        <DefaultCard cardTitle="Detail Data">
           <div class="flex flex-col gap-2 p-6.5">
             <div class="flex flex-col gap-6 xl:flex-row">
-              <div class="w-full">
+              <div class="w-2/3">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                   Kode Bon Material
                 </label>
@@ -301,6 +309,18 @@ const removeImage = (field: string) => {
                   placeholder="Nama Tas"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_teknis_logistik_id"
+                />
+              </div>
+              <div class="w-1/3">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Kategori
+                </label>
+                <input
+                  disabled
+                  type="text"
+                  placeholder="Nama Tas"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_kategori"
                 />
               </div>
             </div>
@@ -324,6 +344,7 @@ const removeImage = (field: string) => {
                   Id Pelanggan (Wajib Diisi)
                 </label>
                 <input
+                  disabled
                   type="text"
                   placeholder="Id Pelanggan"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -335,6 +356,7 @@ const removeImage = (field: string) => {
                   Server
                 </label>
                 <input
+                  disabled
                   type="text"
                   placeholder="Server"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -348,6 +370,7 @@ const removeImage = (field: string) => {
                 Nama Pelanggan (Wajib Diisi)
               </label>
               <input
+                disabled
                 type="text"
                 placeholder="Nama Pelanggan"
                 class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
@@ -355,11 +378,37 @@ const removeImage = (field: string) => {
               />
             </div>
 
+            <div v-if="savedData.Tr_teknis_kategori === 'MT'">
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Masalah (Trouble)
+              </label>
+              <textarea
+                disabled
+                rows="3"
+                placeholder="Masukan keterangan disini!"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_trouble"
+              ></textarea>
+            </div>
+            <div v-if="savedData.Tr_teknis_kategori === 'MT'">
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Solusi (Action)
+              </label>
+              <textarea
+                disabled
+                rows="3"
+                placeholder="Masukan keterangan disini!"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_action"
+              ></textarea>
+            </div>
+
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Keterangan
               </label>
               <textarea
+                disabled
                 rows="3"
                 placeholder="Masukan keterangan disini!"
                 class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -372,15 +421,14 @@ const removeImage = (field: string) => {
 
         <!-- Input Fields Start -->
         <DefaultCard
-          cardTitle="Input Material Terpakai"
+          cardTitle="Detail Material Terpakai"
           @handle-click="handleAddMaterialTerpakai"
-          v-if="logistikData"
         >
           <div class="p-6.5">
             <div
               class="flex flex-col gap-2 xl:flex-row"
-              v-for="(data, index) in materialData"
-              v-if="materialData && materialData.length > 0"
+              v-for="(data, index) in savedData.Tr_teknis_work_order_terpakai_material"
+              v-if="savedData && savedData.Tr_teknis_work_order_terpakai_material.length > 0"
               :class="index === 0 ? '' : 'pt-2'"
             >
               <div class="w-6/12">
@@ -398,7 +446,22 @@ const removeImage = (field: string) => {
                   v-model="data.label"
                 />
               </div>
-              <div class="w-3/12" v-if="data.label !== 'ONT'">
+              <div class="w-3/12" v-if="!data.label.toLowerCase().includes('ont')">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
+                  Qty. Dipakai
+                </label>
+                <input
+                  disabled
+                  type="number"
+                  placeholder="Qty"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-4 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="data.qty"
+                />
+              </div>
+              <div class="w-3/12" v-if="!data.label.toLowerCase().includes('ont')">
                 <label
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
                   v-if="index === 0"
@@ -413,30 +476,15 @@ const removeImage = (field: string) => {
                   v-model="data.qtySisa"
                 />
               </div>
-              <div class="w-3/12" v-if="data.label !== 'ONT'">
-                <label
-                  class="mb-3 block text-sm font-medium text-black dark:text-white"
-                  v-if="index === 0"
-                >
-                  Qty. Dipakai
-                </label>
-                <input
-                  :disabled="!data.qtySisa"
-                  type="number"
-                  placeholder="Qty"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-4 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.qty"
-                />
-              </div>
               <div class="w-6/12" v-else>
                 <label
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
-                  v-if="index === 0"
+                  v-if="index === 0 || data.label.toLowerCase().includes('ont')"
                 >
-                  SN
+                  Serial Number
                 </label>
                 <input
-                  :disabled="!data.qtySisa"
+                  disabled
                   type="text"
                   placeholder="SN"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -451,9 +499,8 @@ const removeImage = (field: string) => {
 
       <div class="flex flex-col gap-9">
         <!-- Textarea Fields Start -->
-        <DefaultCard cardTitle="Input Gambar">
+        <DefaultCard cardTitle="Detail Gambar">
           <div class="grid grid-cols-2">
-            <!-- Redaman Sebelum -->
             <div class="col-span-3 grid grid-cols-2">
               <p class="text-black dark:text-white text-center p-2 col-span-2">
                 Evident Sebelum
@@ -466,6 +513,7 @@ const removeImage = (field: string) => {
                   @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sebelum = file)"
                 />
               </div>
+
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
                   v-if="savedData.Tr_teknis_work_order_images"
@@ -476,7 +524,6 @@ const removeImage = (field: string) => {
               </div>
             </div>
 
-            <!-- Kendala 2 -->
             <div class="col-span-3 grid grid-cols-2">
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
@@ -486,6 +533,7 @@ const removeImage = (field: string) => {
                   @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_2 = file)"
                 />
               </div>
+
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
                   v-if="savedData.Tr_teknis_work_order_images"
@@ -496,7 +544,6 @@ const removeImage = (field: string) => {
               </div>
             </div>
 
-            <!-- Proses Sambung -->
             <div class="col-span-3 grid grid-cols-1">
               <p class="text-black dark:text-white text-center p-2 col-span-2">
                 Evident Progres
@@ -513,7 +560,6 @@ const removeImage = (field: string) => {
               </div>
             </div>
 
-            <!-- Redaman Sesudah -->
             <div class="col-span-3 grid grid-cols-3">
               <p class="text-black dark:text-white text-center p-2 col-span-3">
                 Evident Sesudah
@@ -544,7 +590,6 @@ const removeImage = (field: string) => {
               </div>
             </div>
 
-            <!-- Marking Kabel -->
             <div class="col-span-3 grid grid-cols-2">
               <p class="text-black dark:text-white text-center p-2 col-span-2">
                 Evident Marking Kabel

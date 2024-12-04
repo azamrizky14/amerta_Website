@@ -1,39 +1,43 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import BreadcrumbDefault from '@/components/Breadcrumbs/BreadcrumbDefault.vue'
-import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import { adminTeknis_GetDataByDomainAndDeleted } from '@/stores/functionAPI'
-import { mdiEyeOutline, mdiSquareEditOutline, mdiMagnify, mdiRefresh, mdiPlusCircleOutline } from '@mdi/js';
+import { ref, computed, onMounted } from "vue";
+import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
+import DefaultLayout from "@/layouts/DefaultLayout.vue";
+import { adminTeknis_GetDataByDomainAndDeleted } from "@/stores/functionAPI";
+import { formatDate } from "@/stores/date";
+import {
+  mdiEyeOutline,
+  mdiSquareEditOutline,
+  mdiMagnify,
+  mdiRefresh,
+  mdiPlusCircleOutline,
+} from "@mdi/js";
 
-const pageTitle = ref('Bon & Material')
-const pageList = ref(['Work Order', 'Bon & Material'])
+const pageTitle = ref("Bon & Material");
+const pageList = ref(["Work Order", "Bon & Material"]);
 const dataHeader = ref([
-  { name: 'No.', class: 'py-2 pl-3' },
-  { name: 'Tgl. Dibuat', class: 'min-w-[100px] py-2 px-4' },
-  { name: 'No. Logistik', class: 'min-w-[160px] py-2 px-4' },
-  { name: 'Jenis', class: 'min-w-[50px] py-2 px-4' },
-  { name: 'PIC', class: 'min-w-[200px] py-2 px-4 xl:pl-11' },
-  { name: 'Teknisi', class: 'min-w-[90px] py-2 px-4' },
-  { name: 'Tas', class: 'min-w-[100px] py-2 px-4' },
-  { name: 'Status', class: 'min-w-[100px] py-2 px-4' },
-])
-let dataTable = ref([])
-const searchQuery = ref('')
+  { name: "No.", class: "py-2 pl-3" },
+  { name: "Tgl. Dibuat", class: "min-w-[100px] py-2 px-4" },
+  { name: "No. Logistik", class: "min-w-[160px] py-2 px-4" },
+  { name: "Jenis", class: "min-w-[50px] py-2 px-4" },
+  { name: "PIC", class: "min-w-[200px] py-2 px-4 xl:pl-11" },
+  // { name: 'Teknisi', class: 'min-w-[90px] py-2 px-4' },
+  { name: "Tas", class: "min-w-[100px] py-2 px-4" },
+  { name: "Status", class: "min-w-[100px] py-2 px-4" },
+]);
+let dataTable = ref([]);
+const searchQuery = ref("");
 
 // Pagination state
-const currentPage = ref(1)
-const itemsPerPage = 5
+const currentPage = ref(1);
+const itemsPerPage = 5;
 
 // Filtered data based on search query
 const filteredData = computed(() => {
-  if (!searchQuery.value.trim()) return dataTable.value
-  return dataTable.value.filter(item =>
-    Object.values(item)
-      .join(' ')
-      .toLowerCase()
-      .includes(searchQuery.value.toLowerCase())
-  )
-})
+  if (!searchQuery.value.trim()) return dataTable.value;
+  return dataTable.value.filter((item) =>
+    Object.values(item).join(" ").toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
 
 const visiblePages = computed(() => {
   const pages = [];
@@ -49,30 +53,35 @@ const visiblePages = computed(() => {
   return pages;
 });
 
-
 // Total items based on the filtered data
-const totalItems = computed(() => filteredData.value.length)
-const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage))
+const totalItems = computed(() => filteredData.value.length);
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage));
 
 // Paginated data based on filtered results
 const paginatedData = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  const end = start + itemsPerPage
-  return filteredData.value.slice(start, end)
-})
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return filteredData.value.slice(start, end);
+});
 
 // Change page function
 const changePage = (page: number) => {
   if (page > 0 && page <= totalPages.value) {
-    currentPage.value = page
+    currentPage.value = page;
   }
-}
+};
 
 // Fetch data on mount
 onMounted(async () => {
-  const data = await adminTeknis_GetDataByDomainAndDeleted('N')
-  dataTable.value = data
-})
+  const data = await adminTeknis_GetDataByDomainAndDeleted("N");
+
+  dataTable.value = await Promise.all(
+    data.map(async (item) => ({
+      ...item,
+      formattedDate: await formatDate(item.Tr_teknis_tanggal, "dd-MM-yyyy"),
+    }))
+  );
+});
 </script>
 
 <template>
@@ -114,10 +123,7 @@ onMounted(async () => {
           </div>
           <div class="right-data flex items-center flex-row-reverse">
             <!-- Add Button -->
-            <router-link
-              to="/modules/work-order/bon-dan-material/add"
-              class="px-1"
-            >
+            <router-link to="/modules/work-order/bon-dan-material/add" class="px-1">
               <svg
                 class="fill-current hover:text-primary"
                 width="22"
@@ -163,32 +169,22 @@ onMounted(async () => {
               </tr>
             </thead>
             <tbody>
-              <tr
-                v-for="(item, index) in paginatedData"
-                :key="index"
-                class="border"
-              >
+              <tr v-for="(item, index) in paginatedData" :key="index" class="border">
                 <td class="pl-3 text-xs border">
                   {{ (currentPage - 1) * itemsPerPage + index + 1 }}
                 </td>
                 <td class="py-1 px-4 border">
-                  <p
-                    class="text-black dark:text-white text-xs text-center"
-                  >
-                    {{ item.Tr_teknis_created }}
+                  <p class="text-black dark:text-white text-xs text-center">
+                    {{ item.formattedDate }}
                   </p>
                 </td>
                 <td class="py-1 px-4 border">
-                  <p
-                    class="text-black dark:text-white text-xs text-center"
-                  >
+                  <p class="text-black dark:text-white text-xs text-center">
                     {{ item.Tr_teknis_logistik_id }}
                   </p>
                 </td>
                 <td class="py-1 px-4 border">
-                  <p
-                    class="text-black dark:text-white text-xs text-center"
-                  >
+                  <p class="text-black dark:text-white text-xs text-center">
                     {{ item.Tr_teknis_jenis }}
                   </p>
                 </td>
@@ -197,17 +193,15 @@ onMounted(async () => {
                     {{ item.Tr_teknis_user_created }}
                   </p>
                 </td>
-                <td class="py-1 px-4 border">
+                <!-- <td class="py-1 px-4 border">
                   <h5
                     class="font-medium text-black text-xs dark:text-white text-center"
                   >
                     {{ item.Tr_teknis_team.length }}
                   </h5>
-                </td>
+                </td> -->
                 <td class="py-1 px-4 border">
-                  <h5
-                    class="font-medium text-black text-xs dark:text-white"
-                  >
+                  <h5 class="font-medium text-black text-xs dark:text-white">
                     {{ item.Tr_teknis_item }}
                   </h5>
                 </td>
@@ -217,45 +211,61 @@ onMounted(async () => {
                     :class="{
                       'bg-warning text-warning': item.Tr_teknis_status === 'pending',
                       'bg-danger text-danger': item.Tr_teknis_status === 'closed',
-                      'bg-success text-success': item.Tr_teknis_status === 'open'
+                      'bg-success text-success': item.Tr_teknis_status === 'open',
                     }"
                   >
                     {{ item.Tr_teknis_status }}
                   </p>
                 </td>
-            <td class="py-1 px-4">
-              <div class="flex items-center space-x-3.5 d-flex justify-center">              
-                <router-link class="hover:text-primary" :to="'/modules/work-order/bon-dan-material/detail/'+item._id">
-                  <svg
-                    class="fill-current"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      :d="mdiEyeOutline"  
-                      fill=""
-                    />
-                  </svg>
-                </router-link>
+                <td class="py-1 px-4">
+                  <div class="flex items-center space-x-3.5 d-flex justify-center">
+                    <router-link
+                      class="hover:text-primary"
+                      :to="'/modules/work-order/bon-dan-material/detail/' + item._id"
+                    >
+                      <svg
+                        class="fill-current"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path :d="mdiEyeOutline" fill="" />
+                      </svg>
+                    </router-link>
 
-                <router-link :class="item.Tr_teknis_status === 'closed' ? 'cursor-default opacity-50' : 'hover:text-primary'" class="" :to="item.Tr_teknis_status !== 'closed' ? '/modules/work-order/bon-dan-material/closing/'+item._id : ''">
-                  <svg
-                    class="fill-current"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                  <path fill-rule="evenodd" clip-rule="evenodd" :d="mdiSquareEditOutline" fill=""/>
-                  </svg>
-                </router-link>
-
-              </div>
-            </td>
+                    <router-link
+                      :class="
+                        item.Tr_teknis_status === 'closed'
+                          ? 'cursor-default opacity-50'
+                          : 'hover:text-primary'
+                      "
+                      class=""
+                      :to="
+                        item.Tr_teknis_status !== 'closed'
+                          ? '/modules/work-order/bon-dan-material/closing/' + item._id
+                          : ''
+                      "
+                    >
+                      <svg
+                        class="fill-current"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          :d="mdiSquareEditOutline"
+                          fill=""
+                        />
+                      </svg>
+                    </router-link>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -263,63 +273,62 @@ onMounted(async () => {
 
         <!-- Pagination and Total Data -->
         <div class="mt-4 flex justify-between items-center">
-  <p class="text-sm">Total Data: {{ totalItems }}</p>
-  <div class="flex space-x-2">
-    <!-- Previous Button -->
-    <button
-      class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-      :disabled="currentPage === 1"
-      @click="changePage(currentPage - 1)"
-    >
-      Prev
-    </button>
+          <p class="text-sm">Total Data: {{ totalItems }}</p>
+          <div class="flex space-x-2">
+            <!-- Previous Button -->
+            <button
+              class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+              :disabled="currentPage === 1"
+              @click="changePage(currentPage - 1)"
+            >
+              Prev
+            </button>
 
-    <!-- First Page -->
-    <button
-      v-if="currentPage > 3"
-      class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-      @click="changePage(1)"
-    >
-      1
-    </button>
+            <!-- First Page -->
+            <button
+              v-if="currentPage > 3"
+              class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+              @click="changePage(1)"
+            >
+              1
+            </button>
 
-    <!-- Ellipsis Before -->
-    <span v-if="currentPage > 4" class="text-xs px-2 py-1">...</span>
+            <!-- Ellipsis Before -->
+            <span v-if="currentPage > 4" class="text-xs px-2 py-1">...</span>
 
-    <!-- Visible Page Buttons -->
-    <button
-      v-for="page in visiblePages"
-      :key="page"
-      class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-      :class="currentPage === page ? 'bg-primary text-white' : ''"
-      @click="changePage(page)"
-    >
-      {{ page }}
-    </button>
+            <!-- Visible Page Buttons -->
+            <button
+              v-for="page in visiblePages"
+              :key="page"
+              class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+              :class="currentPage === page ? 'bg-primary text-white' : ''"
+              @click="changePage(page)"
+            >
+              {{ page }}
+            </button>
 
-    <!-- Ellipsis After -->
-    <span v-if="currentPage < totalPages - 3" class="text-xs px-2 py-1">...</span>
+            <!-- Ellipsis After -->
+            <span v-if="currentPage < totalPages - 3" class="text-xs px-2 py-1">...</span>
 
-    <!-- Last Page -->
-    <button
-      v-if="currentPage < totalPages - 2"
-      class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-      @click="changePage(totalPages)"
-    >
-      {{ totalPages }}
-    </button>
+            <!-- Last Page -->
+            <button
+              v-if="currentPage < totalPages - 2"
+              class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+              @click="changePage(totalPages)"
+            >
+              {{ totalPages }}
+            </button>
 
-    <!-- Next Button -->
-    <button
-      class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-      :disabled="currentPage === totalPages"
-      @click="changePage(currentPage + 1)"
-    >
-      Next
-    </button>
-  </div>
-</div>
-
+            <!-- Next Button -->
+            <button
+              class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+              :disabled="currentPage === totalPages"
+              @click="changePage(currentPage + 1)"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </DefaultLayout>

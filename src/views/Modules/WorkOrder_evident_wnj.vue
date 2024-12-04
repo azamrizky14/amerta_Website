@@ -5,16 +5,17 @@ import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import { adminTeknis_GetDataEvidentByType } from "@/stores/functionAPI";
 import { mdiEyeOutline, mdiMagnify, mdiRefresh, mdiPlusCircleOutline } from "@mdi/js";
 
-const pageTitle = ref("Evident - INFRA");
-const pageList = ref(["Work Order", "Evident", "INFRA"]);
+const pageTitle = ref("Evident - WNJ");
+const pageList = ref(["Work Order", "Evident", "WNJ"]);
 const dataHeader = ref([
   { name: "No.", class: "py-2 pl-3" },
   { name: "Tgl. Dibuat", class: "min-w-[100px] py-2 px-4" },
   { name: "No. Logistik", class: "min-w-[150px] py-2 px-4" },
   { name: "Id. User", class: "min-w-[100px] py-2 px-4" },
   { name: "Nama. User", class: "min-w-[150px] py-2 px-4" },
-  { name: "Server", class: "min-w-[100px] py-2 px-4" },
-  { name: "Tr Teknis", class: "min-w-[150px] py-2 px-4" },
+  { name: "Server", class: "py-2 px-4" },
+  { name: "Kategori", class: "py-2 px-4" },
+  { name: "Tr Teknis", class: "py-2 px-4" },
 ]);
 let dataTable = ref([]);
 const searchQuery = ref("");
@@ -64,7 +65,7 @@ const changePage = (page: number) => {
 };
 
 onMounted(async () => {
-  const data = await adminTeknis_GetDataEvidentByType("N", "INFRA");
+  const data = await adminTeknis_GetDataEvidentByType("N", "WNJ");
   dataTable.value = data;
 });
 </script>
@@ -109,7 +110,7 @@ onMounted(async () => {
           <div class="right-data flex items-center flex-row-reverse">
             <!-- Add Button -->
             <router-link
-              to="/modules/work-order/evident/infra/add"
+              to="/modules/work-order/evident/wnj/add"
               class="px-1"
             >
               <svg
@@ -146,7 +147,7 @@ onMounted(async () => {
                 <th
                   v-for="data in dataHeader"
                   :class="data.class"
-                  class="font-medium text-black dark:text-white text-center"
+                  class="font-medium text-black dark:text-white text-center text-sm"
                 >
                   {{ data.name }}
                 </th>
@@ -187,6 +188,12 @@ onMounted(async () => {
                   </h5>
                   <!-- <p class="text-xs">{{ item.picId }}</p> -->
                 </td>
+                <td class="py-1 px-4 text-center border">
+                  <h5 class="font-medium text-black text-xs dark:text-white">
+                    {{ item.Tr_teknis_kategori }}
+                  </h5>
+                  <!-- <p class="text-xs">{{ item.picId }}</p> -->
+                </td>
                 <td class="py-1 px-4 border">
                   <h5 class="font-medium text-black text-xs dark:text-white">
                     {{ item.Tr_teknis_user_updated }}
@@ -197,7 +204,7 @@ onMounted(async () => {
                     <router-link
                       class="hover:text-primary"
                       :to="
-                        '/modules/work-order/evident/infra/detail/' +
+                        '/modules/work-order/evident/wnj/detail/' +
                         item.Tr_teknis_logistik_id +
                         '/' +
                         item._id
@@ -220,7 +227,7 @@ onMounted(async () => {
             </tbody>
           </table>
         </div>
-
+        
         <!-- Pagination and Total Data -->
         <div class="mt-4 flex justify-between items-center">
           <p class="text-sm">Total Data: {{ totalItems }}</p>

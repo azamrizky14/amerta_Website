@@ -42,7 +42,6 @@ const groupPages = async (pages) => {
     const groupedPages: Record<string, any> = {};
 
     filteredPages.forEach((page) => {
-      console.log('page',page)
       const { pageGroup, pageName, pageRoutes } = page;
 
       // If `pageGroup` is empty, add it directly to `menuItems` without grouping

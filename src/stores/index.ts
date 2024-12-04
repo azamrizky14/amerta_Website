@@ -6,6 +6,7 @@ interface User {
   [key: string]: any; // Allow any string key
   _id: string;
   companyCode: string[];
+  companyName: string;
   email: string;
   hierarchyCode: string;
   userRole: string;
@@ -32,6 +33,7 @@ export const useIndexStore = defineStore('index', () => {
   const user = reactive<User>({
     _id: dataUser?._id || '',
     companyCode: dataUser?.companyCode || [],
+    companyName: dataUser?.companyName || "",
     email: dataUser?.email || '',
     hierarchyCode: dataUser?.hierarchyCode || '',
     userRole: dataUser?.userRole || '',

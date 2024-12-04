@@ -116,7 +116,6 @@ onMounted(async () => {
 const dataValidator = ref([
   { key: "Tr_teknis_item", label: "Nama Tas" },
   { key: "Tr_teknis_jenis", label: "Jenis Permintaan" },
-  { key: "Tr_teknis_team", label: "Teknisi" },
   { key: "Tr_teknis_keterangan", label: "Keterangan" },
 ]);
 
@@ -153,14 +152,14 @@ const validateQtyKeluar = (index, qtySisa) => {
 
 const cancelClose = async () => {
   const result = await Swal.fire({
-    title: "Cancel Closing?",
-    text: "are you sure to cancel closing data?",
+    title: "Batalkan Closing?",
+    text: "anda yakin membatalkan closing data?",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#FF0000",
     cancelButtonColor: "#",
-    confirmButtonText: "Cancel",
-    cancelButtonText: "Back",
+    confirmButtonText: "Batalkan",
+    cancelButtonText: "Kembali",
   });
 
   if (result.isConfirmed) {
@@ -192,7 +191,8 @@ const submitData = async () => {
     showCancelButton: true,
     confirmButtonColor: "#10B981",
     cancelButtonColor: "#d33",
-    confirmButtonText: "Close!",
+    confirmButtonText: "Closing!",
+    cancelButtonText: "Batalkan",
   });
 
   if (result.isConfirmed) {
@@ -243,17 +243,51 @@ const submitData = async () => {
                 v-model="savedData.Tr_teknis_logistik_id"
               />
             </div>
+            
+            <div class="flex flex-col gap-6 xl:flex-row">
+            <div class="lg:w-1/2">
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Tgl. Dibuat
+              </label>
+              <input
+                disabled
+                type="date"
+                placeholder="Nama Tas"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_tanggal"
+              />
+            </div>
+            <div class="lg:w-1/2">
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Dibuat Oleh
+              </label>
+              <input
+                disabled
+                type="text"
+                placeholder="Nama Tas"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_user_created"
+              />
+            </div>
+            </div>
             <div class="flex flex-col gap-6 xl:flex-row">
               <div class="lg:w-1/2">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Jenis Permintaan
+                  Tim Peminta
                 </label>
-                <SelectGroup
+                <input
                   disabled
-                  placeholder="Pilih Jenis Permintaan"
-                  :options="optionsType"
+                  type="text"
+                  placeholder="Nama Tas"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_teknis_jenis"
                 />
+                <!-- <SelectGroup
+                  disabled
+                  placeholder="Pilih Tim Peminta"
+                  :options="optionsType"
+                  v-model="savedData.Tr_teknis_jenis"
+                /> -->
               </div>
               <div class="lg:w-1/2">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
@@ -268,21 +302,7 @@ const submitData = async () => {
                 />
               </div>
             </div>
-
-
-            <div>
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Teknisi
-                </label>
-                <div>
-                  <multiselectReadOnly
-                    disabled
-                    :options="savedData.Tr_teknis_team"
-                    placeholder="Pilih Teknisi..."
-                  />
-                </div>
-              </div>
-                          
+     
             <div>
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                   Keterangan
@@ -296,17 +316,6 @@ const submitData = async () => {
                 ></textarea>
               </div>
                      
-            <div>
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Catatan Closing
-                </label>
-                <textarea
-                  rows="3"
-                  placeholder="Masukan keterangan disini!"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.Tr_teknis_keterangan_closing"
-                ></textarea>
-              </div>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->
@@ -369,6 +378,18 @@ const submitData = async () => {
                 />
               </div>
             </div>
+            
+            <div>
+                <label class="mb-3 pt-6.5 block text-sm font-medium text-black dark:text-white">
+                  Catatan Closing
+                </label>
+                <textarea
+                  rows="3"
+                  placeholder="Masukan keterangan disini!"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_keterangan_closing"
+                ></textarea>
+              </div>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->
@@ -389,7 +410,7 @@ const submitData = async () => {
               @click="cancelClose"
               class="flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90"
             >
-              Cancel
+              Batalkan
             </button>
             <button
               @click="submitData"

@@ -15,8 +15,9 @@ import { ref, onMounted } from 'vue'
 import router from '@/router';
 
 const route = useRoute();
-const pageTitle = ref('Evident - Edit PSB')
-const pageList = ref (['Work Order', 'Evident', 'PSB', 'Edit'])
+const pageTitle = ref('Evident - Edit MT')
+const pageList = ref (['Work Order', 'Evident', 'MT', 'Edit'])
+
 
 // Saved Data
 const savedData = ref({
@@ -25,6 +26,8 @@ const savedData = ref({
   Tr_teknis_pelanggan_server: "",
   Tr_teknis_user_updated: "",
   Tr_teknis_keterangan: "",
+  Tr_teknis_trouble: "",
+  Tr_teknis_action: "",
  
   Tr_teknis_redaman_sebelum: null,
   Tr_teknis_evident_kendala_1: null,
@@ -41,7 +44,7 @@ const savedData = ref({
   Tr_teknis_domain: domain,
   Tr_teknis_tanggal: "",
   Tr_teknis_created: "",
-  Tr_teknis_jenis: "PSB",
+  Tr_teknis_jenis: "MT",
   Tr_teknis_material_terpakai: [
     {label: "PS Besar", qtyKeluar: "", qtyKembali: ""},
     {label: "DC", qtyKeluar: "", qtyKembali: ""},
@@ -92,7 +95,7 @@ const cancelDetail = async () => {
     });
 
     if (result.isConfirmed) { 
-      await router.push('/modules/work-order/evident/psb');
+      await router.push('/modules/work-order/evident/mt');
     }
 }
 
@@ -158,7 +161,7 @@ const submitData = async () => {
         //
         await adminTeknis_UpdateDataImage(sendData, route.params.id)
         await successEdit().then(() => {
-          router.push('/modules/work-order/evident/psb')
+          router.push('/modules/work-order/evident/mt')
         });
       } catch (error) {
         await failedEdit(error);
@@ -229,6 +232,29 @@ const submitData = async () => {
               />
             </div>
             
+            <div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Masalah (Trouble)
+              </label>
+              <textarea
+                rows="3"
+                placeholder="Masukan keterangan disini!"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_trouble"
+              ></textarea>
+            </div>
+            <div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Solusi (Action)
+              </label>
+              <textarea
+                rows="3"
+                placeholder="Masukan keterangan disini!"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_action"
+              ></textarea>
+            </div>
+
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Keterangan
@@ -359,62 +385,54 @@ const submitData = async () => {
         <!-- Textarea Fields Start -->
         <DefaultCard cardTitle="Input Gambar">
           <div class="grid grid-cols-2" v-if="savedData">
-            <div class="flex border flex-col items-center p-2 justify-end">
-              <imageWithPreview label="Evident Progress" v-model="savedData.Tr_teknis_evident_progress" 
-                @update:file="file => savedData.Tr_teknis_evident_progress = file" />
+          
+            <div class="col-span-3 grid grid-cols-2">
+              <p class="text-black dark:text-white text-center p-2 col-span-2">Evident Sebelum</p>
+            <div class="flex border flex-col items-center p-2 justify-end"> 
+              <imageWithPreview label="Redaman Sebelum" v-model="savedData.Tr_teknis_redaman_sebelum" 
+                @update:file="file => savedData.Tr_teknis_redaman_sebelum = file" />
             </div>
-            <div class="flex border flex-col items-center p-2 justify-end">              
-              <imageWithPreview label="Evident SpeedTest" v-model="savedData.Tr_teknis_evident_speed_test" 
-                @update:file="file => savedData.Tr_teknis_evident_speed_test = file" />
+            <div class="flex border flex-col items-center p-2 justify-end"> 
+              <imageWithPreview label="Kendala 1" v-model="savedData.Tr_teknis_evident_kendala_1" 
+                @update:file="file => savedData.Tr_teknis_evident_kendala_1 = file" />
+            </div>
             </div>
             
             <div class="col-span-3 grid grid-cols-2">
             <div class="flex border flex-col items-center p-2 justify-end"> 
-              <imageWithPreview label="Review Google" v-model="savedData.Tr_teknis_evident_review_google" 
-                @update:file="file => savedData.Tr_teknis_evident_review_google = file" />
+              <imageWithPreview label="Kendala 2" v-model="savedData.Tr_teknis_evident_kendala_2" 
+                @update:file="file => savedData.Tr_teknis_evident_kendala_2 = file" />
             </div>
             <div class="flex border flex-col items-center p-2 justify-end"> 
-              <imageWithPreview label="Kertas Form PSB" v-model="savedData.Tr_teknis_evident_kertas_psb" 
-                @update:file="file => savedData.Tr_teknis_evident_kertas_psb = file" />
+              <imageWithPreview label="Kendala 3" v-model="savedData.Tr_teknis_evident_kendala_3" 
+                @update:file="file => savedData.Tr_teknis_evident_kendala_3 = file" />
             </div>
             </div>
 
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">Evident Redaman</p>
+            <div class="col-span-3 grid grid-cols-1">
+              <p class="text-black dark:text-white text-center p-2 col-span-2">Evident Progres</p>
             <div class="flex border flex-col items-center p-2 justify-end"> 
-              <imageWithPreview label="ODP" v-model="savedData.Tr_teknis_evident_redaman_odp" 
-                @update:file="file => savedData.Tr_teknis_evident_redaman_odp = file" />
-            </div>
-            <div class="flex border flex-col items-center p-2 justify-end"> 
-              <imageWithPreview label="ONT" v-model="savedData.Tr_teknis_evident_redaman_ont" 
-                @update:file="file => savedData.Tr_teknis_evident_redaman_ont = file" />
+              <imageWithPreview label="Splicer - Proses Sambung" v-model="savedData.Tr_teknis_evident_proses_sambung" 
+                @update:file="file => savedData.Tr_teknis_evident_proses_sambung = file" />
             </div>
             </div>
             
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">Evident ODP</p>
+            <div class="col-span-3 grid grid-cols-3">
+              <p class="text-black dark:text-white text-center p-2 col-span-3">Evident Sesudah</p>
             <div class="flex border flex-col items-center p-2 justify-end"> 
-              <imageWithPreview label="ODP (Tampak Depan)" v-model="savedData.Tr_teknis_evident_odp_depan" 
-                @update:file="file => savedData.Tr_teknis_evident_odp_depan = file" />
-            </div>
-            <div class="flex border flex-col items-center p-2 justify-end"> 
-              <imageWithPreview label="PORT (Tampak Dalam)" v-model="savedData.Tr_teknis_evident_odp_dalam" 
-                @update:file="file => savedData.Tr_teknis_evident_odp_dalam = file" />
-            </div>
-            </div>
-            
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">Evident Customer</p>
-            <div class="flex border flex-col items-center p-2 justify-end"> 
-              <imageWithPreview label="Dengan Pelanggan" v-model="savedData.Tr_teknis_evident_pelanggan_dengan_pelanggan" 
-                @update:file="file => savedData.Tr_teknis_evident_pelanggan_dengan_pelanggan = file" />
+              <imageWithPreview label="Redaman Sesudah" v-model="savedData.Tr_teknis_redaman_sesudah" 
+                @update:file="file => savedData.Tr_teknis_redaman_sesudah = file" />
             </div>
             <div class="flex border flex-col items-center p-2 justify-end"> 
-              <imageWithPreview label="Depan Rumah Pelanggan" v-model="savedData.Tr_teknis_evident_pelanggan_depan_rumah" 
-                @update:file="file => savedData.Tr_teknis_evident_pelanggan_depan_rumah = file" />
+              <imageWithPreview label="Redaman Out ODP" v-model="savedData.Tr_teknis_redaman_out_odp" 
+                @update:file="file => savedData.Tr_teknis_redaman_out_odp = file" />
+            </div>
+            <div class="flex border flex-col items-center p-2 justify-end"> 
+              <imageWithPreview label="Redaman Pelanggan" v-model="savedData.Tr_teknis_redaman_pelanggan" 
+                @update:file="file => savedData.Tr_teknis_redaman_pelanggan = file" />
             </div>
             </div>
-            
+                        
             <div class="col-span-3 grid grid-cols-2">
               <p class="text-black dark:text-white text-center p-2 col-span-2">Evident Marking Kabel</p>
             <div class="flex border flex-col items-center p-2 justify-end"> 

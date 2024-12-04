@@ -12,6 +12,7 @@ import {
   adminTeknis_CreateData,
   adminTeknis_GetDataById,
   BonMaterial_GetPrefixByTypeAndDate,
+  getUtilByName
 } from "@/stores/functionAPI";
 import { mdiPlusCircleOutline, mdiTrashCanOutline } from "@mdi/js";
 import multiselectReadOnly from "@/components/Forms/SelectGroup/multiselectReadOnly.vue";
@@ -38,11 +39,7 @@ const options: Option[] = [
   { id: 5, name: "Option 5" },
 ];
 
-const optionsType = [
-  { label: "PSB", value: "PSB" },
-  { label: "MT", value: "MT" },
-  { label: "INFRA", value: "INFRA" },
-];
+const optionsType = ref([]);
 
 const pageTitle = ref("Detail Bon & Material");
 const pageList = ref(["Work Order", "Bon & Material", "Detail"]);
@@ -78,6 +75,14 @@ const savedData = ref({
 const materialData = ref([{ label: "", qty: "" }]);
 
 onMounted(async () => {
+  const data = await  getUtilByName('bonMaterial')
+  if (data && data.utilData.length > 0) {
+    let option  = await data.utilData.find((x) => x.companyName === indexStore.user.companyName)
+    option = option.bonMaterialList.map(x => ({
+      label: x, value:x
+    }))
+    optionsType.value = [...option]
+  }
   await getData();
 
   savedData.value.Tr_teknis_work_order_tersedia = savedData.value.Tr_teknis_work_order_tersedia.map(
@@ -149,7 +154,7 @@ const cancelDetail = async () => {
 const dataValidator = ref([
   { key: "Tr_teknis_item", label: "Nama Tas" },
   { key: "Tr_teknis_jenis", label: "Jenis Permintaan" },
-  { key: "Tr_teknis_team", label: "Teknisi" },
+  // { key: "Tr_teknis_team", label: "Teknisi" },
   { key: "Tr_teknis_keterangan", label: "Keterangan" },
 ]);
 
@@ -271,9 +276,9 @@ const submitData = async () => {
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="Detail Data">
-          <div class="flex flex-col gap-2 p-6.5">
-            <div class="flex flex-col gap-6 xl:flex-row">
-            <div class="lg:w-1/2">
+          <div class="flex flex-col gap-2 p-6.5">          
+            <div class="flex flex-col gap-6">
+            <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Id Logistik
               </label>
@@ -283,6 +288,20 @@ const submitData = async () => {
                 placeholder="Nama Tas"
                 class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="savedData.Tr_teknis_logistik_id"
+              />
+            </div>
+            </div>
+            <div class="flex flex-col gap-6 xl:flex-row">
+            <div class="lg:w-1/2">
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Tgl. Dibuat
+              </label>
+              <input
+                disabled
+                type="date"
+                placeholder="Nama Tas"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_tanggal"
               />
             </div>
             <div class="lg:w-1/2">
@@ -301,14 +320,21 @@ const submitData = async () => {
             <div class="flex flex-col gap-6 xl:flex-row">
               <div class="lg:w-1/2">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Jenis Permintaan
+                  Tim Peminta
                 </label>
-                <SelectGroup
+                <input
                   disabled
-                  placeholder="Pilih Jenis Permintaan"
-                  :options="optionsType"
+                  type="text"
+                  placeholder="Nama Tas"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_teknis_jenis"
                 />
+                <!-- <SelectGroup
+                  disabled
+                  placeholder="Pilih Tim Peminta"
+                  :options="optionsType"
+                  v-model="savedData.Tr_teknis_jenis"
+                /> -->
               </div>
               <div class="lg:w-1/2">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
@@ -325,7 +351,7 @@ const submitData = async () => {
             </div>
 
 
-            <div>
+            <!-- <div>
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                   Teknisi
                 </label>
@@ -336,7 +362,7 @@ const submitData = async () => {
                     placeholder="Pilih Teknisi..."
                   />
                 </div>
-              </div>
+              </div> -->
                           
             <div>
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">

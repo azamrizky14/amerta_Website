@@ -10,6 +10,7 @@ import { showLoading, confirmDelete, successCreate, failedCreate } from "@/store
 import {
   adminTeknis_CreateData,
   BonMaterial_GetPrefixByTypeAndDate,
+  getUtilByName
 } from "@/stores/functionAPI";
 import { mdiPlusCircleOutline, mdiTrashCanOutline } from "@mdi/js";
 import multiselectOption from "@/components/Forms/SelectGroup/multiselectOption.vue";
@@ -34,11 +35,7 @@ const options: Option[] = [
   { id: 5, name: "Option 5" },
 ];
 
-const optionsType = [
-  { label: "PSB", value: "PSB" },
-  { label: "MT", value: "MT" },
-  { label: "INFRA", value: "INFRA" },
-];
+const optionsType = ref([]);
 
 const pageTitle = ref("Tambah Bon & Material");
 const pageList = ref(["Work Order", "Bon & Material", "Tambah"]);
@@ -46,7 +43,7 @@ const pageList = ref(["Work Order", "Bon & Material", "Tambah"]);
 // Saved Data
 const savedData = ref({
   Tr_teknis_item: "", // wajib
-  Tr_teknis_team: [],
+  // Tr_teknis_team: [],
   Tr_teknis_keterangan: "",
   Tr_teknis_keterangan_closing: "",
 
@@ -60,7 +57,7 @@ const savedData = ref({
   Tr_teknis_status: "open", // otomatis
   Tr_teknis_jenis: "", // otomatis
   Tr_teknis_deleted: "N", // otomatis
-  Tr_teknis_domain: "AMERTA-PASURUAN", // otomatis
+  Tr_teknis_domain: indexStore.user.companyName, // otomatis
 
   // Array WO Terpakai
   Tr_teknis_work_order_terpakai: [],
@@ -75,8 +72,16 @@ const savedData = ref({
 const materialData = ref([{ label: "", qty: "" }]);
 
 onMounted(async () => {
+  const data = await  getUtilByName('bonMaterial')
+  if (data && data.utilData.length > 0) {
+    let option  = await data.utilData.find((x) => x.companyName === indexStore.user.companyName)
+    option = option.bonMaterialList.map(x => ({
+      label: x, value:x
+    }))
+    optionsType.value = [...option]
+  }
   const date = await getDateToday("yyyy-MM-dd");
-  savedData.value.Tr_teknis_tanggal = date;
+  // savedData.value.Tr_teknis_tanggal = date;
   savedData.value.Tr_teknis_created = date;
   savedData.value.Tr_teknis_user_created = indexStore.user.userName;
 
@@ -114,9 +119,8 @@ const cancelAdd = async () => {
 // Array validator untuk field wajib
 const dataValidator = ref([
   { key: "Tr_teknis_item", label: "Nama Tas" },
-  { key: "Tr_teknis_jenis", label: "Jenis Permintaan" },
-  { key: "Tr_teknis_team", label: "Teknisi" },
-  { key: "Tr_teknis_keterangan", label: "Keterangan" },
+  { key: "Tr_teknis_jenis", label: "Tim Peminta" },
+  { key: "Tr_teknis_tanggal", label: "Tanggal" },
 ]);
 
 const dataError = ref([]); // Array untuk menyimpan error
@@ -239,18 +243,18 @@ const submitData = async () => {
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="Input Data">
           <div class="flex flex-col gap-2 p-6.5">
-            <div class="flex flex-col gap-6 xl:flex-row">
-              <div class="lg:w-1/2">
+            <div class="flex flex-col gap-3 xl:flex-row">
+              <div class="lg:w-1/3">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Jenis Permintaan
+                  Tim Peminta
                 </label>
                 <SelectGroup
-                  placeholder="Pilih Jenis Permintaan"
+                  placeholder="Pilih Tim"
                   :options="optionsType"
                   v-model="savedData.Tr_teknis_jenis"
                 />
               </div>
-              <div class="lg:w-1/2">
+              <div class="lg:w-1/3">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                   Nama Tas
                 </label>
@@ -261,12 +265,23 @@ const submitData = async () => {
                   v-model="savedData.Tr_teknis_item"
                 />
               </div>
+              <div class="lg:w-1/3">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Tgl. Dibuat
+                </label>
+                <input
+                  type="date"
+                  placeholder="Tgl. Dibuat"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-2 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_tanggal"
+                />
+              </div>
             </div>
 
             <!-- Qty Keluar Input -->
             <div>
               
-            <div>
+            <!-- <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Teknisi
               </label>
@@ -277,7 +292,7 @@ const submitData = async () => {
                   placeholder="Pilih Teknisi..."
                 />
               </div>
-            </div>
+            </div> -->
 
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
