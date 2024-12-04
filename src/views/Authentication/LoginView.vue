@@ -36,6 +36,7 @@ const logCredentials = async () => {
         indexStore.setUser({
           _id: loginData.user._id,
           companyCode: loginData.user.companyCode,
+          companyName: loginData.user.companyName,
           email: loginData.user.email,
           userRole: loginData.user.userRole,
           userName: loginData.user.userName,

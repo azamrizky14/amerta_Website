@@ -41,6 +41,7 @@ const previousStep = () => {
 
 onMounted(async () => {
   const data = await adminTeknis_GetDataById(route.params.id);
+  console.log("ini data", data);
 
   dataKembali.value = {
     Tr_teknis_work_order_terpakai: data.Tr_teknis_work_order_terpakai,
@@ -115,7 +116,15 @@ onMounted(async () => {
     });
   }
 
-  console.log("cok 2", dataKembali.value);
+  // Reduce `qtySisa` by `qty` for each object in `Tr_teknis_work_order_kembali`
+  dataKembali.value.Tr_teknis_work_order_kembali.forEach((item) => {
+    if (item.qtySisa !== undefined && item.qty !== undefined) {
+      item.qtySisa -= item.qty;
+      if (item.qtySisa < 0) item.qtySisa = 0; // Ensure `qtySisa` doesn't go below 0
+    }
+  });
+
+  console.log("data akhir", dataKembali.value);
 });
 </script>
 
@@ -317,15 +326,15 @@ onMounted(async () => {
           <div class="w-6/12">
             <label
               class="mb-3 block text-sm font-medium text-black dark:text-white"
-              v-if="index === 0"
+              v-if="data.label.toLowerCase().includes('ont') && data.qty === 1"
             >
-              Nama Barang
+              ONT
             </label>
             <label
               class="mb-3 block text-sm font-medium text-black dark:text-white"
-              v-else="data.label.toLowerCase().includes('ont') && data.qty === 1"
+              v-else-if="index === 0"
             >
-              ONT
+              Nama Barang
             </label>
             <input
               disabled
@@ -372,20 +381,20 @@ onMounted(async () => {
               class="mb-3 block text-sm font-medium text-black dark:text-white"
               v-if="index === 0"
             >
-              Qty. Dipakai
+              SN
             </label>
             <label
               class="mb-3 block text-sm font-medium text-black dark:text-white"
               v-else="data.label.toLowerCase().includes('ont')"
             >
-              Qty. Dipakai
+              SN
             </label>
             <input
               disabled
-              type="number"
+              type="text"
               placeholder="Qty"
               class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-              v-model="data.qty"
+              v-model="data.snNumber"
               @change="validateQtyKeluar(index)"
             />
           </div>
@@ -438,7 +447,7 @@ onMounted(async () => {
               class="mb-3 block text-sm font-medium text-black dark:text-white"
               v-if="index === 0"
             >
-              Qty. Belum
+              Qty. Hilang
             </label>
             <input
               disabled
