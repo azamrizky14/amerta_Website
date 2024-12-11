@@ -3,264 +3,124 @@ import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import inputImageWithPreview from "@/components/Forms/SelectGroup/inputImageWithPreview.vue";
-import Swal from "sweetalert2";
 import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
 import multiselectReadOnly from "@/components/Forms/SelectGroup/multiselectReadOnly.vue";
+import Swal from "sweetalert2";
 
-import { useIndexStore } from '@/stores'
+import { useIndexStore } from "@/stores";
 import { getDateToday } from "@/stores/date";
 import { showLoading, confirmDelete, successCreate, failedCreate } from "@/stores/swal";
-import {
-  adminTeknis_CreateDataEvidentWithImages,
-  adminTeknis_GetDataByDomainAndDeletedAndTypeAndStatus,
-} from "@/stores/functionAPI";
+import { createUser, getAllRole } from "@/stores/functionAPI";
 
 import { ref, onMounted } from "vue";
 import router from "@/router";
 
-const indexStore = useIndexStore()
+const indexStore = useIndexStore();
 const pageTitle = ref("Master - Add User Internal");
 const pageList = ref(["Master", "User Internal", "Add"]);
 
 // Saved Data
 const savedData = ref({
-  Tr_teknis_pelanggan_id: "",
-  Tr_teknis_pelanggan_nama: "",
-  Tr_teknis_pelanggan_server: "",
-  Tr_teknis_user_updated: "",
-  Tr_teknis_keterangan: "",
-  Tr_teknis_logistik_id: "",
-  Tr_teknis_jenis: "PSB",
-
-  Tr_teknis_evident_progress: null,
-  Tr_teknis_evident_speed_test: null,
-  Tr_teknis_evident_review_google: null,
-  Tr_teknis_evident_kertas_psb: null,
-  Tr_teknis_evident_redaman_odp: null,
-  Tr_teknis_evident_redaman_ont: null,
-  Tr_teknis_evident_odp_depan: null,
-  Tr_teknis_evident_odp_dalam: null,
-  Tr_teknis_evident_pelanggan_dengan_pelanggan: null,
-  Tr_teknis_evident_pelanggan_depan_rumah: null,
-  Tr_teknis_evident_marking_dc_start: null,
-  Tr_teknis_evident_marking_dc_end: null,
-
-  Tr_teknis_tanggal: "",
-  Tr_teknis_created: "",
-  Tr_teknis_work_order_terpakai_material: [],
+  companyCode: "",
+  companyName: "",
+  userName: "",
+  email: "",
+  password: "",
+  userBirth: "",
+  userPhone: "",
+  userAddress: "",
+  userAccess: "",
+  accessEdited: "",
+  userAccStatus: "",
+  hierarchyCode: "",
+  userGender: "",
+  userImage: null,
+  imageName: null,
+  userRole: "",
+  isDeleted: "",
+  userProperties: "",
+  user_created: "",
+  user_updated: "",
 });
 
-const materialData = ref([]);
-const logistikData = ref(null);
 const optionsType = ref([]);
 
-// const optionsType = [
-//   { label: "PSB", value: "PSB" },
-//   { label: "MT", value: "MT" },
-//   { label: "INFRA", value: "INFRA" },
-// ];
-
+// Fetch roles and populate dropdown
 onMounted(async () => {
-  const options = await adminTeknis_GetDataByDomainAndDeletedAndTypeAndStatus(
-    "N",
-    "PSB",
-    "open"
-  );
+  const options = await getAllRole();
   options.forEach((option) => {
-    option.label = option.Tr_teknis_logistik_id + " - " + option.Tr_teknis_item;
+    option.label = option.roleName; // Map roleName to label
+    option.value = option.roleName; // Use roleName as the value
   });
   optionsType.value = options;
-  const date = await getDateToday("yyyy-MM-dd");
-  savedData.value.Tr_teknis_tanggal = date;
-  savedData.value.Tr_teknis_created = date;
-  savedData.value.Tr_teknis_user_updated = indexStore.user.userName
+  console.log(indexStore.user)
 });
 
-// Function
-const handleButtonClick = async () => {
-  alert("tes");
-};
-
-const handleRemoveMaterialTerpakai = async (index) => {
-  await confirmDelete(null, null, async () => {
-    materialData.value.splice(index, 1);
-  });
-};
-
-// Function to handle option change
-const handleOptionChange = (selected: { label: string; value: string }) => {
-  // Perform any additional actions here
-  materialData.value.splice(0, materialData.value.length);
-  if (selected.Tr_teknis_work_order_tersedia) {
-    savedData.value.Tr_teknis_logistik_id = selected.Tr_teknis_logistik_id;
-    selected.Tr_teknis_work_order_tersedia.forEach((data) => {
-      materialData.value.push({
-        label: data.label,
-        qtySisa: data.qty,
-        qty: "",
-      });
-    });
-
-    // Step 2: Merge all Tr_teknis_work_order_terpakai_material and reduce qtySisa accordingly
-    if (
-      selected.Tr_teknis_work_order_terpakai &&
-      selected.Tr_teknis_work_order_terpakai.length > 0
-    ) {
-      const mergedMaterials = selected.Tr_teknis_work_order_terpakai.flatMap(
-        (item) => item.Tr_teknis_work_order_terpakai_material || []
-      );
-
-      // Deduct the qty from qtySisa in materialData if labels match
-      mergedMaterials.forEach((material) => {
-        const existingItem = materialData.value.find(
-          (item) => item.label === material.label
-        );
-        if (existingItem) {
-          existingItem.qtySisa -= material.qty; // Reduce qtySisa based on the merged qty
-          if (existingItem.qtySisa < 0) existingItem.qtySisa = 0; // Ensure qtySisa doesn't go below 0
-        }
-      });
-    }
-  }
-};
-
-const cancelAdd = async () => {
-  const result = await Swal.fire({
-    title: "Cancel Create?",
-    text: "are you sure to cancel add data?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#FF0000",
-    cancelButtonColor: "#",
-    confirmButtonText: "Cancel",
-    cancelButtonText: "Back",
-  });
-
-  if (result.isConfirmed) {
-    await router.push("/modules/work-order/evident/psb");
+// Function to handle role selection
+const handleOptionChange = (selected: { label: string; value: string; hierarchyCode: string }) => {
+  if (selected) {
+    savedData.value.userRole = selected.value; // Set userRole from roleName
+    savedData.value.hierarchyCode = selected.hierarchyCode; // Set hierarchyCode from selected role
   }
 };
 
 // Validators for required fields
 const dataValidator = ref([
-  { key: "logistikData", label: "Kode Bon Material" },
-  { key: "Tr_teknis_pelanggan_id", label: "Id Pelanggan" },
-  { key: "Tr_teknis_pelanggan_server", label: "Server" },
-  { key: "Tr_teknis_pelanggan_nama", label: "Nama Pelanggan" },
+  { key: "userName", label: "Nama User" },
+  { key: "userRole", label: "Role User" },
+  { key: "hierarchyCode", label: "Kode Hirarki User" },
+  { key: "email", label: "Email User" },
+  { key: "userGender", label: "Gender User" },
+  { key: "userBirth", label: "Tanggal Lahir User" },
+  { key: "userPhone", label: "No Telp User" },
+  { key: "userAddress", label: "Alamat User" },
 ]);
 
 const dataError = ref([]);
 
 // Helper function for validation
 const validateForm = () => {
-  // Clear previous errors
   dataError.value = [];
-
-  // Validate each field
   dataValidator.value.forEach((validator) => {
-    if (
-      (validator.key === "logistikData" && !logistikData.value) || // For logistikData
-      (!savedData.value[validator.key] && validator.key !== "logistikData") // For other fields in savedData
-    ) {
-      // Add error message if validation fails
+    if (!savedData.value[validator.key]) {
       dataError.value.push(`${validator.label} tidak boleh kosong!`);
     }
   });
-
-  // Return true if no errors, false otherwise
   return dataError.value.length === 0;
 };
 
 const submitData = async () => {
-  // Validate form before submission
   const isValid = validateForm();
+  if (!isValid) return;
 
-  // If validation fails, show errors
-  if (!isValid) {
-    return; // Stop the submission process
-  }
-
-  // If form is valid, continue with submission
   const result = await Swal.fire({
-    title: "Add Data?",
+    title: "Tambah Data?",
     text: "",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#10B981",
     cancelButtonColor: "#d33",
-    confirmButtonText: "Add!",
+    confirmButtonText: "Tambah!",
+    cancelButtonText: "Batal",
   });
 
   if (result.isConfirmed) {
     try {
       showLoading();
+      const formData = new FormData();
 
-      // Clone the savedData to avoid mutating the original
-      const fixData = { ...savedData.value };
-
-      // Clean material data if needed
-      if (materialData.value && materialData.value.length > 0) {
-        const cleanedArray = materialData.value.filter((item) => {
-          return Object.values(item).some((value) => value !== "");
-        });
-        fixData.Tr_teknis_work_order_terpakai_material = cleanedArray;
-        fixData.Tr_teknis_work_order_terpakai_material = fixData.Tr_teknis_work_order_terpakai_material.map(
-          (x) => {
-            // Check if label is "ONT" and dataSN is not empty
-            if (x.label.includes("ONT") && x.snNumber) {
-              return {
-                label: x.label,
-                qty: 1,
-                snNumber: x.snNumber
-              };
-            } else if (x.label.includes("ONT") && !x.snNumber) {
-              return {
-                label: x.label,
-                qty: 0,
-              };
-            } else {
-              return {
-                label: x.label,
-                qty: x.qty,
-              };
-            }
-          }
-        );
-      }
-
-      // Ensure the Tr_teknis_work_order_terpakai is stringified for proper parsing on the server
-      if (
-        fixData.Tr_teknis_work_order_terpakai &&
-        Array.isArray(fixData.Tr_teknis_work_order_terpakai)
-      ) {
-        fixData.Tr_teknis_work_order_terpakai = JSON.stringify(
-          fixData.Tr_teknis_work_order_terpakai
-        );
-      }
-
-      const sendData = new FormData();
-
-      // Append all fields to FormData
-      Object.keys(fixData).forEach((key) => {
-        if (Array.isArray(fixData[key])) {
-          sendData.append(key, JSON.stringify(fixData[key])); // Ensure arrays are stringified
-        } else {
-          sendData.append(key, fixData[key]);
-        }
+      Object.keys(savedData.value).forEach((key) => {
+        formData.append(key, savedData.value[key]);
       });
 
-      // Handle file uploads if necessary
-      const files = document.querySelector('input[type="file"]').files;
-      if (files && files.length > 0) {
-        for (let i = 0; i < files.length; i++) {
-          sendData.append("images", files[i]);
-        }
+      if (savedData.value.userImage) {
+        formData.append("userImage", savedData.value.userImage);
       }
 
-      await adminTeknis_CreateDataEvidentWithImages(sendData);
+      await createUser(formData);
 
       await successCreate().then(() => {
-        router.push("/modules/work-order/evident/psb");
+        router.push("/master/user-internal");
       });
     } catch (error) {
       await failedCreate(error);
@@ -268,7 +128,7 @@ const submitData = async () => {
   }
 };
 
-// Fungsi untuk menghapus gambar
+// Remove image function
 const removeImage = (field: string) => {
   savedData.value[field] = null;
 };
@@ -281,325 +141,201 @@ const removeImage = (field: string) => {
     <!-- Breadcrumb End -->
 
     <!-- ====== Form Elements Section Start -->
-    <div class="grid-cols-1 gap-9 sm:grid-cols-2">
+    <div class="grid grid-cols-1 gap-9 sm:grid-cols-2">
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="Input Data">
           <div class="flex flex-col gap-2 p-6.5">
             <div class="flex flex-col gap-6 xl:flex-row">
-              <div class="lg:w-3/5">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Email
-                </label>
-                <input
-                  type="text"
-                  placeholder="Id Pelanggan"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.Tr_teknis_pelanggan_id"
-                />
-              </div>
-            </div>
-
-            <div class="lg:w-3/5">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Password
-                </label>
-                <input
-                  type="text"
-                  placeholder="Id Pelanggan"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.Tr_teknis_pelanggan_id"
-                />
-              </div>
-
-              <div>
+              <div class="w-full">
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Nama User
               </label>
               <input
                 type="text"
-                placeholder="Nama Pelanggan"
+                placeholder="Nama User"
                 class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
-                v-model="savedData.Tr_teknis_pelanggan_nama"
+                v-model="savedData.userName"
               />
-            </div>
-
-            <div class="flex flex-col gap-6 xl:flex-row">
-              <div class="lg:w-1/2">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  No. Telp
-                </label>
-                <input
-                  type="text"
-                  placeholder="Id Pelanggan"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.Tr_teknis_pelanggan_id"
-                />
-              </div>
-              <div class="lg:w-1/2">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Tanggal Lahir
-                </label>
-                <input
-                  type="date"
-                  placeholder="Server"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.Tr_teknis_pelanggan_server"
-                />
               </div>
             </div>
 
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Alamat
+                Email
               </label>
-              <textarea
-                rows="3"
-                placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_keterangan"
-              ></textarea>
+              <input
+                type="text"
+                placeholder="Email User"
+                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
+                v-model="savedData.email"
+              />
+              </div>
+
+              <div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Password
+              </label>
+              <input
+                type="text"
+                placeholder="Password User"
+                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
+                v-model="savedData.password"
+              />
+              </div>
+              <div class="w-full">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Role User
+                </label>
+                <SelectGroup
+                  placeholder="Pilih Nama Role"
+                  id="userRole"
+                  :options="optionsType"
+                  v-model="logistikData"
+                  @option-changed="handleOptionChange"
+                />
+              </div>
+
+            <div class="hidden">
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Hierarchy Code
+              </label>
+              <div>
+          <input
+          id="hierarchyCode"
+                type="text"
+                placeholder="Kode Hirarki"
+                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
+                v-model="savedData.hierarchyCode"
+                readonly
+              />
+              </div>
             </div>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->
       </div>
       <div class="flex flex-col gap-9">
-        <!-- Textarea Fields Start -->
-        <DefaultCard cardTitle="Input Images">
-          <div class="grid grid-cols-2">
-            <div class="flex border flex-col items-center p-2 justify-end relative">
-              <inputImageWithPreview
-                label="Evident Progress"
-                v-model="savedData.Tr_teknis_evident_progress"
-                @update:file="(file) => (savedData.Tr_teknis_evident_progress = file)"
-              />
-              <!-- Tombol Hapus -->
-              <button
-                v-if="savedData.Tr_teknis_evident_progress"
-                @click="removeImage('Tr_teknis_evident_progress')"
-                class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-              >
-                X
-              </button>
-            </div>
+  <!-- Textarea Fields Start -->
+  <DefaultCard cardTitle="Input Data Pribadi">
+    <div class="flex flex-col gap-2 p-6.5">
+      <!-- Flex Container untuk Gambar dan Form -->
+      <div class="flex flex-col lg:flex-row gap-6">
+        
+        <!-- Bagian Input Gambar -->
+        <div class="lg:w-2/5 flex items-center justify-center">
+          <div class="relative flex border flex-col items-center p-2 justify-end w-full">
+            <!-- Label untuk Input Gambar -->
+            <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+              Photo User
+            </label>
+            <inputImageWithPreview
+              v-model="savedData.userImage"
+              @update:file="(file) => (savedData.userImage = file)"
+            />
+            <!-- Tombol Hapus -->
+            <button
+              v-if="savedData.userImage"
+              @click="removeImage('userImage')"
+              class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+            >
+              X
+            </button>
+          </div>
+        </div>
+        
+        <!-- Bagian Form Gender dan Tanggal Lahir -->
+        <div class="lg:w-3/5 flex flex-col gap-6">
+          <!-- Gender -->
+          <div>
+            <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+              Gender
+            </label>
+            <div class="flex items-center space-x-6">
+              <label for="radioPria" class="flex cursor-pointer select-none items-center">
+                <div class="relative">
+                  <input
+                    type="radio"
+                    id="radioPria"
+                    name="gender"
+                    value="Pria"
+                    v-model="savedData.userGender"
+                    class="sr-only"
+                  />
+                  <div :class="savedData.userGender === 'Pria' ? 'border-primary bg-primary' : 'border'"
+                    class="mr-2 flex h-5 w-5 items-center justify-center rounded-full border transition-colors duration-300">
+                    <span :class="savedData.userGender === 'Pria' ? 'bg-white' : 'bg-transparent'"
+                      class="h-2.5 w-2.5 rounded-full"></span>
+                  </div>
+                </div>
+                Pria
+              </label>
 
-            <div class="flex border flex-col items-center p-2 justify-end relative">
-              <inputImageWithPreview
-                label="Evident SpeedTest"
-                v-model="savedData.Tr_teknis_evident_speed_test"
-                @update:file="(file) => (savedData.Tr_teknis_evident_speed_test = file)"
-              />
-              <!-- Tombol Hapus -->
-              <button
-                v-if="savedData.Tr_teknis_evident_speed_test"
-                @click="removeImage('Tr_teknis_evident_speed_test')"
-                class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-              >
-                X
-              </button>
-            </div>
-
-            <div class="col-span-3 grid grid-cols-2">
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="Review Google"
-                  v-model="savedData.Tr_teknis_evident_review_google"
-                  @update:file="
-                    (file) => (savedData.Tr_teknis_evident_review_google = file)
-                  "
-                />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_review_google"
-                  @click="removeImage('Tr_teknis_evident_review_google')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
-              </div>
-
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="Kertas Form PSB"
-                  v-model="savedData.Tr_teknis_evident_kertas_psb"
-                  @update:file="(file) => (savedData.Tr_teknis_evident_kertas_psb = file)"
-                />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_kertas_psb"
-                  @click="removeImage('Tr_teknis_evident_kertas_psb')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
-              </div>
-            </div>
-
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">
-                Evident Redaman
-              </p>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="ODP"
-                  v-model="savedData.Tr_teknis_evident_redaman_odp"
-                  @update:file="
-                    (file) => (savedData.Tr_teknis_evident_redaman_odp = file)
-                  "
-                />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_redaman_odp"
-                  @click="removeImage('Tr_teknis_evident_redaman_odp')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
-              </div>
-
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="ONT"
-                  v-model="savedData.Tr_teknis_evident_redaman_ont"
-                  @update:file="
-                    (file) => (savedData.Tr_teknis_evident_redaman_ont = file)
-                  "
-                />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_redaman_ont"
-                  @click="removeImage('Tr_teknis_evident_redaman_ont')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
-              </div>
-            </div>
-
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">
-                Evident ODP
-              </p>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="ODP (Tampak Depan)"
-                  v-model="savedData.Tr_teknis_evident_odp_depan"
-                  @update:file="(file) => (savedData.Tr_teknis_evident_odp_depan = file)"
-                />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_odp_depan"
-                  @click="removeImage('Tr_teknis_evident_odp_depan')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
-              </div>
-
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="PORT (Tampak Dalam)"
-                  v-model="savedData.Tr_teknis_evident_odp_dalam"
-                  @update:file="(file) => (savedData.Tr_teknis_evident_odp_dalam = file)"
-                />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_odp_dalam"
-                  @click="removeImage('Tr_teknis_evident_odp_dalam')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
-              </div>
-            </div>
-
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">
-                Evident Customer
-              </p>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="Dengan Pelanggan"
-                  v-model="savedData.Tr_teknis_evident_pelanggan_dengan_pelanggan"
-                  @update:file="
-                    (file) =>
-                      (savedData.Tr_teknis_evident_pelanggan_dengan_pelanggan = file)
-                  "
-                />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_pelanggan_dengan_pelanggan"
-                  @click="removeImage('Tr_teknis_evident_pelanggan_dengan_pelanggan')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
-              </div>
-
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="Depan Rumah Pelanggan"
-                  v-model="savedData.Tr_teknis_evident_pelanggan_depan_rumah"
-                  @update:file="
-                    (file) => (savedData.Tr_teknis_evident_pelanggan_depan_rumah = file)
-                  "
-                />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_pelanggan_depan_rumah"
-                  @click="removeImage('Tr_teknis_evident_pelanggan_depan_rumah')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
-              </div>
-            </div>
-
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">
-                Evident Marking Kabel
-              </p>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="Start"
-                  v-model="savedData.Tr_teknis_evident_marking_dc_start"
-                  @update:file="
-                    (file) => (savedData.Tr_teknis_evident_marking_dc_start = file)
-                  "
-                />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_marking_dc_start"
-                  @click="removeImage('Tr_teknis_evident_marking_dc_start')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
-              </div>
-
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="End"
-                  v-model="savedData.Tr_teknis_evident_marking_dc_end"
-                  @update:file="
-                    (file) => (savedData.Tr_teknis_evident_marking_dc_end = file)
-                  "
-                />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_marking_dc_end"
-                  @click="removeImage('Tr_teknis_evident_marking_dc_end')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
-              </div>
+              <label for="radioWanita" class="flex cursor-pointer select-none items-center">
+                <div class="relative">
+                  <input
+                    type="radio"
+                    id="radioWanita"
+                    name="gender"
+                    value="Wanita"
+                    v-model="savedData.userGender"
+                    class="sr-only"
+                  />
+                  <div :class="savedData.userGender === 'Wanita' ? 'border-primary bg-primary' : 'border'"
+                    class="mr-2 flex h-5 w-5 items-center justify-center rounded-full border transition-colors duration-300">
+                    <span :class="savedData.userGender === 'Wanita' ? 'bg-white' : 'bg-transparent'"
+                      class="h-2.5 w-2.5 rounded-full"></span>
+                  </div>
+                </div>
+                Wanita
+              </label>
             </div>
           </div>
-        </DefaultCard>
-        <!-- Textarea Fields End -->
+
+          <!-- Tanggal Lahir -->
+          <div>
+            <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+              Tanggal Lahir
+            </label>
+            <input
+              type="date"
+              placeholder="Server"
+              class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+              v-model="savedData.userBirth"
+            />
+          </div>
+        </div>
       </div>
+      <div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                No Telp
+              </label>
+              <input
+                type="text"
+                placeholder="No Telp User"
+                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
+                v-model="savedData.userPhone"
+              />
+              </div>
+
+              <div>
+        <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+          Alamat
+        </label>
+        <textarea
+          rows="3"
+          placeholder="Masukan alamat disini!"
+          class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+          v-model="savedData.userAddress"
+        ></textarea>
+      </div>
+    </div>
+  </DefaultCard>
+  <!-- Textarea Fields End -->
+</div>
+
+
+
 
       <div class="flex flex-col gap-9 col-span-2">
         <!-- Input Fields Start -->
@@ -616,13 +352,13 @@ const removeImage = (field: string) => {
               @click="cancelAdd"
               class="flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90"
             >
-              Cancel
+              Batalkan
             </button>
             <button
               @click="submitData"
               class="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
             >
-              Add Data
+              Tambah Data
             </button>
           </div>
         </DefaultCard>
