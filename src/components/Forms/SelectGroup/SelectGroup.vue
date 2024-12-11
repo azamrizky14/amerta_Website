@@ -56,7 +56,7 @@ const updateSelection = () => {
       >
         <!-- Placeholder option -->
         <option value="" disabled
-          class="text-black">
+          class="text-black dark:text-white">
           {{ props.placeholder || 'Select an option' }}
         </option>
         <!-- Dynamic options using `label` as value -->
@@ -64,7 +64,7 @@ const updateSelection = () => {
           v-for="option in props.options"
           :key="option.label"
           :value="option.label"
-          class="text-black"
+          class="text-black dark:text-white"
         >
           {{ option.label }}
         </option>

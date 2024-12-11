@@ -3,13 +3,13 @@ import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import ButtonDynamic from "@/components/Buttons/ButtonDynamic.vue";
+import inputImageWithPreviewV2 from "@/components/Forms/SelectGroup/inputImageWithPreviewV2.vue";
 import Swal from "sweetalert2";
 
 import { getDateToday } from "@/stores/date";
 import { showLoading, confirmDelete, successCreate, failedCreate } from "@/stores/swal";
 import {
   adminTeknis_CreateData,
-  BonMaterial_GetPrefixByTypeAndDate,
   getUtilByName
 } from "@/stores/functionAPI";
 import { mdiPlusCircleOutline, mdiTrashCanOutline } from "@mdi/js";
@@ -35,17 +35,36 @@ const options: Option[] = [
   { id: 5, name: "Option 5" },
 ];
 
-const optionsType = ref([]);
+// const optionsType = ref([]);
+const optionsType = [
+    {label: "Material", value: "Material"},
+    {label: "Aset", value: "Aset"}
+  ]
 
-const pageTitle = ref("Tambah Bon & Material");
-const pageList = ref(["Work Order", "Bon & Material", "Tambah"]);
+const pageTitle = ref("Tambah Item");
+const pageList = ref(["Master", "Item", "Tambah"]);
 
 // Saved Data
 const savedData = ref({
+  item_gambar: null,
+  item_id: "",
+  item_nama: "",
+  item_brand: "",
+  item_tipe: "",
+  item_satuan: "",
+  item_keterangan: "",
+
+  item_bundle: [],
+  item_harga: [],
+  item_konversi: [],
+
+  item_user_created: indexStore.user.userName,
+  item_created: "",
+  item_updated: "",
+  item_deleted: "N",
+  companyName: indexStore.user.companyName,
+
   Tr_teknis_item: "", // wajib
-  // Tr_teknis_team: [],
-  Tr_teknis_keterangan: "",
-  Tr_teknis_keterangan_closing: "",
 
   Tr_teknis_logistik_id: "",
   Tr_teknis_user_created: "", // otomatis
@@ -69,17 +88,9 @@ const savedData = ref({
   Tr_teknis_work_order_kembali: [],
 });
 
-const materialData = ref([{ label: "", qty: "" }]);
+const materialData = ref([{ satuan_awal: "", qty_awal: "", satuan_akhir: "", qty_akhir: "" }]);
 
 onMounted(async () => {
-  const data = await  getUtilByName('bonMaterial')
-  if (data && data.utilData.length > 0) {
-    let option  = await data.utilData.find((x) => x.companyName === indexStore.user.companyName)
-    option = option.bonMaterialList.map(x => ({
-      label: x, value:x
-    }))
-    optionsType.value = [...option]
-  }
   const date = await getDateToday("yyyy-MM-dd");
   // savedData.value.Tr_teknis_tanggal = date;
   savedData.value.Tr_teknis_created = date;
@@ -90,7 +101,7 @@ onMounted(async () => {
 // Function
 const handleAddMaterialTerpakai = async () => {
   await successCreate(null, null, "top-end");
-  materialData.value.push({ label: "", qty: "" });
+  materialData.value.push({ satuan_awal: "", qty_awal: "", satuan_akhir: "", qty_akhir: "" });
 };
 
 const handleRemoveMaterialTerpakai = async (index) => {
@@ -199,25 +210,10 @@ const submitData = async () => {
         const cleanedArray = materialData.value.filter((item) => {
           return Object.values(item).some((value) => value !== "");
         });
-        fixData.Tr_teknis_work_order_terpakai_material = cleanedArray.sort((a, b) => {
-          const aHasONT = a.label.toLowerCase().includes('ont');
-          const bHasONT = b.label.toLowerCase().includes('ont');
-
-          if (aHasONT && !bHasONT) return 1; // Move `a` after `b`
-          if (!aHasONT && bHasONT) return -1; // Keep `a` before `b`
-          return 0; // Maintain order otherwise
-        });
         fixData.Tr_teknis_work_order_tersedia = fixData.Tr_teknis_work_order_tersedia.concat(
           cleanedArray
         );
       }
-
-      const prefix = await BonMaterial_GetPrefixByTypeAndDate(
-        fixData.Tr_teknis_jenis.value,
-        fixData.Tr_teknis_created
-      );
-      fixData.Tr_teknis_logistik_id = prefix.nextId;
-      fixData.Tr_teknis_jenis = fixData.Tr_teknis_jenis.value;
 
       await adminTeknis_CreateData(fixData);
       await successCreate().then(() => {
@@ -227,6 +223,11 @@ const submitData = async () => {
       await failedCreate(error);
     }
   }
+};
+
+// Fungsi untuk menghapus gambar
+const removeImage = (field: string) => {
+  savedData.value[field] = null;
 };
 </script>
 
@@ -238,46 +239,85 @@ const submitData = async () => {
 
     <!-- ====== Form Elements Section Start -->
 
-    <div class="grid grid-cols-1 gap-9 sm:grid-cols-2">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="Input Data">
           <div class="flex flex-col gap-2 p-6.5">
             <div class="flex flex-col gap-3 xl:flex-row">
               <div class="lg:w-1/3">
+                <div class="flex border flex-col items-center p-2 justify-end relative">
+                  <inputImageWithPreviewV2
+                    label="Gambar"
+                    v-model="savedData.item_gambar"
+                    @update:file="(file) => (savedData.item_gambar = file)"
+                  />
+                  <!-- Tombol Hapus -->
+                  <button
+                    v-if="savedData.item_gambar"
+                    @click="removeImage('item_gambar')"
+                    class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center text-gray-400 font-large rounded-md hover:opacity-50"
+                  >
+                    X
+                  </button>
+                </div>
+                </div>
+              <div class="lg:w-2/3">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Tim Peminta
+                  Kode Item
+                </label>
+                <input
+                  type="text"
+                  placeholder="Masukan Kode Item"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.item_id"
+                />
+                <label class="mb-3 mt-2 block text-sm font-medium text-black dark:text-white">
+                  Nama Item
+                </label>
+                <input
+                  type="text"
+                  placeholder="Masukan Nama Item"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.item_nama"
+                />
+              </div>
+            </div>
+            <div class="flex flex-col gap-3 xl:flex-row">
+              <div class="lg:w-1/2">
+                <label class="mb-3 mt-2 block text-sm font-medium text-black dark:text-white">
+                  Tipe Item
                 </label>
                 <SelectGroup
                   placeholder="Pilih Tim"
                   :options="optionsType"
-                  v-model="savedData.Tr_teknis_jenis"
+                  v-model="savedData.item_tipe"
                 />
               </div>
-              <div class="lg:w-1/3">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Nama Tas
+              <div class="lg:w-1/2">
+                <label class="mb-3 mt-2 block text-sm font-medium text-black dark:text-white">
+                  Satuan
                 </label>
                 <input
                   type="text"
-                  placeholder="Nama Tas"
+                  placeholder="Masukan Satuan Item"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.Tr_teknis_item"
-                />
-              </div>
-              <div class="lg:w-1/3">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Tgl. Dibuat
-                </label>
-                <input
-                  type="date"
-                  placeholder="Tgl. Dibuat"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-2 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.Tr_teknis_tanggal"
+                  v-model="savedData.item_satuan"
                 />
               </div>
             </div>
 
+            <div>
+                <label class="mb-3 mt-2 block text-sm font-medium text-black dark:text-white">
+                  Brand Item
+                </label>
+                <input
+                  type="text"
+                  placeholder="Masukan Merk Item"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.item_brand"
+                />
+              </div>
             <!-- Qty Keluar Input -->
             <div>
               
@@ -302,7 +342,7 @@ const submitData = async () => {
                 rows="3"
                 placeholder="Masukan keterangan disini!"
                 class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_keterangan"
+                v-model="savedData.item_keterangan"
               ></textarea>
             </div>
           </div>
@@ -312,7 +352,7 @@ const submitData = async () => {
       </div>
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Input Material">
+        <DefaultCard cardTitle="Input Konversi">
           <div class="p-6.5">
             <div
               class="flex flex-col gap-2 xl:flex-row"
@@ -320,40 +360,67 @@ const submitData = async () => {
               v-if="materialData.length > 0"
               :class="index === 0 ? '' : 'pt-2'"
             >
-              <div class="w-8/12">
+              <div class="w-3/12">
                 <label
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
                   v-if="index === 0"
                 >
-                  Nama Barang
-                </label>
-                <label
-                  class="mb-3 block text-sm font-medium text-black dark:text-white"
-                  v-else-if="data.label.toLowerCase().includes('ont')"
-                >
-                  ONT
-                </label>
-                <input
-                  type="text"
-                  placeholder="Nama Barang"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.label"
-                />
-              </div>
-              <div class="w-4/12">
-                <label
-                  class="mb-3 block text-sm font-medium text-black dark:text-white"
-                  v-if="index === 0"
-                >
-                  Qty. Keluar
+                  Qty. Awal
                 </label>
                 <input
                   type="number"
                   placeholder="Qty"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.qty"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-3 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="data.qty_awal"
                   
                 @change="validateQtyKeluar(index)"
+                />
+              </div>
+              <div class="w-2/12">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
+                  Satuan
+                </label>
+                <input
+                  type="text"
+                  placeholder="Satuan"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-2 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="data.satuan_awal"
+                />
+              </div>
+              <div class="flex pt-5 items-center">
+              -
+              </div>              
+              <div class="w-3/12">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
+                  Qty. Akhir
+                </label>
+                <input
+                  type="number"
+                  placeholder="Qty"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-3 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="data.qty_akhir"
+                  
+                @change="validateQtyKeluar(index)"
+                />
+              </div>
+              <div class="w-2/12">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
+                  Satuan
+                </label>
+                <input
+                  type="text"
+                  placeholder="Satuan"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-2 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="data.satuan_akhir"
                 />
               </div>
               <div class="w-1/12 flex items-end pb-2 flex-wrap">
