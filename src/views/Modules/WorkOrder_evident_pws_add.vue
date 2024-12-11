@@ -53,9 +53,10 @@ const savedData = ref({
   Tr_teknis_redaman_sebelum: null,
   Tr_teknis_evident_kendala_1: null,
   Tr_teknis_evident_kendala_2: null,
-  Tr_teknis_evident_kendala_3: null,
+  Tr_teknis_evident_modem_sebelum: null,
   Tr_teknis_evident_proses_sambung: null,
   Tr_teknis_redaman_sesudah: null,
+  Tr_teknis_evident_modem_sesudah: null,
   Tr_teknis_redaman_out_odp: null,
   Tr_teknis_redaman_pelanggan: null,
 
@@ -845,6 +846,24 @@ const removeImage = (field: string) => {
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <inputImageWithPreview
+                  label="Modem Sebelum"
+                  v-model="savedData.Tr_teknis_evident_modem_sebelum"
+                  @update:file="(file) => (savedData.Tr_teknis_evident_modem_sebelum = file)"
+                />
+                <!-- Tombol Hapus -->
+                <button
+                  v-if="savedData.Tr_teknis_evident_modem_sebelum"
+                  @click="removeImage('Tr_teknis_evident_modem_sebelum')"
+                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+                >
+                  X
+                </button>
+              </div>
+            </div>
+
+            <div class="col-span-3 grid grid-cols-2">
+              <div class="flex border flex-col items-center p-2 justify-end relative">
+                <inputImageWithPreview
                   label="Kendala 1"
                   v-model="savedData.Tr_teknis_evident_kendala_1"
                   @update:file="(file) => (savedData.Tr_teknis_evident_kendala_1 = file)"
@@ -858,9 +877,7 @@ const removeImage = (field: string) => {
                   X
                 </button>
               </div>
-            </div>
 
-            <div class="col-span-3 grid grid-cols-2">
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <inputImageWithPreview
                   label="Kendala 2"
@@ -871,22 +888,6 @@ const removeImage = (field: string) => {
                 <button
                   v-if="savedData.Tr_teknis_evident_kendala_2"
                   @click="removeImage('Tr_teknis_evident_kendala_2')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
-              </div>
-
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="Kendala 3"
-                  v-model="savedData.Tr_teknis_evident_kendala_3"
-                  @update:file="(file) => (savedData.Tr_teknis_evident_kendala_3 = file)"
-                />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_evident_kendala_3"
-                  @click="removeImage('Tr_teknis_evident_kendala_3')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
                   X
@@ -917,7 +918,7 @@ const removeImage = (field: string) => {
               </div>
             </div>
 
-            <div class="col-span-3 grid grid-cols-3">
+            <div class="col-span-3 grid grid-cols-2">
               <p class="text-black dark:text-white text-center p-2 col-span-3">
                 Evident Sesudah
               </p>
@@ -936,6 +937,23 @@ const removeImage = (field: string) => {
                   X
                 </button>
               </div>
+              <div class="flex border flex-col items-center p-2 justify-end relative">
+                <inputImageWithPreview
+                  label="Modem Sesudah"
+                  v-model="savedData.Tr_teknis_evident_modem_sesudah"
+                  @update:file="(file) => (savedData.Tr_teknis_evident_modem_sesudah = file)"
+                />
+                <!-- Tombol Hapus -->
+                <button
+                  v-if="savedData.Tr_teknis_evident_modem_sesudah"
+                  @click="removeImage('Tr_teknis_evident_modem_sesudah')"
+                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+                >
+                  X
+                </button>
+              </div>
+            </div>
+            <div class="col-span-3 grid grid-cols-2">
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <inputImageWithPreview
                   label="Redaman Out ODP"
@@ -967,7 +985,6 @@ const removeImage = (field: string) => {
                 </button>
               </div>
             </div>
-
             <div class="col-span-3 grid grid-cols-2">
               <p class="text-black dark:text-white text-center p-2 col-span-2">
                 Evident Marking Kabel

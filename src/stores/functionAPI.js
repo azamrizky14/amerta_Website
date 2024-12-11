@@ -75,8 +75,8 @@ export const adminTeknis_UpdateData = async (data, id) => {
   return suppData
 }
 
-export const adminTeknis_UpdateDataImage = async (data, id) => {
-  const response = await axios.put(API+'/api/Tr_teknis/Trteknis/updateImageById/'+ id, data)
+export const adminTeknis_UpdateDataImage = async (data, id, kode) => {
+  const response = await axios.put(API+'/api/Tr_teknis/Trteknis/updateEvidentbyid/'+ kode + '/' + id, data)
   var suppData = response.data;
   return suppData
 }
@@ -89,7 +89,7 @@ export const getUtilByName = async (data) => {
 }
 
 // User Internal
-export const getAllUsers = async (data) => {
+export const getAllUsers = async () => {
   const response = await axios.get(API+'/api/userInternal/')
   var suppData = response.data;
   return suppData
@@ -97,6 +97,13 @@ export const getAllUsers = async (data) => {
 
 export const getUserInternalByRole = async (company, role) => {
   const response = await axios.get(API+'/api/userInternal/getUserByRole/'+company+'/'+role)
+  var suppData = response.data;
+  return suppData
+}
+
+// Item
+export const item_getAllItemWithStatus = async (company, status) => {
+  const response = await axios.get(API+'/api/item/getAllItem/'+company+'/'+status)
   var suppData = response.data;
   return suppData
 }

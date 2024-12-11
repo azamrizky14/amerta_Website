@@ -188,7 +188,7 @@ const routes = [
     }
   },
   {
-    path: '/modules/work-order/evident/pws/edit/:id',
+    path: '/modules/work-order/evident/pws/edit/:logistikType/:logistikDate/:logistikNumber/:id',
     name: 'EvidentPwsEdit',
     component: () => import('@/views/Modules/WorkOrder_evident_pws_edit.vue'),
     meta: {
@@ -286,6 +286,25 @@ const routes = [
     component: () => import('@/views/Master/Master_userInternal.vue'),
     meta: {
       title: 'Master User Internal',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  // Master Item
+  {
+    path: '/master/item',
+    name: 'masterItem',
+    component: () => import('@/views/Master/Master_item.vue'),
+    meta: {
+      title: 'Master Item',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/master/item/add',
+    name: 'masterItemAdd',
+    component: () => import('@/views/Master/Master_item_add.vue'),
+    meta: {
+      title: 'Master Item Add',
       requiresAuth: true // Add this line to protect this route
     }
   },
