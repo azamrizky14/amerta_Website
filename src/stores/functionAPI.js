@@ -89,38 +89,33 @@ export const getUtilByName = async (data) => {
 }
 
 // User Internal
-<<<<<<< HEAD
-export const getAllUsers = async (data) => {
-  const response = await axios.get(API+'/api/userInternal/', data)
-=======
 export const getAllUsers = async () => {
   const response = await axios.get(API+'/api/userInternal/')
->>>>>>> 506ca8fd5cf068c0aa4106bb2637d520c34a3482
   var suppData = response.data;
   return suppData
 }
 
-<<<<<<< HEAD
 export const createUser = async (data) => {
   const response = await axios.post(API+'/api/userInternal/create', data)
-=======
-export const getUserInternalByRole = async (company, role) => {
-  const response = await axios.get(API+'/api/userInternal/getUserByRole/'+company+'/'+role)
->>>>>>> 506ca8fd5cf068c0aa4106bb2637d520c34a3482
   var suppData = response.data;
   return suppData
 }
 
-<<<<<<< HEAD
+export const getUserInternalByRole = async (company, role) => {
+  const response = await axios.get(API+'/api/userInternal/getUserByRole/'+company+'/'+role)
+  var suppData = response.data;
+  return suppData
+}
 
 // User Role
 export const getAllRole = async (data) => {
   const response = await axios.get(API+'/api/role/', data)
-=======
+  var suppData = response.data;
+  return suppData
+}
 // Item
 export const item_getAllItemWithStatus = async (company, status) => {
   const response = await axios.get(API+'/api/item/getAllItem/'+company+'/'+status)
->>>>>>> 506ca8fd5cf068c0aa4106bb2637d520c34a3482
   var suppData = response.data;
   return suppData
 }

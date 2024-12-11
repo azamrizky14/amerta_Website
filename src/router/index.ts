@@ -320,6 +320,25 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
+  // Master Item
+  {
+    path: '/master/item',
+    name: 'masterItem',
+    component: () => import('@/views/Master/Master_item.vue'),
+    meta: {
+      title: 'Master Item',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/master/item/add',
+    name: 'masterItemAdd',
+    component: () => import('@/views/Master/Master_item_add.vue'),
+    meta: {
+      title: 'Master Item Add',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
 ]
 
 
