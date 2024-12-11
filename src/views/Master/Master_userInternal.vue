@@ -10,10 +10,10 @@ const pageList = ref (['Master', 'User Internal'])
 const dataHeader = ref([
   {name: 'No.', class: 'py-2 pl-3'},
   {name: 'Nama User', class: 'min-w-[100px] py-2 px-4'},
-  {name: 'Email', class: 'min-w-[150px] py-2 px-4'},
-  {name: 'No. Telp', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Role', class: 'min-w-[150px] py-2 px-4'},
   {name: 'Gender', class: 'min-w-[100px] py-2 px-4'},
-  {name: 'Role', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Email', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'No Telp', class: 'min-w-[100px] py-2 px-4'},
 ])
 let dataTable = ref([])
 
@@ -110,17 +110,17 @@ onMounted( async () => {
               <p class="text-black dark:text-white text-xs ">{{ item.userName }}</p>
             </td>
             <td class="py-1 px-4 border">
-              <p class="text-black dark:text-white text-xs ">{{ item.email }}</p>
+              <p class="text-black dark:text-white text-xs ">{{ item.userRole }}</p>
             </td>
             <td class="py-1 px-4 border">
-              <p class=" text-xs text-black dark:text-white">{{ item.userPhone }}</p>
+              <p class=" text-xs text-black dark:text-white text-center">{{ item.userGender }}</p>
             </td>
             <td class="py-1 px-4 border">
-              <h5 class="font-medium text-black text-xs dark:text-white text-center">{{ item.userGender }}</h5>
+              <h5 class="font-medium text-black text-xs dark:text-white">{{ item.email }}</h5>
               <!-- <p class="text-xs">{{ item.picId }}</p> -->
             </td>
             <td class="py-1 px-4 text-center border">
-              <h5 class="font-medium text-black text-xs dark:text-white text-left">{{ item.userRole }}</h5>
+              <h5 class="font-medium text-black text-xs dark:text-white text-left">{{ item.userPhone }}</h5>
               <!-- <p class="text-xs">{{ item.picId }}</p> -->
             </td>
             <td class="py-1 px-4">

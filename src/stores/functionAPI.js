@@ -90,8 +90,21 @@ export const getUtilByName = async (data) => {
 
 // User Internal
 export const getAllUsers = async (data) => {
-  const response = await axios.get(API+'/api/userInternal/')
+  const response = await axios.get(API+'/api/userInternal/', data)
   var suppData = response.data;
   return suppData
 }
 
+export const createUser = async (data) => {
+  const response = await axios.post(API+'/api/userInternal/create', data)
+  var suppData = response.data;
+  return suppData
+}
+
+
+// User Role
+export const getAllRole = async (data) => {
+  const response = await axios.get(API+'/api/role/', data)
+  var suppData = response.data;
+  return suppData
+}

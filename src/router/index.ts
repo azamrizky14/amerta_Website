@@ -279,6 +279,17 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
+  
+  // Master User Internal
+  {
+    path: '/modules/master/user-internal',
+    name: 'userInternal',
+    component: () => import('@/views/Master/Master_userInternal.vue'),
+    meta: {
+      title: 'Master User Internal',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
   {
     path: '/modules/master/user-internal/add',
     name: 'userInternalAdd',
@@ -288,13 +299,14 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
-  // Master User Internal
+
+  // Master User Role
   {
-    path: '/modules/master/user-internal',
-    name: 'userInternal',
-    component: () => import('@/views/Master/Master_userInternal.vue'),
+    path: '/modules/master/user-role',
+    name: 'userRole',
+    component: () => import('@/views/Master/Master_userRole.vue'),
     meta: {
-      title: 'Master User Internal',
+      title: 'Master User Role',
       requiresAuth: true // Add this line to protect this route
     }
   },
