@@ -8,9 +8,9 @@ interface Option {
 }
 
 let props = defineProps<{
-  options: Option[];
-  modelValue: Option[];
-  placeholder?: string;
+  options: Option[]; // Available options
+  modelValue: Option[]; // Selected options from the parent
+  placeholder?: string; // Placeholder text
   value?: string; // Parent prop for the search query
   disabled?: boolean;
 }>();
@@ -19,9 +19,30 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: Option[]): void;
 }>();
 
-const searchQuery = ref(props.value || ''); // Initialize with the prop value
+const searchQuery = ref(props.value || ''); // Search query
 const isOpen = ref(false);
-let selectedOptions = ref<Option[]>([...(props.modelValue || [])]);
+const selectedOptions = ref<Option[]>([]); // Initialize empty
+
+// Update selectedOptions dynamically
+const updateSelectedOptions = () => {
+  if (!props.modelValue || !props.options) return;
+  selectedOptions.value = props.options.filter((option) =>
+    props.modelValue.some((selected) => selected.id === option.id)
+  );
+};
+
+// Watch for changes in parent-provided modelValue and options
+watch(
+  () => props.modelValue,
+  updateSelectedOptions,
+  { immediate: true, deep: true } // React to changes immediately
+);
+
+watch(
+  () => props.options,
+  updateSelectedOptions,
+  { immediate: true, deep: true } // React to changes immediately
+);
 
 // Filter options based on the search query
 const filteredOptions = computed(() =>
@@ -30,7 +51,7 @@ const filteredOptions = computed(() =>
   )
 );
 
-// Toggle selection of an option
+// Handle toggling selection of an option
 const toggleSelection = (option: Option) => {
   const index = selectedOptions.value.findIndex((o) => o.id === option.id);
   if (index > -1) {
