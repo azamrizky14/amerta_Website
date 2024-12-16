@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from "vue";
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import { adminTeknis_GetDataEvidentByType } from "@/stores/functionAPI";
-import { mdiEyeOutline, mdiMagnify, mdiRefresh, mdiPlusCircleOutline } from "@mdi/js";
+import { mdiEyeOutline, mdiMagnify, mdiRefresh, mdiPlusCircleOutline, mdiSquareEditOutline } from "@mdi/js";
 
 const pageTitle = ref("Evident - WNJ");
 const pageList = ref(["Work Order", "Evident", "WNJ"]);
@@ -219,6 +219,26 @@ onMounted(async () => {
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path :d="mdiEyeOutline" fill="" />
+                      </svg>
+                    </router-link>
+                    <router-link
+                      class="hover:text-primary"
+                      :to="
+                        '/modules/work-order/evident/wnj/edit/' +
+                        item.Tr_teknis_logistik_id +
+                        '/' +
+                        item._id
+                      "
+                    >
+                      <svg
+                        class="fill-current"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path :d="mdiSquareEditOutline" fill="" />
                       </svg>
                     </router-link>
                   </div>
