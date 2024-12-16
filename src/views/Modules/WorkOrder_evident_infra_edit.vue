@@ -3,27 +3,27 @@ import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import imageWithPreview from "@/components/Forms/SelectGroup/imageWithPreview.vue";
-import ButtonDynamic from "@/components/Buttons/ButtonDynamic.vue";
-import { domain } from "@/API/";
-import { useRoute } from "vue-router";
 import Swal from "sweetalert2";
-import {
-  showLoading,
-  confirmDelete,
-  successCreate,
-  successEdit,
-  failedEdit,
-} from "@/stores/swal";
+import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
+import multiselectOptionEdit from "@/components/Forms/SelectGroup/multiselectOptionEdit.vue";
+
+import { domain } from "@/API/";
+import { getDateToday } from "@/stores/date";
+import { useIndexStore } from "@/stores";
+import { showLoading, confirmDelete, successCreate, failedCreate } from "@/stores/swal";
 import {
   adminTeknis_UpdateDataImage,
-  adminTeknis_GetDataById,
+  adminTeknis_GetDataEvidentById,
+  getUserInternalByRole,
 } from "@/stores/functionAPI";
-import { mdiPlusCircleOutline, mdiTrashCanOutline } from "@mdi/js";
 
 import { ref, onMounted } from "vue";
 import router from "@/router";
+import { useRoute } from "vue-router";
 
 const route = useRoute();
+const indexStore = useIndexStore();
+const optionsTeknisi: Option[] = ref([]);
 const pageTitle = ref("Evident - Edit INFRA");
 const pageList = ref(["Work Order", "Evident", "INFRA", "Edit"]);
 
@@ -34,7 +34,13 @@ const savedData = ref({
   Tr_teknis_pelanggan_server: "",
   Tr_teknis_user_updated: "",
   Tr_teknis_keterangan: "",
- 
+  Tr_teknis_logistik_id: "",
+  Tr_teknis_jenis: "INFRA",
+  Tr_teknis_trouble: "",
+  Tr_teknis_action: "",
+  Tr_teknis_team: [],
+  Tr_teknis_work_order_images: {},
+
   Tr_teknis_redaman_sebelum: null,
   Tr_teknis_evident_kendala_1: null,
   Tr_teknis_evident_kendala_2: null,
@@ -46,45 +52,121 @@ const savedData = ref({
   Tr_teknis_evident_marking_dc_start: null,
   Tr_teknis_evident_marking_dc_end: null,
 
-  Tr_teknis_status: "Y",
-  Tr_teknis_domain: domain,
   Tr_teknis_tanggal: "",
   Tr_teknis_created: "",
-  Tr_teknis_jenis: "INFRA",
-  Tr_teknis_material_terpakai: [
-    {label: "PS Besar", qtyKeluar: "", qtyKembali: ""},
-    {label: "DC", qtyKeluar: "", qtyKembali: ""},
-    {label: "ONT", snNumber: ""},
-    {label: "Pigtail", qtyKeluar: "", qtyKembali: ""},
-    {label: "Adaptor (12V)", qtyKeluar: "", qtyKembali: ""},
-    {label: "Konektor PAZ", qtyKeluar: "", qtyKembali: ""},
-    {label: "SPL 1:8", qtyKeluar: "", qtyKembali: ""},
-    {label: "SPL 1:4", qtyKeluar: "", qtyKembali: ""}
-  ]
-})
+  Tr_teknis_work_order_terpakai_material: [],
+});
+
+const loading = ref(true); // Loading state
 const materialData = ref([]);
+const logistikData = ref(null);
+const optionsType = ref([]);
+
+// const optionsType = [
+//   { label: "PSB", value: "PSB" },
+//   { label: "INFRA", value: "INFRA" },
+//   { label: "INFRA", value: "INFRA" },
+// ];
 
 onMounted(async () => {
-  await getData();
+  console.log("data", indexStore.user);
+  try {
+    const [data, listTeknisi] = await Promise.all([
+      getUserInternalByRole(
+        indexStore.user.companyName,
+        "Teknisi " + savedData.value.Tr_teknis_jenis
+      ),
+      getData(),
+    ]);
+
+    if (data) {
+      optionsTeknisi.value = data.map((x, i) => ({
+        id: i,
+        name: x.userName,
+        role: x.userRole,
+      }));
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  } finally {
+    loading.value = false; // Stop loading indicator
+  }
 });
+
+const isFile = (key: string) => {
+  const image = savedData.value.Tr_teknis_work_order_images?.[key];
+  console.log(image);
+  return image && image instanceof File;
+};
+
+const getData = async () => {
+  const data = await adminTeknis_GetDataEvidentById(
+    route.params.logistikType +
+      "/" +
+      route.params.logistikDate +
+      "/" +
+      route.params.logistikNumber,
+    route.params.id
+  );
+  if (data.Tr_teknis_team) {
+    data.Tr_teknis_team = data.Tr_teknis_team.map((x, i) => ({ id: i, name: x }));
+  }
+  console.log("ini data", data);
+  savedData.value = data;
+};
 
 // Function
 const handleButtonClick = async () => {
   alert("tes");
 };
-const handleAddMaterialTerpakai = async () => {
-  await successCreate(null, null, 'top-end')
-  materialData.value.push({
-    label: "", qtyKeluar: "", qtyKembali: "",
-  })
-}
+
 const handleRemoveMaterialTerpakai = async (index) => {
   await confirmDelete(null, null, async () => {
     materialData.value.splice(index, 1);
   });
 };
 
-const cancelDetail = async () => {
+// Function to handle option change
+const handleOptionChange = (selected: { label: string; value: string }) => {
+  console.log("Selected option changed:", selected);
+  // Perform any additional actions here
+  materialData.value.splice(0, materialData.value.length);
+  if (selected.Tr_teknis_work_order_tersedia) {
+    savedData.value.Tr_teknis_logistik_id = selected.Tr_teknis_logistik_id;
+    // console.log('berhasil')
+    selected.Tr_teknis_work_order_tersedia.forEach((data) => {
+      materialData.value.push({
+        label: data.label,
+        qtySisa: data.qty,
+        qty: "",
+      });
+    });
+
+    // Step 2: Merge all Tr_teknis_work_order_terpakai_material and reduce qtySisa accordingly
+    if (
+      selected.Tr_teknis_work_order_terpakai &&
+      selected.Tr_teknis_work_order_terpakai.length > 0
+    ) {
+      const mergedMaterials = selected.Tr_teknis_work_order_terpakai.flatMap(
+        (item) => item.Tr_teknis_work_order_terpakai_material || []
+      );
+
+      // Deduct the qty from qtySisa in materialData if labels match
+      mergedMaterials.forEach((material) => {
+        const existingItem = materialData.value.find(
+          (item) => item.label === material.label
+        );
+        if (existingItem) {
+          existingItem.qtySisa -= material.qty; // Reduce qtySisa based on the merged qty
+          if (existingItem.qtySisa < 0) existingItem.qtySisa = 0; // Ensure qtySisa doesn't go below 0
+        }
+      });
+    }
+  }
+  // console.log('saved data: ', materialData.value)
+};
+
+const cancelAdd = async () => {
   const result = await Swal.fire({
     title: "Cancel Create?",
     text: "are you sure to cancel add data?",
@@ -101,16 +183,62 @@ const cancelDetail = async () => {
   }
 };
 
+// Validators for required fields
+const dataValidator = ref([
+  { key: "Tr_teknis_logistik_id", label: "Kode Bon Material" },
+  { key: "Tr_teknis_pelanggan_id", label: "Id Pelanggan" },
+  { key: "Tr_teknis_pelanggan_server", label: "Server" },
+  { key: "Tr_teknis_pelanggan_nama", label: "Nama Pelanggan" },
+]);
+
+const dataError = ref([]);
+
+// Helper function for validation
+const validateForm = () => {
+  // Clear previous errors
+  // Validate each field
+  dataValidator.value.forEach((validator) => {
+    if (
+      (validator.key === "logistikData" && !logistikData.value) || // For logistikData
+      (!savedData.value[validator.key] && validator.key !== "logistikData") // For other fields in savedData
+    ) {
+      // Add error message if validation fails
+      dataError.value.push(`${validator.label} tidak boleh kosong!`);
+    }
+  });
+
+  console.log("list error", dataError.value);
+  // Return true if no errors, false otherwise
+  return dataError.value.length === 0;
+};
+
+const cancelEdit = async () => {
+  const result = await Swal.fire({
+    title: "Batal Edit?",
+    text: "Anda yakin ingin membatalkan edit data ini?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#FF0000",
+    cancelButtonColor: "#",
+    confirmButtonText: "Batalkan",
+    cancelButtonText: "Kembali",
+  });
+
+  if (result.isConfirmed) {
+    await router.push("/modules/work-order/evident/infra");
+  }
+};
+
 const resetData = async () => {
   const result = await Swal.fire({
     title: "Reset Data?",
-    text: "are you sure to reset add data?",
+    text: "anda yakin ingin mereset perubahan yang anda buat?",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#FF0000",
     cancelButtonColor: "#",
     confirmButtonText: "Reset",
-    cancelButtonText: "Cancel",
+    cancelButtonText: "Kembali",
   });
 
   if (result.isConfirmed) {
@@ -118,17 +246,17 @@ const resetData = async () => {
   }
 };
 
-const getData = async () => {
-  let data = await adminTeknis_GetDataById(route.params.id);
-  if (data.Tr_teknis_images) {
-    data = { ...data, ...data.Tr_teknis_images };
-    delete data.Tr_teknis_images;
+const submitData = async () => {
+  console.log(savedData.value);
+  // Validate form before submission
+  const isValid = validateForm();
+
+  // If validation fails, show errors
+  if (!isValid) {
+    return; // Stop the submission process
   }
 
-  savedData.value = data;
-};
-
-const submitData = async () => {
+  // If form is valid, continue with submission
   const result = await Swal.fire({
     title: "Edit Data?",
     text: "",
@@ -136,42 +264,60 @@ const submitData = async () => {
     showCancelButton: true,
     confirmButtonColor: "#10B981",
     cancelButtonColor: "#d33",
-    confirmButtonText: "Edit!",
+    confirmButtonText: "Edit",
+    cancelButtonText: "Kembali",
   });
 
   if (result.isConfirmed) {
     try {
       showLoading();
-      //
-      const fixData = { ...savedData.value };
-      if (materialData.value && materialData.value.length > 0) {
-        const cleanedArray = materialData.value.filter((item) => {
-          return Object.values(item).some((value) => value !== "");
-        });
-        fixData.Tr_teknis_material_terpakai = fixData.Tr_teknis_material_terpakai.concat(
-          cleanedArray
-        );
-      }
 
-      fixData.Tr_teknis_material_terpakai = JSON.stringify(
-        fixData.Tr_teknis_material_terpakai
+      const fixData = { ...savedData.value };
+
+      
+      fixData.Tr_teknis_team = JSON.stringify(fixData.Tr_teknis_team.map(x => (x.name)))
+      fixData.Tr_teknis_team = JSON.stringify(fixData.Tr_teknis_team);
+      fixData.Tr_teknis_work_order_terpakai_material = JSON.stringify(
+        fixData.Tr_teknis_work_order_terpakai_material
       );
+
+      Object.keys(fixData.Tr_teknis_work_order_images).forEach((key) => {
+        if (fixData.Tr_teknis_work_order_images[key] === null) {
+          fixData.Tr_teknis_work_order_images[key] = "";
+        }
+      });
 
       const sendData = new FormData();
 
       Object.keys(fixData).forEach((key) => {
-        sendData.append(key, fixData[key]);
+        if (key === "Tr_teknis_work_order_images") {
+          Object.keys(fixData.Tr_teknis_work_order_images).forEach((image) => {
+            sendData.append(image, fixData.Tr_teknis_work_order_images[image]);
+          });
+        } else {
+          sendData.append(key, fixData[key]);
+        }
       });
 
       //
-      await adminTeknis_UpdateDataImage(sendData, route.params.id);
-      await successEdit().then(() => {
+      await adminTeknis_UpdateDataImage(
+        sendData,
+        route.params.id,
+        fixData.Tr_teknis_logistik_id
+      );
+
+      await successCreate().then(() => {
         router.push("/modules/work-order/evident/infra");
       });
     } catch (error) {
-      await failedEdit(error);
+      await failedCreate(error);
     }
   }
+};
+
+// Fungsi untuk menghapus gambar
+const removeImage = (field: string) => {
+  savedData.value.Tr_teknis_work_order_images[field] = null;
 };
 </script>
 
@@ -185,32 +331,73 @@ const submitData = async () => {
     <div class="grid grid-cols-1 gap-9 sm:grid-cols-2">
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Input Data">
+        <DefaultCard cardTitle="Edit Data">
           <div class="flex flex-col gap-2 p-6.5">
-          <div class="flex flex-col gap-6 xl:flex-row">
-            <div class="lg:w-2/3">
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Id Pelanggan (Wajib Diisi)
-              </label>
-              <input
-                type="text"
-                placeholder="Id Pelanggan"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_pelanggan_id"
-              />
+            <div class="flex flex-col gap-6 xl:flex-row">
+              <div class="w-2/3">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Kode Bon Material
+                </label>
+                <input
+                  disabled
+                  type="text"
+                  placeholder="Nama Tas"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_logistik_id"
+                />
+              </div>
+              <div class="w-1/3">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Kategori
+                </label>
+                <input
+                  disabled
+                  type="text"
+                  placeholder="Nama Tas"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_kategori"
+                />
+              </div>
             </div>
-            <div class="lg:w-1/3">
+
+            <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Server
+                Teknisi
               </label>
-              <input
-                type="text"
-                placeholder="Server"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_pelanggan_server"
-              />
+              <div>
+                <multiselectOptionEdit
+                  :options="optionsTeknisi"
+                  v-model="savedData.Tr_teknis_team"
+                  placeholder="Pilih Teknisi..."
+                />
+                <div v-if="loading" class="text-gray-500 mt-2">Loading...</div>
+              </div>
             </div>
-          </div>
+
+            <div class="flex flex-col gap-6 xl:flex-row">
+              <div class="lg:w-2/3">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Id Pelanggan (Wajib Diisi)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Id Pelanggan"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_pelanggan_id"
+                />
+              </div>
+              <div class="lg:w-1/3">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Server
+                </label>
+                <input
+                  type="text"
+                  placeholder="Server"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_pelanggan_server"
+                />
+              </div>
+            </div>
 
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
@@ -221,18 +408,6 @@ const submitData = async () => {
                 placeholder="Nama Pelanggan"
                 class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
                 v-model="savedData.Tr_teknis_pelanggan_nama"
-              />
-            </div>
-
-            <div>
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                PIC
-              </label>
-              <input
-                type="text"
-                placeholder="Person in charge"
-                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
-                v-model="savedData.Tr_teknis_user_updated"
               />
             </div>
             
@@ -250,156 +425,198 @@ const submitData = async () => {
           </div>
         </DefaultCard>
         <!-- Input Fields End -->
-        
+
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Input Material Terpakai" class="hidden">
+        <DefaultCard
+          cardTitle="Edit Material Terpakai"
+          @handle-click="handleAddMaterialTerpakai"
+        >
           <div class="p-6.5">
-            <div class="flex flex-col gap-2 xl:flex-row" 
-             v-for="(data, index) in savedData.Tr_teknis_material_terpakai"
-             v-if="savedData && savedData.Tr_teknis_material_terpakai.length > 0"
-             :class="index === 0 ? '' : 'pt-2'"> 
-              <div class="w-5/12">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
+            <div
+              class="flex flex-col gap-2 xl:flex-row"
+              v-for="(data, index) in savedData.Tr_teknis_work_order_terpakai_material"
+              v-if="
+                savedData && savedData.Tr_teknis_work_order_terpakai_material.length > 0
+              "
+              :class="index === 0 ? '' : 'pt-2'"
+            >
+              <div class="w-6/12">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
                   Nama Barang
+                </label>
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-else-if="data.label.toLowerCase().includes('ont')"
+                >
+                  ONT
                 </label>
                 <input
                   disabled
                   type="text"
                   placeholder="Nama Barang"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.label"
                 />
               </div>
-              <div class="w-3/12" v-if="data.qtyKeluar || data.qtyKeluar === '' || data.qtyKeluar === 0">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
-                  Qty. Keluar
+              <div class="w-3/12" v-if="!data.label.toLowerCase().includes('ont')">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
+                  Qty. Dipakai
                 </label>
                 <input
+                  disabled
                   type="number"
                   placeholder="Qty"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.qtyKeluar"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-4 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="data.qty"
                 />
               </div>
-              <div class="w-3/12" v-if="data.qtyKembali || data.qtyKembali === '' || data.qtyKembali === 0">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
-                  Qty. Kembali
+              <div class="w-3/12" v-if="!data.label.toLowerCase().includes('ont')">
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0"
+                >
+                  Qty. Tersisa
                 </label>
                 <input
+                  disabled
                   type="number"
                   placeholder="Qty"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.qtyKembali"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-4 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="data.qtySisa"
                 />
               </div>
               <div class="w-6/12" v-else>
-                <!-- <label class="mb-3 block text-sm font-medium text-black dark:text-white" v-if="index === 0">
-                  SN
-                </label> -->
+                <label
+                  class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  v-if="index === 0 || data.label.toLowerCase().includes('ont')"
+                >
+                  Serial Number
+                </label>
                 <input
+                  disabled
                   type="text"
                   placeholder="SN"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.snNumber"
                 />
               </div>
-              <div class="w-1/12 flex items-end pb-2 flex-wrap">
-                <div class="flex w-full justify-center  mb-5 cursor-pointer font-medium text-blue-600 hover:bg-opacity-90"
-                @click="handleAddMaterialTerpakai" v-if="index === 0">
-                  <svg
-                class="fill-current"
-                width="20"
-                height="20"
-                viewBox="0 0 22 22"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path :d="mdiPlusCircleOutline" />
-              </svg>
-                </div>
-                <ButtonDynamic
-                  disabled
-                  :icon="mdiTrashCanOutline"
-                  label=""
-                  buttonClass="flex w-full justify-center p-2 cursor-pointer rounded bg-red-500 text-gray-50 hover:bg-red-600"
-                  @click="handleButtonClick"
-                />
-              </div>
             </div>
-
-            <div class="flex flex-col gap-2 pt-2 xl:flex-row" v-for="(data, index) in materialData" v-if="materialData.length > 0">
-              <div class="w-8/12">
-                <input
-                  type="text"
-                  placeholder="Nama Barang"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.label"
-                />
-              </div>
-              <div class="w-3/12">
-                <input
-                  type="number"
-                  placeholder="Qty"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="data.qty"
-                />
-              </div>
-              <div class="w-1/12 flex pb-2 items-end">
-                <ButtonDynamic
-                  :icon="mdiTrashCanOutline"
-                  label=""
-                  buttonClass="flex w-full justify-center p-2 cursor-pointer rounded bg-red-500 text-gray-50 hover:bg-red-600"
-                  @click="handleRemoveMaterialTerpakai(index)"
-                />
-              </div>
-            </div>
-            
-            
           </div>
-          
         </DefaultCard>
         <!-- Input Fields End -->
-
       </div>
 
       <div class="flex flex-col gap-9">
         <!-- Textarea Fields Start -->
-        <DefaultCard cardTitle="Input Gambar">
-          <div class="grid grid-cols-2" v-if="savedData">
+        <DefaultCard cardTitle="Edit Gambar">
+          <div class="grid grid-cols-2">
             <div class="col-span-3 grid grid-cols-2">
               <p class="text-black dark:text-white text-center p-2 col-span-2">
                 Evident Sebelum
               </p>
-              <div class="flex border flex-col items-center p-2 justify-end">
+              <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Sebelum"
-                  v-model="savedData.Tr_teknis_redaman_sebelum"
-                  @update:file="(file) => (savedData.Tr_teknis_redaman_sebelum = file)"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sebelum
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sebelum = file)
+                  "
                 />
+                <button
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sebelum
+                  "
+                  @click="removeImage('Tr_teknis_redaman_sebelum')"
+                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+                >
+                  X
+                </button>
               </div>
-              <div class="flex border flex-col items-center p-2 justify-end">
+
+              <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
-                  label="Kendala 1"
-                  v-model="savedData.Tr_teknis_evident_kendala_1"
-                  @update:file="(file) => (savedData.Tr_teknis_evident_kendala_1 = file)"
+                  v-if="savedData.Tr_teknis_work_order_images"
+                  label="Modem Sebelum"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_1
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_1 = file)
+                  "
                 />
+                <button
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_kendala_1
+                  "
+                  @click="removeImage('Tr_teknis_evident_kendala_1')"
+                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+                >
+                  X
+                </button>
               </div>
             </div>
 
             <div class="col-span-3 grid grid-cols-2">
-              <div class="flex border flex-col items-center p-2 justify-end">
+              <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
-                  label="Kendala 2"
-                  v-model="savedData.Tr_teknis_evident_kendala_2"
-                  @update:file="(file) => (savedData.Tr_teknis_evident_kendala_2 = file)"
+                  v-if="savedData.Tr_teknis_work_order_images"
+                  label="Kendala 1"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_2
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_2 = file)
+                  "
                 />
+                <button
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_2
+                  "
+                  @click="removeImage('Tr_teknis_evident_kendala_2')"
+                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+                >
+                  X
+                </button>
               </div>
-              <div class="flex border flex-col items-center p-2 justify-end">
+
+              <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
-                  label="Kendala 3"
-                  v-model="savedData.Tr_teknis_evident_kendala_3"
-                  @update:file="(file) => (savedData.Tr_teknis_evident_kendala_3 = file)"
+                  v-if="savedData.Tr_teknis_work_order_images"
+                  label="Kendala 2"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_3
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_3 = file)
+                  "
                 />
+                <button
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_3
+                  "
+                  @click="removeImage('Tr_teknis_evident_kendala_3')"
+                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+                >
+                  X
+                </button>
               </div>
             </div>
 
@@ -407,41 +624,104 @@ const submitData = async () => {
               <p class="text-black dark:text-white text-center p-2 col-span-2">
                 Evident Progres
               </p>
-              <div class="flex border flex-col items-center p-2 justify-end">
+              <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  v-if="savedData.Tr_teknis_work_order_images"
                   label="Splicer - Proses Sambung"
-                  v-model="savedData.Tr_teknis_evident_proses_sambung"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_proses_sambung
+                  "
                   @update:file="
-                    (file) => (savedData.Tr_teknis_evident_proses_sambung = file)
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_proses_sambung = file)
                   "
                 />
+                <button
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_proses_sambung
+                  "
+                  @click="removeImage('Tr_teknis_evident_proses_sambung')"
+                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+                >
+                  X
+                </button>
               </div>
             </div>
 
-            <div class="col-span-3 grid grid-cols-3">
+            <div class="col-span-2 grid grid-cols-3">
               <p class="text-black dark:text-white text-center p-2 col-span-3">
                 Evident Sesudah
               </p>
-              <div class="flex border flex-col items-center p-2 justify-end">
+              <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Sesudah"
-                  v-model="savedData.Tr_teknis_redaman_sesudah"
-                  @update:file="(file) => (savedData.Tr_teknis_redaman_sesudah = file)"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sesudah
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sesudah = file)
+                  "
                 />
+                <button
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sesudah
+                  "
+                  @click="removeImage('Tr_teknis_redaman_sesudah')"
+                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+                >
+                  X
+                </button>
               </div>
-              <div class="flex border flex-col items-center p-2 justify-end">
+              <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Out ODP"
-                  v-model="savedData.Tr_teknis_redaman_out_odp"
-                  @update:file="(file) => (savedData.Tr_teknis_redaman_out_odp = file)"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_out_odp
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_out_odp = file)
+                  "
                 />
+                <button
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_out_odp
+                  "
+                  @click="removeImage('Tr_teknis_redaman_out_odp')"
+                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+                >
+                  X
+                </button>
               </div>
-              <div class="flex border flex-col items-center p-2 justify-end">
+              <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Pelanggan"
-                  v-model="savedData.Tr_teknis_redaman_pelanggan"
-                  @update:file="(file) => (savedData.Tr_teknis_redaman_pelanggan = file)"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_pelanggan
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_pelanggan = file)
+                  "
                 />
+                <button
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_pelanggan
+                  "
+                  @click="removeImage('Tr_teknis_redaman_pelanggan')"
+                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+                >
+                  X
+                </button>
               </div>
             </div>
 
@@ -449,23 +729,54 @@ const submitData = async () => {
               <p class="text-black dark:text-white text-center p-2 col-span-2">
                 Evident Marking Kabel
               </p>
-              <div class="flex border flex-col items-center p-2 justify-end">
+              <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  v-if="savedData.Tr_teknis_work_order_images"
                   label="Start"
-                  v-model="savedData.Tr_teknis_evident_marking_dc_start"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_marking_dc_start
+                  "
                   @update:file="
-                    (file) => (savedData.Tr_teknis_evident_marking_dc_start = file)
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_start = file)
                   "
                 />
+                <button
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_marking_dc_start
+                  "
+                  @click="removeImage('Tr_teknis_evident_marking_dc_start')"
+                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+                >
+                  X
+                </button>
               </div>
-              <div class="flex border flex-col items-center p-2 justify-end">
+              <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  v-if="savedData.Tr_teknis_work_order_images"
                   label="End"
-                  v-model="savedData.Tr_teknis_evident_marking_dc_end"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_end
+                  "
                   @update:file="
-                    (file) => (savedData.Tr_teknis_evident_marking_dc_end = file)
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_end = file)
                   "
                 />
+                <button
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_marking_dc_end
+                  "
+                  @click="removeImage('Tr_teknis_evident_marking_dc_end')"
+                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+                >
+                  X
+                </button>
               </div>
             </div>
           </div>
@@ -476,12 +787,19 @@ const submitData = async () => {
       <div class="flex flex-col gap-9 col-span-2">
         <!-- Input Fields Start -->
         <DefaultCard>
+          <div v-if="dataError.length > 0" class="mt-4 mb-4">
+            <ul>
+              <li v-for="(error, index) in dataError" :key="index" class="ml-5 text-red">
+                <b>- {{ error }}</b>
+              </li>
+            </ul>
+          </div>
           <div class="pb-6 px-4 grid grid-cols-3 gap-2">
             <button
-              @click="cancelDetail"
+              @click="cancelEdit"
               class="flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90"
             >
-              Cancel
+              Batal
             </button>
             <button
               @click="resetData"
