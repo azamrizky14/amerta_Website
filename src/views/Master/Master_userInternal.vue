@@ -126,7 +126,7 @@ onMounted( async () => {
             <td class="py-1 px-4">
               <div class="flex items-center space-x-3.5 d-flex justify-center">              
                 
-                <router-link :class="item.Tr_teknis_status === 'closed' ? 'cursor-default opacity-50' : 'hover:text-primary'" class="" :to="'/modules/work-order/evident/infra/detail/'+item.Tr_teknis_logistik_id+'/'+item._id">
+                <router-link :class="item.Tr_teknis_status === 'closed' ? 'cursor-default opacity-50' : 'hover:text-primary'" class="" :to="'/modules/master/user-internal/detail/'+item._id">
                 <svg
                   class="fill-current"
                   width="24"
