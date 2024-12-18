@@ -141,17 +141,8 @@ const submitData = async () => {
         formData.append(key, fixData[key]);
       });
 
-      // Handle file uploads if necessary
-      const files = document.querySelector('input[type="file"]').files;
-      if (files && files.length > 0) {
-        console.log(files.length && files)
-        for (let i = 0; i < files.length; i++) {
-          formData.append("userImage", files[i]);
-        }
-      }
 
-
-      // await createUser(formData);
+      await createUser(formData);
 
       await successCreate().then(() => {
         router.push("/modules/master/user-internal");

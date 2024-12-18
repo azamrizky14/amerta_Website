@@ -14,7 +14,7 @@ import { showLoading, confirmDelete, successCreate, failedCreate } from "@/store
 import {
   adminTeknis_UpdateDataImage,
   adminTeknis_GetDataEvidentById,
-  getUserInternalByRole
+  getUserInternalByRole,
 } from "@/stores/functionAPI";
 
 import { ref, onMounted } from "vue";
@@ -24,8 +24,8 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 const indexStore = useIndexStore();
 const optionsTeknisi: Option[] = ref([]);
-const pageTitle = ref("Evident - Detail PWS");
-const pageList = ref(["Work Order", "Evident", "PWS", "Detail"]);
+const pageTitle = ref("Evident - Edit PWS");
+const pageList = ref(["Work Order", "Evident", "PWS", "Edit"]);
 
 // Saved Data
 const savedData = ref({
@@ -39,6 +39,7 @@ const savedData = ref({
   Tr_teknis_trouble: "",
   Tr_teknis_action: "",
   Tr_teknis_team: [],
+  Tr_teknis_work_order_images: {},
 
   Tr_teknis_redaman_sebelum: null,
   Tr_teknis_evident_kendala_1: null,
@@ -68,34 +69,33 @@ const optionsType = ref([]);
 // ];
 
 onMounted(async () => {
-  console.log('data',indexStore.user)
+  console.log("data", indexStore.user);
   try {
     const [data, listTeknisi] = await Promise.all([
       getUserInternalByRole(
-    indexStore.user.companyName,
-    "Teknisi " + savedData.value.Tr_teknis_jenis
-  ),getData()
-    ])
+        indexStore.user.companyName,
+        "Teknisi " + savedData.value.Tr_teknis_jenis
+      ),
+      getData(),
+    ]);
 
-  if (data) {
-    optionsTeknisi.value = data.map((x, i) => ({
-      id: i,
-      name: x.userName,
-      role: x.userRole,
-    }));
-  }
+    if (data) {
+      optionsTeknisi.value = data.map((x, i) => ({
+        id: i,
+        name: x.userName,
+        role: x.userRole,
+      }));
+    }
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error("Error fetching data:", error);
   } finally {
     loading.value = false; // Stop loading indicator
   }
-  
-
 });
 
 const isFile = (key: string) => {
   const image = savedData.value.Tr_teknis_work_order_images?.[key];
-  console.log(image)
+  console.log(image);
   return image && image instanceof File;
 };
 
@@ -108,13 +108,12 @@ const getData = async () => {
       route.params.logistikNumber,
     route.params.id
   );
-  console.log(data);
   if (data.Tr_teknis_team) {
-    data.Tr_teknis_team = data.Tr_teknis_team.map((x,i) => ({id: i, name: x}))
+    data.Tr_teknis_team = data.Tr_teknis_team.map((x, i) => ({ id: i, name: x }));
   }
-  console.log('ini data', data)
+  console.log("ini data", data);
   savedData.value = data;
-}
+};
 
 // Function
 const handleButtonClick = async () => {
@@ -156,7 +155,7 @@ const handleOptionChange = (selected: { label: string; value: string }) => {
       mergedMaterials.forEach((material) => {
         const existingItem = materialData.value.find(
           (item) => item.label === material.label
-        );
+        );  
         if (existingItem) {
           existingItem.qtySisa -= material.qty; // Reduce qtySisa based on the merged qty
           if (existingItem.qtySisa < 0) existingItem.qtySisa = 0; // Ensure qtySisa doesn't go below 0
@@ -190,8 +189,6 @@ const dataValidator = ref([
   { key: "Tr_teknis_pelanggan_id", label: "Id Pelanggan" },
   { key: "Tr_teknis_pelanggan_server", label: "Server" },
   { key: "Tr_teknis_pelanggan_nama", label: "Nama Pelanggan" },
-  { key: "Tr_teknis_trouble", label: "Masalah" },
-  { key: "Tr_teknis_action", label: "Solusi" },
 ]);
 
 const dataError = ref([]);
@@ -200,7 +197,10 @@ const dataError = ref([]);
 const validateForm = () => {
   // Clear previous errors
   dataError.value = [];
-
+  const mtValidator = [
+    { key: "Tr_teknis_trouble", label: "Masalah" },
+    { key: "Tr_teknis_action", label: "Solusi" },
+  ];
   // Validate each field
   dataValidator.value.forEach((validator) => {
     if (
@@ -211,48 +211,60 @@ const validateForm = () => {
       dataError.value.push(`${validator.label} tidak boleh kosong!`);
     }
   });
-console.log('list error', dataError.value)
+
+  if (savedData.Tr_teknis_kategori === "MT") {
+    // Validate each field
+    mtValidator.forEach((validator) => {
+      if (
+        (validator.key === "logistikData" && !logistikData.value) || // For logistikData
+        (!savedData.value[validator.key] && validator.key !== "logistikData") // For other fields in savedData
+      ) {
+        // Add error message if validation fails
+        dataError.value.push(`${validator.label} tidak boleh kosong!`);
+      }
+    });
+  }
+  console.log("list error", dataError.value);
   // Return true if no errors, false otherwise
   return dataError.value.length === 0;
 };
 
-
-const cancelDetail = async () => {
+const cancelEdit = async () => {
   const result = await Swal.fire({
-      title: "Batal Edit?",
-      text: "Anda yakin ingin membatalkan edit data ini?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#FF0000",
-      cancelButtonColor: "#",
-      confirmButtonText: "Batalkan",
-      cancelButtonText: "Kembali",
-    });
+    title: "Batal Edit?",
+    text: "Anda yakin ingin membatalkan edit data ini?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#FF0000",
+    cancelButtonColor: "#",
+    confirmButtonText: "Batalkan",
+    cancelButtonText: "Kembali",
+  });
 
-    if (result.isConfirmed) { 
-      await router.push('/modules/work-order/evident/pws');
-    }
-}
+  if (result.isConfirmed) {
+    await router.push("/modules/work-order/evident/pws");
+  }
+};
 
 const resetData = async () => {
   const result = await Swal.fire({
-      title: "Reset Data?",
-      text: "anda yakin ingin mereset perubahan yang anda buat?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#FF0000",
-      cancelButtonColor: "#",
-      confirmButtonText: "Reset",
-      cancelButtonText: "Kembali",
-    });
+    title: "Reset Data?",
+    text: "anda yakin ingin mereset perubahan yang anda buat?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#FF0000",
+    cancelButtonColor: "#",
+    confirmButtonText: "Reset",
+    cancelButtonText: "Kembali",
+  });
 
-    if (result.isConfirmed) { 
-      await getData()
-    }
-}
+  if (result.isConfirmed) {
+    await getData();
+  }
+};
 
 const submitData = async () => {
-  console.log(savedData.value)
+  console.log(savedData.value);
   // Validate form before submission
   const isValid = validateForm();
 
@@ -277,19 +289,39 @@ const submitData = async () => {
     try {
       showLoading();
 
-      const fixData = {...savedData.value}
+      const fixData = { ...savedData.value };
 
-        fixData.Tr_teknis_team = JSON.stringify(fixData.Tr_teknis_team)
-        fixData.Tr_teknis_work_order_terpakai_material = JSON.stringify(fixData.Tr_teknis_work_order_terpakai_material)
-        fixData.Tr_teknis_work_order_images = JSON.stringify(fixData.Tr_teknis_work_order_images)
-        const sendData = new FormData();
+      
+      fixData.Tr_teknis_team = JSON.stringify(fixData.Tr_teknis_team.map(x => (x.name)))
+      fixData.Tr_teknis_team = JSON.stringify(fixData.Tr_teknis_team);
+      fixData.Tr_teknis_work_order_terpakai_material = JSON.stringify(
+        fixData.Tr_teknis_work_order_terpakai_material
+      );
 
-        Object.keys(fixData).forEach((key) => {
+      Object.keys(fixData.Tr_teknis_work_order_images).forEach((key) => {
+        if (fixData.Tr_teknis_work_order_images[key] === null) {
+          fixData.Tr_teknis_work_order_images[key] = "";
+        }
+      });
+
+      const sendData = new FormData();
+
+      Object.keys(fixData).forEach((key) => {
+        if (key === "Tr_teknis_work_order_images") {
+          Object.keys(fixData.Tr_teknis_work_order_images).forEach((image) => {
+            sendData.append(image, fixData.Tr_teknis_work_order_images[image]);
+          });
+        } else {
           sendData.append(key, fixData[key]);
-        });
+        }
+      });
 
-        //
-        await adminTeknis_UpdateDataImage(sendData, route.params.id, fixData.Tr_teknis_logistik_id)
+      //
+      await adminTeknis_UpdateDataImage(
+        sendData,
+        route.params.id,
+        fixData.Tr_teknis_logistik_id
+      );
 
       await successCreate().then(() => {
         router.push("/modules/work-order/evident/pws");
@@ -316,7 +348,7 @@ const removeImage = (field: string) => {
     <div class="grid grid-cols-1 gap-9 sm:grid-cols-2">
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Detail Data">
+        <DefaultCard cardTitle="Edit Data">
           <div class="flex flex-col gap-2 p-6.5">
             <div class="flex flex-col gap-6 xl:flex-row">
               <div class="w-2/3">
@@ -436,14 +468,16 @@ const removeImage = (field: string) => {
 
         <!-- Input Fields Start -->
         <DefaultCard
-          cardTitle="Detail Material Terpakai"
+          cardTitle="Edit Material Terpakai"
           @handle-click="handleAddMaterialTerpakai"
         >
           <div class="p-6.5">
             <div
               class="flex flex-col gap-2 xl:flex-row"
               v-for="(data, index) in savedData.Tr_teknis_work_order_terpakai_material"
-              v-if="savedData && savedData.Tr_teknis_work_order_terpakai_material.length > 0"
+              v-if="
+                savedData && savedData.Tr_teknis_work_order_terpakai_material.length > 0
+              "
               :class="index === 0 ? '' : 'pt-2'"
             >
               <div class="w-6/12">
@@ -520,7 +554,7 @@ const removeImage = (field: string) => {
 
       <div class="flex flex-col gap-9">
         <!-- Textarea Fields Start -->
-        <DefaultCard cardTitle="Detail Gambar">
+        <DefaultCard cardTitle="Edit Gambar">
           <div class="grid grid-cols-2" v-if="savedData.Tr_teknis_kategori === 'PSB'">
             <div class="flex border flex-col items-center p-2 justify-end relative">
               <imageWithPreview
@@ -532,15 +566,17 @@ const removeImage = (field: string) => {
                     (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_progress = file)
                 "
               />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_progress && isFile('Tr_teknis_evident_progress')"
-                  @click="removeImage('Tr_teknis_evident_progress')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
+              <!-- Tombol Hapus -->
+              <button
+                v-if="
+                  savedData.Tr_teknis_work_order_images &&
+                  savedData.Tr_teknis_work_order_images.Tr_teknis_evident_progress
+                "
+                @click="removeImage('Tr_teknis_evident_progress')"
+                class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+              >
+                X
+              </button>
             </div>
 
             <div class="flex border flex-col items-center p-2 justify-end relative">
@@ -555,15 +591,17 @@ const removeImage = (field: string) => {
                     (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_speed_test = file)
                 "
               />
-                <!-- Tombol Hapus -->
-                <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_speed_test && isFile('Tr_teknis_evident_speed_test')"
-                  @click="removeImage('Tr_teknis_evident_speed_test')"
-                  class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-                >
-                  X
-                </button>
+              <!-- Tombol Hapus -->
+              <button
+                v-if="
+                  savedData.Tr_teknis_work_order_images &&
+                  savedData.Tr_teknis_work_order_images.Tr_teknis_evident_speed_test
+                "
+                @click="removeImage('Tr_teknis_evident_speed_test')"
+                class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+              >
+                X
+              </button>
             </div>
 
             <div class="col-span-3 grid grid-cols-2">
@@ -581,8 +619,11 @@ const removeImage = (field: string) => {
                 />
                 <!-- Tombol Hapus -->
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_review_google && isFile('Tr_teknis_evident_review_google')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_review_google
+                  "
                   @click="removeImage('Tr_teknis_evident_review_google')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -604,8 +645,10 @@ const removeImage = (field: string) => {
                 />
                 <!-- Tombol Hapus -->
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_kertas_psb && isFile('Tr_teknis_evident_kertas_psb')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kertas_psb
+                  "
                   @click="removeImage('Tr_teknis_evident_kertas_psb')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -632,8 +675,10 @@ const removeImage = (field: string) => {
                 />
                 <!-- Tombol Hapus -->
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_redaman_odp && isFile('Tr_teknis_evident_redaman_odp')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_redaman_odp
+                  "
                   @click="removeImage('Tr_teknis_evident_redaman_odp')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -655,8 +700,10 @@ const removeImage = (field: string) => {
                 />
                 <!-- Tombol Hapus -->
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_redaman_ont && isFile('Tr_teknis_evident_redaman_ont')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_redaman_ont
+                  "
                   @click="removeImage('Tr_teknis_evident_redaman_ont')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -683,8 +730,10 @@ const removeImage = (field: string) => {
                 />
                 <!-- Tombol Hapus -->
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_odp_depan && isFile('Tr_teknis_evident_odp_depan')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_odp_depan
+                  "
                   @click="removeImage('Tr_teknis_evident_odp_depan')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -706,8 +755,10 @@ const removeImage = (field: string) => {
                 />
                 <!-- Tombol Hapus -->
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_odp_dalam && isFile('Tr_teknis_evident_odp_dalam')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_odp_dalam
+                  "
                   @click="removeImage('Tr_teknis_evident_odp_dalam')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -735,8 +786,11 @@ const removeImage = (field: string) => {
                 />
                 <!-- Tombol Hapus -->
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_pelanggan_dengan_pelanggan && isFile('Tr_teknis_evident_pelanggan_dengan_pelanggan')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_pelanggan_dengan_pelanggan
+                  "
                   @click="removeImage('Tr_teknis_evident_pelanggan_dengan_pelanggan')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -759,8 +813,11 @@ const removeImage = (field: string) => {
                 />
                 <!-- Tombol Hapus -->
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_pelanggan_depan_rumah && isFile('Tr_teknis_evident_pelanggan_depan_rumah')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_pelanggan_depan_rumah
+                  "
                   @click="removeImage('Tr_teknis_evident_pelanggan_depan_rumah')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -786,11 +843,14 @@ const removeImage = (field: string) => {
                       (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_start = file)
                   "
                 />
-                
+
                 <!-- Tombol Hapus -->
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_marking_dc_start && isFile('Tr_teknis_evident_marking_dc_start')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_marking_dc_start
+                  "
                   @click="removeImage('Tr_teknis_evident_marking_dc_start')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -800,6 +860,7 @@ const removeImage = (field: string) => {
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  label="End"
                   v-if="savedData.Tr_teknis_work_order_images"
                   v-model="
                     savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_end
@@ -811,8 +872,11 @@ const removeImage = (field: string) => {
                 />
                 <!-- Tombol Hapus -->
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_marking_dc_end && isFile('Tr_teknis_evident_marking_dc_end')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_marking_dc_end
+                  "
                   @click="removeImage('Tr_teknis_evident_marking_dc_end')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -830,30 +894,44 @@ const removeImage = (field: string) => {
                 <imageWithPreview
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Sebelum"
-                  v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sebelum"
-                  @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sebelum = file)"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sebelum
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sebelum = file)
+                  "
                 />
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_redaman_sebelum && isFile('Tr_teknis_redaman_sebelum')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sebelum
+                  "
                   @click="removeImage('Tr_teknis_redaman_sebelum')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
                   X
                 </button>
-                
               </div>
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Modem Sebelum"
-                  v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_modem_sebelum"
-                  @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_modem_sebelum = file)"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_modem_sebelum
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_modem_sebelum = file)
+                  "
                 />
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_modem_sebelum && isFile('Tr_teknis_evident_modem_sebelum')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_modem_sebelum
+                  "
                   @click="removeImage('Tr_teknis_evident_modem_sebelum')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -866,13 +944,20 @@ const removeImage = (field: string) => {
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
                   v-if="savedData.Tr_teknis_work_order_images"
-                  label="Kendala 2"
-                  v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_2"
-                  @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_2 = file)"
+                  label="Kendala 1"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_1
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_1 = file)
+                  "
                 />
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_kendala_1 && isFile('Tr_teknis_evident_kendala_1')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_1
+                  "
                   @click="removeImage('Tr_teknis_evident_kendala_1')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -883,13 +968,20 @@ const removeImage = (field: string) => {
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
                   v-if="savedData.Tr_teknis_work_order_images"
-                  label="Kendala 3"
-                  v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_2"
-                  @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_3 = file)"
+                  label="Kendala 2"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_2
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_2 = file)
+                  "
                 />
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_kendala_2 && isFile('Tr_teknis_evident_kendala_2')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_2
+                  "
                   @click="removeImage('Tr_teknis_evident_kendala_2')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -906,14 +998,20 @@ const removeImage = (field: string) => {
                 <imageWithPreview
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Splicer - Proses Sambung"
-                  v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_proses_sambung"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_proses_sambung
+                  "
                   @update:file="
-                    (file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_proses_sambung = file)
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_proses_sambung = file)
                   "
                 />
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_proses_sambung && isFile('Tr_teknis_evident_proses_sambung')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_proses_sambung
+                  "
                   @click="removeImage('Tr_teknis_evident_proses_sambung')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -930,27 +1028,43 @@ const removeImage = (field: string) => {
                 <imageWithPreview
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Sesudah"
-                  v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sesudah"
-                  @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sesudah = file)"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sesudah
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sesudah = file)
+                  "
                 />
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_redaman_sesudah && isFile('Tr_teknis_redaman_sesudah')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sesudah
+                  "
                   @click="removeImage('Tr_teknis_redaman_sesudah')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
                   X
                 </button>
-              </div><div class="flex border flex-col items-center p-2 justify-end relative">
+              </div>
+              <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Modem Sesudah"
-                  v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_modem_sesudah"
-                  @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_modem_sesudah = file)"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_modem_sesudah
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_modem_sesudah = file)
+                  "
                 />
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_modem_sesudah && isFile('Tr_teknis_evident_modem_sesudah')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_modem_sesudah
+                  "
                   @click="removeImage('Tr_teknis_evident_modem_sesudah')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -964,12 +1078,19 @@ const removeImage = (field: string) => {
                 <imageWithPreview
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Out ODP"
-                  v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_out_odp"
-                  @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_out_odp = file)"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_out_odp
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_out_odp = file)
+                  "
                 />
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_redaman_out_odp && isFile('Tr_teknis_redaman_out_odp')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_out_odp
+                  "
                   @click="removeImage('Tr_teknis_redaman_out_odp')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -980,12 +1101,19 @@ const removeImage = (field: string) => {
                 <imageWithPreview
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Pelanggan"
-                  v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_pelanggan"
-                  @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_pelanggan = file)"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_pelanggan
+                  "
+                  @update:file="
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_pelanggan = file)
+                  "
                 />
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_redaman_pelanggan && isFile('Tr_teknis_redaman_pelanggan')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_pelanggan
+                  "
                   @click="removeImage('Tr_teknis_redaman_pelanggan')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -1002,15 +1130,22 @@ const removeImage = (field: string) => {
                 <imageWithPreview
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Start"
-                  v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_start"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_marking_dc_start
+                  "
                   @update:file="
-                    (file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_start = file)
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_start = file)
                   "
                 />
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_marking_dc_end && isFile('Tr_teknis_evident_marking_dc_end')"
-                  @click="removeImage('Tr_teknis_evident_marking_dc_end')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_marking_dc_start
+                  "
+                  @click="removeImage('Tr_teknis_evident_marking_dc_start')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
                   X
@@ -1020,14 +1155,20 @@ const removeImage = (field: string) => {
                 <imageWithPreview
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="End"
-                  v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_end"
+                  v-model="
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_end
+                  "
                   @update:file="
-                    (file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_end = file)
+                    (file) =>
+                      (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_end = file)
                   "
                 />
                 <button
-                  v-if="savedData.Tr_teknis_work_order_images && savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_marking_dc_end && isFile('Tr_teknis_evident_marking_dc_end')"
+                  v-if="
+                    savedData.Tr_teknis_work_order_images &&
+                    savedData.Tr_teknis_work_order_images
+                      .Tr_teknis_evident_marking_dc_end
+                  "
                   @click="removeImage('Tr_teknis_evident_marking_dc_end')"
                   class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
                 >
@@ -1051,21 +1192,24 @@ const removeImage = (field: string) => {
             </ul>
           </div>
           <div class="pb-6 px-4 grid grid-cols-3 gap-2">
-            <button @click="cancelDetail"
-                class="flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90"
-              >
-                Batal
-              </button>
-            <button @click="resetData"
-                class="flex w-full justify-center rounded bg-gray-500 p-3 font-medium text-gray hover:bg-opacity-90"
-              >
-                Reset
-              </button>
-            <button @click="submitData"
-                class="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-              >
-                Update Data
-              </button>
+            <button
+              @click="cancelEdit"
+              class="flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90"
+            >
+              Batal
+            </button>
+            <button
+              @click="resetData"
+              class="flex w-full justify-center rounded bg-gray-500 p-3 font-medium text-gray hover:bg-opacity-90"
+            >
+              Reset
+            </button>
+            <button
+              @click="submitData"
+              class="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
+            >
+              Update Data
+            </button>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->

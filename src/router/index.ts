@@ -225,7 +225,7 @@ const routes = [
     }
   },
   {
-    path: '/modules/work-order/evident/wnj/edit/:id',
+    path: '/modules/work-order/evident/wnj/edit/:logistikType/:logistikDate/:logistikNumber/:id',
     name: 'EvidentWnjEdit',
     component: () => import('@/views/Modules/WorkOrder_evident_wnj_edit.vue'),
     meta: {
@@ -262,7 +262,7 @@ const routes = [
     }
   },
   {
-    path: '/modules/work-order/evident/infra/edit/:id',
+    path: '/modules/work-order/evident/infra/edit/:logistikType/:logistikDate/:logistikNumber/:id',
     name: 'EvidentInfraEdit',
     component: () => import('@/views/Modules/WorkOrder_evident_infra_edit.vue'),
     meta: {

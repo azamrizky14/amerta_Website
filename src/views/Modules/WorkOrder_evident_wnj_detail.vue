@@ -75,7 +75,7 @@ onMounted(async () => {
       route.params.logistikNumber,
     route.params.id
   );
-  console.log(data);
+  console.log('tes',data);
   if (data.Tr_teknis_team) {
     data.Tr_teknis_team = data.Tr_teknis_team.map((x,i) => ({id: i, name: x}))
   }

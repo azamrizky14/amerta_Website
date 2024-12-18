@@ -342,14 +342,6 @@ const submitData = async () => {
         }
       });
 
-      // Handle file uploads if necessary
-      const files = document.querySelector('input[type="file"]').files;
-      if (files && files.length > 0) {
-        for (let i = 0; i < files.length; i++) {
-          sendData.append("images", files[i]);
-        }
-      }
-
       await adminTeknis_CreateDataEvidentWithImages(sendData);
 
       await successCreate().then(() => {

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
+import DefaultCardTable from "@/components/Forms/DefaultCardAccessPage.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import imageWithPreview from "@/components/Forms/SelectGroup/imageWithPreview.vue";
+import imageWithPreviewUser from "@/components/Forms/SelectGroup/imageWithPreviewUser.vue";
 import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
 import multiselectReadOnly from "@/components/Forms/SelectGroup/multiselectReadOnly.vue";
 import Swal from "sweetalert2";
@@ -21,6 +22,16 @@ const route = useRoute();
 const indexStore = useIndexStore();
 const pageTitle = ref("Master - Detail User Internal");
 const pageList = ref(["Master", "User Internal", "Detail"]);
+const dataHeader = ref([
+  {name: '', class: 'min-w-[30px] py-2 px-4'}, // Kolom checkbox
+  {name: 'Nama Halaman', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Kode', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Kategori', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Tipe', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Grup', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Halaman Tujuan', class: 'min-w-[150px] py-2 px-4'},
+])
+let dataTable = ref([])
 
 // Saved Data
 const savedData = ref({
@@ -52,6 +63,13 @@ const optionsType = ref([]);
 onMounted(async () => {
   const data = await getUserById(route.params.id);
   savedData.value = data;
+  const pageData = await indexStore.getUtilPage();
+  console.log(pageData)
+  if (pageData && pageData.utilData) {
+    // Masukkan data page ke dalam tabel
+    dataTable.value = pageData.utilData;
+  }
+  
   // options.forEach((option) => {
   //   option.label = option.roleName; // Map roleName to label
   //   option.value = option.roleName; // Use roleName as the value
@@ -85,6 +103,9 @@ const dataValidator = ref([
   { key: "userPhone", label: "No Telp User" },
   { key: "userAddress", label: "Alamat User" },
 ]);
+
+const switcherToggle = ref<boolean>(false)
+
 
 const dataError = ref([]);
 
@@ -250,9 +271,9 @@ const removeImage = (field: string) => {
             <label class="mb-3 block text-sm font-medium text-black dark:text-white">
               Photo User
             </label>
-            <imageWithPreview
-              v-model="savedData.userImage"
-              @update:file="(file) => (savedData.userImage = file)"
+            <imageWithPreviewUser
+              v-model="savedData.imageName"
+              @update:file="(file) => (savedData.imageName = file)"
               disabled
             />
             <!-- Tombol Hapus -->
@@ -330,7 +351,70 @@ const removeImage = (field: string) => {
   <!-- Textarea Fields End -->
 </div>
 
-
+<div class="flex flex-col gap-9 col-span-2">
+  <DefaultCardTable cardTitle="Pilih Page">
+    <template #card-tools>
+      <label for="toggle4" class="flex cursor-pointer select-none items-center">
+        <div class="relative">
+          <input
+            type="checkbox"
+            id="toggle4"
+            class="sr-only"
+            @change="switcherToggle = !switcherToggle; toggleAllCheckboxes()"
+          />
+          <div
+            :class="switcherToggle && '!bg-primary'"
+            class="block h-8 w-14 rounded-full bg-black"
+          ></div>
+          <div
+            :class="switcherToggle && '!right-1 !translate-x-full'"
+            class="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white transition"
+          ></div>
+        </div>
+      </label>
+    </template>
+    
+    <div class="max-w-full overflow-x-auto">
+      <table class="w-full table-auto">
+        <thead>
+          <tr class="bg-gray-2 text-left dark:bg-meta-4">
+          <th v-for="data in dataHeader" :class="data.class" class="font-medium text-black dark:text-white text-center">
+          {{ data.name }}
+          </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in dataTable" :key="index" class="border">
+            <td class="py-2 px-4 align-middle justify-center">
+          <input type="checkbox" v-model="item.selected">
+        </td>
+            <td class="py-1 px-4 border">
+              <p class="font-medium text-black dark:text-white text-xs ">{{ item.pageName }}</p>
+            </td>
+            <td class="py-1 px-4 border">
+              <p class="font-medium text-black dark:text-white text-xs text-center">{{ item.pageCode }}</p>
+            </td>
+            <td class="py-1 px-4 border">
+              <p class="font-medium text-xs text-black dark:text-white text-center">{{ item.pageCategory }}</p>
+            </td>
+            <td class="py-1 px-4 border">
+              <h5 class="font-medium text-black text-xs dark:text-white text-center">{{ item.pageType }}</h5>
+              <!-- <p class="text-xs">{{ item.picId }}</p> -->
+            </td>
+            <td class="py-1 px-4 text-center border">
+              <h5 class="font-medium text-black text-xs dark:text-white text-left">{{ item.pageGroup }}</h5>
+              <!-- <p class="text-xs">{{ item }}</p> -->
+            </td>
+            <td class="py-1 px-4 border">
+              <h5 class="font-medium text-black text-xs dark:text-white">{{ item.pageRoutes }}</h5>
+              <!-- <p class="text-xs">{{ item.picId }}</p> -->
+            </td>
+          </tr> 
+        </tbody>
+      </table>
+    </div>
+    </DefaultCardTable>
+    </div>
 
 
       <div class="flex flex-col gap-9 col-span-2">
