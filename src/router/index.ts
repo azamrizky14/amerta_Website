@@ -290,6 +290,15 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
+  {
+    path: '/modules/master/user-internal/detail/:id',
+    name: 'userInternalDetail',
+    component: () => import('@/views/Master/Master_userInternal_detail.vue'),
+    meta: {
+      title: 'Master User Internal Detail',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
 
   // Master User Role
   {

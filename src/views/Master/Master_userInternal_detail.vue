@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
+import DefaultCardTable from "@/components/Forms/DefaultCardAccessPage.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import inputImageWithPreview from "@/components/Forms/SelectGroup/inputImageWithPreview.vue";
+import imageWithPreviewUser from "@/components/Forms/SelectGroup/imageWithPreviewUser.vue";
 import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
 import multiselectReadOnly from "@/components/Forms/SelectGroup/multiselectReadOnly.vue";
 import Swal from "sweetalert2";
@@ -10,14 +11,27 @@ import Swal from "sweetalert2";
 import { useIndexStore } from "@/stores";
 import { getDateToday } from "@/stores/date";
 import { showLoading, confirmDelete, successCreate, failedCreate } from "@/stores/swal";
-import { createUser, getAllRole } from "@/stores/functionAPI";
+import { createUser, getUserById } from "@/stores/functionAPI";
 
 import { ref, onMounted } from "vue";
 import router from "@/router";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
 
 const indexStore = useIndexStore();
-const pageTitle = ref("Master - Add User Internal");
-const pageList = ref(["Master", "User Internal", "Add"]);
+const pageTitle = ref("Master - Detail User Internal");
+const pageList = ref(["Master", "User Internal", "Detail"]);
+const dataHeader = ref([
+  {name: '', class: 'min-w-[30px] py-2 px-4'}, // Kolom checkbox
+  {name: 'Nama Halaman', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Kode', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Kategori', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Tipe', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Grup', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Halaman Tujuan', class: 'min-w-[150px] py-2 px-4'},
+])
+let dataTable = ref([])
 
 // Saved Data
 const savedData = ref({
@@ -47,18 +61,26 @@ const optionsType = ref([]);
 
 // Fetch roles and populate dropdown
 onMounted(async () => {
-  const options = await getAllRole();
-  options.forEach((option) => {
-    option.label = option.roleName; // Map roleName to label
-    option.value = option.roleName; // Use roleName as the value
-  });
-  optionsType.value = options;
-  const date = await getDateToday("yyyy-MM-dd");
-  savedData.value.user_created = date;
-  const page = await indexStore.getUtilPage();
-  console.log(page)
-
+  const data = await getUserById(route.params.id);
+  savedData.value = data;
+  const pageData = await indexStore.getUtilPage();
+  console.log(pageData)
+  if (pageData && pageData.utilData) {
+    // Masukkan data page ke dalam tabel
+    dataTable.value = pageData.utilData;
+  }
+  
+  // options.forEach((option) => {
+  //   option.label = option.roleName; // Map roleName to label
+  //   option.value = option.roleName; // Use roleName as the value
+  // });
+  // optionsType.value = options;
+  // const date = await getDateToday("yyyy-MM-dd");
+  // savedData.value.user_created = date;
+  // const page = await indexStore.getUtilPage();
+  // console.log(page)
 });
+
 
 // Function to handle role selection
 const handleOptionChange = (selected: { label: string; value: string; hierarchyCode: string; roleAccess: string }) => {
@@ -82,6 +104,9 @@ const dataValidator = ref([
   { key: "userAddress", label: "Alamat User" },
 ]);
 
+const switcherToggle = ref<boolean>(false)
+
+
 const dataError = ref([]);
 
 // Helper function for validation
@@ -93,23 +118,6 @@ const validateForm = () => {
     }
   });
   return dataError.value.length === 0;
-};
-
-const cancelAdd = async () => {
-  const result = await Swal.fire({
-    title: "Batalkan?",
-    text: "anda yakin membatalkan tambah data?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#FF0000",
-    cancelButtonColor: "#",
-    confirmButtonText: "Batalkan",
-    cancelButtonText: "Kembali",
-  });
-
-  if (result.isConfirmed) {
-    await router.push("/modules/master/user-internal");
-  }
 };
 
 const submitData = async () => {
@@ -131,28 +139,28 @@ const submitData = async () => {
     try {
       showLoading();
 
-      const fixData = { ...savedData.value };
-      fixData.userAccess = JSON.stringify(fixData.userAccess);
-
+      const fixData = {...savedData.value}
+      fixData.userAccess = JSON.stringify(fixData.userAccess)
       const formData = new FormData();
 
-      // Append all fields to FormData
       Object.keys(fixData).forEach((key) => {
         formData.append(key, fixData[key]);
       });
 
+      if (fixData.userImage) {
+        formData.append("userImage", fixData.userImage);
+      }
 
       await createUser(formData);
 
       await successCreate().then(() => {
-        router.push("/modules/master/user-internal");
+        router.push("/master/user-internal");
       });
     } catch (error) {
       await failedCreate(error);
     }
   }
 };
-
 
 // Remove image function
 const removeImage = (field: string) => {
@@ -178,6 +186,7 @@ const removeImage = (field: string) => {
                 Nama User
               </label>
               <input
+                disabled
                 type="text"
                 placeholder="Nama User"
                 class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
@@ -191,38 +200,27 @@ const removeImage = (field: string) => {
                 Email
               </label>
               <input
+                disabled
                 type="text"
                 placeholder="Email User"
                 class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
                 v-model="savedData.email"
               />
               </div>
-
-              <div>
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Password
-              </label>
-              <input
-                type="text"
-                placeholder="Password User"
-                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
-                v-model="savedData.password"
-              />
-              </div>
               <div class="w-full">
   <label class="mb-3 block text-sm font-medium text-black dark:text-white">
     Role User
   </label>
-  <SelectGroup
-    placeholder="Pilih Nama Role"
-    id="userRole"
-    :options="optionsType"
-    v-model="logistikData"
-    @option-changed="handleOptionChange"
-  />
+  <input
+                disabled
+                type="text"
+                placeholder="Email User"
+                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
+                v-model="savedData.userRole"
+              />
 </div>
 
-<div class="hidden">
+<div class="">
   <label class="mb-3 block text-sm font-medium text-black dark:text-white">
     Hierarchy Code
   </label>
@@ -233,7 +231,7 @@ const removeImage = (field: string) => {
       placeholder="Kode Hirarki"
       class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
       v-model="savedData.hierarchyCode"
-      readonly
+      disabled
     />
   </div>
 </div>
@@ -244,12 +242,13 @@ const removeImage = (field: string) => {
   </label>
   <div>
     <input
+    
       id="userAccess"
       type="text"
       placeholder="Hak Akses User"
       class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
       v-model="savedData.userAccess"
-      readonly
+      disabled
     />
   </div>
 </div>
@@ -272,11 +271,11 @@ const removeImage = (field: string) => {
             <label class="mb-3 block text-sm font-medium text-black dark:text-white">
               Photo User
             </label>
-            <inputImageWithPreview
-              v-model="savedData.userImage"
-              @update:file="(file) => (savedData.userImage = file)"
+            <imageWithPreviewUser
+              v-model="savedData.imageName"
+              @update:file="(file) => (savedData.imageName = file)"
+              disabled
             />
-
             <!-- Tombol Hapus -->
             <button
               v-if="savedData.userImage"
@@ -296,44 +295,15 @@ const removeImage = (field: string) => {
               Gender
             </label>
             <div class="flex items-center space-x-6">
-              <label for="radioPria" class="flex cursor-pointer select-none items-center">
-                <div class="relative">
-                  <input
-                    type="radio"
-                    id="radioPria"
-                    name="gender"
-                    value="pria"
-                    v-model="savedData.userGender"
-                    class="sr-only"
-                  />
-                  <div :class="savedData.userGender === 'pria' ? 'border-primary bg-primary' : 'border'"
-                    class="mr-2 flex h-5 w-5 items-center justify-center rounded-full border transition-colors duration-300">
-                    <span :class="savedData.userGender === 'pria' ? 'bg-white' : 'bg-transparent'"
-                      class="h-2.5 w-2.5 rounded-full"></span>
-                  </div>
-                </div>
-                Pria
-              </label>
-
-              <label for="radioWanita" class="flex cursor-pointer select-none items-center">
-                <div class="relative">
-                  <input
-                    type="radio"
-                    id="radioWanita"
-                    name="gender"
-                    value="wanita"
-                    v-model="savedData.userGender"
-                    class="sr-only"
-                  />
-                  <div :class="savedData.userGender === 'wanita' ? 'border-primary bg-primary' : 'border'"
-                    class="mr-2 flex h-5 w-5 items-center justify-center rounded-full border transition-colors duration-300">
-                    <span :class="savedData.userGender === 'wanita' ? 'bg-white' : 'bg-transparent'"
-                      class="h-2.5 w-2.5 rounded-full"></span>
-                  </div>
-                </div>
-                Wanita
-              </label>
-            </div>
+              <input
+    
+      id="userAccess"
+      type="text"
+      placeholder="Hak Akses User"
+      class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
+      v-model="savedData.userGender"
+      disabled
+    /></div>
           </div>
 
           <!-- Tanggal Lahir -->
@@ -342,10 +312,11 @@ const removeImage = (field: string) => {
               Tanggal Lahir
             </label>
             <input
-              type="date"
-              placeholder="Server"
+              type="input"
+              placeholder="Tanggal Lahir"
               class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
               v-model="savedData.userBirth"
+              disabled
             />
           </div>
         </div>
@@ -359,6 +330,7 @@ const removeImage = (field: string) => {
                 placeholder="No Telp User"
                 class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
                 v-model="savedData.userPhone"
+                disabled
               />
               </div>
 
@@ -371,6 +343,7 @@ const removeImage = (field: string) => {
           placeholder="Masukan alamat disini!"
           class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
           v-model="savedData.userAddress"
+          disabled
         ></textarea>
       </div>
     </div>
@@ -378,7 +351,70 @@ const removeImage = (field: string) => {
   <!-- Textarea Fields End -->
 </div>
 
-
+<div class="flex flex-col gap-9 col-span-2">
+  <DefaultCardTable cardTitle="Pilih Page">
+    <template #card-tools>
+      <label for="toggle4" class="flex cursor-pointer select-none items-center">
+        <div class="relative">
+          <input
+            type="checkbox"
+            id="toggle4"
+            class="sr-only"
+            @change="switcherToggle = !switcherToggle; toggleAllCheckboxes()"
+          />
+          <div
+            :class="switcherToggle && '!bg-primary'"
+            class="block h-8 w-14 rounded-full bg-black"
+          ></div>
+          <div
+            :class="switcherToggle && '!right-1 !translate-x-full'"
+            class="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white transition"
+          ></div>
+        </div>
+      </label>
+    </template>
+    
+    <div class="max-w-full overflow-x-auto">
+      <table class="w-full table-auto">
+        <thead>
+          <tr class="bg-gray-2 text-left dark:bg-meta-4">
+          <th v-for="data in dataHeader" :class="data.class" class="font-medium text-black dark:text-white text-center">
+          {{ data.name }}
+          </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in dataTable" :key="index" class="border">
+            <td class="py-2 px-4 align-middle justify-center">
+          <input type="checkbox" v-model="item.selected">
+        </td>
+            <td class="py-1 px-4 border">
+              <p class="font-medium text-black dark:text-white text-xs ">{{ item.pageName }}</p>
+            </td>
+            <td class="py-1 px-4 border">
+              <p class="font-medium text-black dark:text-white text-xs text-center">{{ item.pageCode }}</p>
+            </td>
+            <td class="py-1 px-4 border">
+              <p class="font-medium text-xs text-black dark:text-white text-center">{{ item.pageCategory }}</p>
+            </td>
+            <td class="py-1 px-4 border">
+              <h5 class="font-medium text-black text-xs dark:text-white text-center">{{ item.pageType }}</h5>
+              <!-- <p class="text-xs">{{ item.picId }}</p> -->
+            </td>
+            <td class="py-1 px-4 text-center border">
+              <h5 class="font-medium text-black text-xs dark:text-white text-left">{{ item.pageGroup }}</h5>
+              <!-- <p class="text-xs">{{ item }}</p> -->
+            </td>
+            <td class="py-1 px-4 border">
+              <h5 class="font-medium text-black text-xs dark:text-white">{{ item.pageRoutes }}</h5>
+              <!-- <p class="text-xs">{{ item.picId }}</p> -->
+            </td>
+          </tr> 
+        </tbody>
+      </table>
+    </div>
+    </DefaultCardTable>
+    </div>
 
 
       <div class="flex flex-col gap-9 col-span-2">
@@ -392,18 +428,12 @@ const removeImage = (field: string) => {
             </ul>
           </div>
           <div class="pb-6 px-4 grid grid-cols-2 gap-2">
-            <button
-              @click="cancelAdd"
-              class="flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90"
+            <router-link
+              to="/modules/master/user-internal"
+              class="flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90 col-span-2"
             >
-              Batalkan
-            </button>
-            <button
-              @click="submitData"
-              class="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-            >
-              Tambah Data
-            </button>
+              Kembali
+            </router-link>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->
