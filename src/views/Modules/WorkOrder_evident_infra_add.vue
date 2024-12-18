@@ -304,7 +304,7 @@ const submitData = async () => {
 
       const sendData = new FormData();
 
-      // Append all fields to FormData
+      // Append all fields  to FormData
       Object.keys(fixData).forEach((key) => {
         if (Array.isArray(fixData[key])) {
           sendData.append(key, JSON.stringify(fixData[key])); // Ensure arrays are stringified

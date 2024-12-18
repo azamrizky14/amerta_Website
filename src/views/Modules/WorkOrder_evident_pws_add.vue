@@ -598,7 +598,6 @@ const removeImage = (field: string) => {
               <inputImageWithPreview
                 label="Evident Progress"
                 v-model="savedData.Tr_teknis_evident_progress"
-                @update:file="(file) => (savedData.Tr_teknis_evident_progress = file)"
               />
               <!-- Tombol Hapus -->
               <button
