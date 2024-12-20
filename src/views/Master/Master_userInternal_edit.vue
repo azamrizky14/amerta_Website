@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
+import DefaultCardTable from "@/components/Forms/DefaultCardAccessPage.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import imageWithPreviewUser from "@/components/Forms/SelectGroup/imageWithPreviewUser.vue";
 import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
@@ -22,6 +23,7 @@ const indexStore = useIndexStore();
 const pageTitle = ref("Master - Detail User Internal");
 const pageList = ref(["Master", "User Internal", "Detail"]);
 const dataHeader = ref([
+  {name: '', class: 'min-w-[30px] py-2 px-4'}, // Kolom checkbox
   {name: 'Nama Halaman', class: 'min-w-[100px] py-2 px-4'},
   {name: 'Kode', class: 'min-w-[100px] py-2 px-4'},
   {name: 'Kategori', class: 'min-w-[100px] py-2 px-4'},
@@ -61,24 +63,23 @@ const optionsType = ref([]);
 onMounted(async () => {
   const data = await getUserById(route.params.id);
   savedData.value = data;
-
   const pageData = await indexStore.getUtilPage();
-  console.log(pageData);
-
+  console.log(pageData)
   if (pageData && pageData.utilData) {
-    // Cek jika userAccess berisi "all"
-    if (savedData.value.userAccess.includes("all")) {
-      // Jika "all", tampilkan seluruh utilData
-      dataTable.value = pageData.utilData;
-    } else {
-      // Filter utilData berdasarkan pageCode yang ada di userAccess
-      const allowedPageCodes = savedData.value.userAccess.map(access => access.pageCode);
-      dataTable.value = pageData.utilData.filter(page => allowedPageCodes.includes(page.pageCode));
-    }
+    // Masukkan data page ke dalam tabel
+    dataTable.value = pageData.utilData;
   }
+  
+  // options.forEach((option) => {
+  //   option.label = option.roleName; // Map roleName to label
+  //   option.value = option.roleName; // Use roleName as the value
+  // });
+  // optionsType.value = options;
+  // const date = await getDateToday("yyyy-MM-dd");
+  // savedData.value.user_created = date;
+  // const page = await indexStore.getUtilPage();
+  // console.log(page)
 });
-
-
 
 
 // Function to handle role selection
@@ -351,8 +352,27 @@ const removeImage = (field: string) => {
 </div>
 
 <div class="flex flex-col gap-9 col-span-2">
-  <DefaultCard cardTitle="Akses Page">
-    
+  <DefaultCardTable cardTitle="Pilih Page">
+    <template #card-tools>
+      <label for="toggle4" class="flex cursor-pointer select-none items-center">
+        <div class="relative">
+          <input
+            type="checkbox"
+            id="toggle4"
+            class="sr-only"
+            @change="switcherToggle = !switcherToggle; toggleAllCheckboxes()"
+          />
+          <div
+            :class="switcherToggle && '!bg-primary'"
+            class="block h-8 w-14 rounded-full bg-black"
+          ></div>
+          <div
+            :class="switcherToggle && '!right-1 !translate-x-full'"
+            class="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white transition"
+          ></div>
+        </div>
+      </label>
+    </template>
     <div class="flex flex-col gap-10">
     
     <div
@@ -369,6 +389,9 @@ const removeImage = (field: string) => {
         </thead>
         <tbody>
           <tr v-for="(item, index) in dataTable" :key="index" class="border">
+            <td class="py-2 px-4 align-middle justify-center">
+          <input type="checkbox" v-model="item.selected">
+        </td>
             <td class="py-1 px-4 border">
               <p class="font-medium text-black dark:text-white text-xs ">{{ item.pageName }}</p>
             </td>
@@ -396,7 +419,7 @@ const removeImage = (field: string) => {
     </div>
     </div>
     </div>
-    </DefaultCard>
+    </DefaultCardTable>
     </div>
 
 
