@@ -2,6 +2,7 @@
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
+import { mdiEyeOutline , mdiEyeOffOutline   } from '@mdi/js';
 import inputImageWithPreview from "@/components/Forms/SelectGroup/inputImageWithPreview.vue";
 import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
 import multiselectReadOnly from "@/components/Forms/SelectGroup/multiselectReadOnly.vue";
@@ -69,7 +70,13 @@ const handleOptionChange = (selected: { label: string; value: string; hierarchyC
   }
 };
 
+// Fungsi untuk toggle visibilitas password
+const showPassword = ref(false);
 
+// Fungsi untuk toggle visibilitas password
+const togglePassword = () => {
+  showPassword.value = !showPassword.value;
+};
 // Validators for required fields
 const dataValidator = ref([
   { key: "userName", label: "Nama User" },
@@ -141,17 +148,28 @@ const submitData = async () => {
         formData.append(key, fixData[key]);
       });
 
-
+      // Send request to create user
       await createUser(formData);
-
+      
       await successCreate().then(() => {
         router.push("/modules/master/user-internal");
       });
     } catch (error) {
-      await failedCreate(error);
+      if (error.response && error.response.status === 401) {
+        // Menangkap error status 401 dan menampilkan SweetAlert untuk email duplikat
+        await Swal.fire({
+          title: "Email Sudah Digunakan!",
+          text: "Silakan gunakan email yang lain.",
+          icon: "error",
+          confirmButtonColor: "#d33",
+        });
+      } else {
+        await failedCreate(error);  // Error lainnya
+      }
     }
   }
 };
+
 
 
 // Remove image function
@@ -202,12 +220,40 @@ const removeImage = (field: string) => {
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Password
               </label>
-              <input
-                type="text"
-                placeholder="Password User"
-                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
-                v-model="savedData.password"
-              />
+              <div class="relative">
+    <!-- Input password -->
+    <input
+      :type="showPassword ? 'text' : 'password'"
+      placeholder="Password User"
+      class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input pr-10"
+      v-model="savedData.password"
+    />
+    <!-- Icon untuk toggle password -->
+    <button
+      type="button"
+      class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
+      @click="togglePassword"
+    >
+      <svg
+        v-if="showPassword"
+        :d="mdiEyeOffOutline "
+        class="w-6 h-6"
+        fill="currentColor"
+      >
+      <path
+                      :d="mdiEyeOffOutline  "
+                    /></svg>
+      <svg
+        v-else
+        :d="mdiEyeOutline "
+        class="w-6 h-6"
+        fill="currentColor"
+      >
+      <path
+                      :d="mdiEyeOutline  "
+                    /></svg>
+    </button>
+  </div>
               </div>
               <div class="w-full">
   <label class="mb-3 block text-sm font-medium text-black dark:text-white">
