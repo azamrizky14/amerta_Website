@@ -457,6 +457,33 @@ const submitData = async () => {
            />  
           </div>  
         </div>  
+        
+        <div class="col-span-3 grid grid-cols-2">  
+          <p class="text-black dark:text-white text-center p-2 col-span-2">  
+           Evident ONT  
+          </p>  
+          <div class="flex border flex-col items-center p-2 justify-end relative">  
+           <imageWithPreview
+            :url="imageUrl"  
+            label="ONT (Tampak Depan)"  
+            v-if="savedData.Tr_teknis_work_order_images"  
+            v-model="  
+              savedData.Tr_teknis_work_order_images.Tr_teknis_evident_ont_depan  
+            "  
+           />  
+          </div>  
+  
+          <div class="flex border flex-col items-center p-2 justify-end relative">  
+           <imageWithPreview
+            :url="imageUrl"  
+            label="ONT (Tampak Belakang)"  
+            v-if="savedData.Tr_teknis_work_order_images"  
+            v-model="  
+              savedData.Tr_teknis_work_order_images.Tr_teknis_evident_ont_belakang 
+            "  
+           />  
+          </div>  
+        </div> 
   
         <div class="col-span-3 grid grid-cols-2">  
           <p class="text-black dark:text-white text-center p-2 col-span-2">  
