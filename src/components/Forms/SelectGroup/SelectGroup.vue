@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, watch } from 'vue'
+import { ref } from 'vue'
+import { onClickOutside } from '@vueuse/core';
 
-// Define the Option interface
 interface Option {
   label: string
-  [key: string]: any // Support extra fields
+  [key: string]: any
 }
 
-// Define props and emits
 const props = defineProps<{
   options: Option[],
   modelValue: string | Option,
@@ -15,60 +14,60 @@ const props = defineProps<{
   disabled: boolean,
 }>()
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: Option): void
-  (e: 'option-changed', value: Option): void // New custom event
-}>()
+const emit = defineEmits(['update:modelValue'])
 
-// Local state for the selected option, using `label` instead of `value`
+const isOpen = ref(false)
 const selectedLabel = ref(
   typeof props.modelValue === 'string'
     ? props.modelValue
     : props.modelValue?.label || ''
 )
 
-// Watch for changes in `modelValue` prop to sync `selectedLabel`
-watch(
-  () => props.modelValue,
-  (newValue) => {
-    selectedLabel.value = typeof newValue === 'string' ? newValue : newValue?.label || ''
-  },
-  { immediate: true }
-)
-
-// Update both `modelValue` and emit events when the selection changes
-const updateSelection = () => {
-  const selectedOption = props.options.find(option => option.label === selectedLabel.value) || { label: '' }
-  emit('update:modelValue', selectedOption)
-  emit('option-changed', selectedOption)
+const toggleDropdown = () => {
+  if (!props.disabled) isOpen.value = !isOpen.value
 }
+
+const selectOption = (option: Option) => {
+  selectedLabel.value = option.label
+  emit('update:modelValue', option)
+  isOpen.value = false
+}
+
+// Handle closing the dropdown when clicking outside
+const dropdownRef = ref(null);
+onClickOutside(dropdownRef, () => {
+  isOpen.value = false;
+});
 </script>
 
 <template>
-  <div>
-    <div class="relative z-20 bg-white dark:bg-form-input">
-      <select
-        :disabled="props.disabled"
-        v-model="selectedLabel"
-        @change="updateSelection"
-        :class="props.disabled? 'bg-whiter ' : ''"
-        class="w-full appearance-none rounded border-[1.5px] border-stroke bg-transparent py-3 px-4 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white"
+  <div class="relative" ref="dropdownRef">
+    <!-- Input box -->
+    <div
+      @click="toggleDropdown"
+      :class="[
+        'w-full rounded border-[1.5px] bg-transparent py-3 px-4 text-black transition dark:border-form-strokedark dark:bg-form-input dark:text-white',
+        props.disabled ? 'cursor-not-allowed bg-gray-200' : 'cursor-pointer focus:border-primary active:border-primary'
+      ]"
+    >
+  <span class="truncate block overflow-hidden whitespace-nowrap">
+    {{ selectedLabel || props.placeholder || 'Select an option' }}
+  </span>
+    </div>
+
+    <!-- Dropdown -->
+    <div
+      v-if="isOpen"
+      class="absolute z-10 mt-1 w-full max-h-[200px] overflow-y-auto bg-white border rounded shadow-lg dark:bg-form-input dark:border-form-strokedark"
+    >
+      <div
+        v-for="option in props.options"
+        :key="option.label"
+        @click="selectOption(option)"
+        class="px-4 py-2 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 text-sm"
       >
-        <!-- Placeholder option -->
-        <option value="" disabled
-          class="text-black dark:text-white">
-          {{ props.placeholder || 'Select an option' }}
-        </option>
-        <!-- Dynamic options using `label` as value -->
-        <option
-          v-for="option in props.options"
-          :key="option.label"
-          :value="option.label"
-          class="text-black dark:text-white"
-        >
-          {{ option.label }}
-        </option>
-      </select>
+        {{ option.label }}
+      </div>
     </div>
   </div>
 </template>

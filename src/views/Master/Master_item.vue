@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from "vue";
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import { item_getAllItemWithStatus } from "@/stores/functionAPI";
-import { mdiEyeOutline, mdiMagnify, mdiRefresh, mdiPlusCircleOutline } from "@mdi/js";
+import { mdiEyeOutline, mdiMagnify, mdiRefresh, mdiPlusCircleOutline, mdiSquareEditOutline } from "@mdi/js";
 import { useIndexStore } from "@/stores";
 import { formatDate } from "@/stores/date";
 
@@ -210,9 +210,7 @@ onMounted(async () => {
                     <router-link
                       class="hover:text-primary"
                       :to="
-                        '/modules/work-order/evident/pws/detail/' +
-                        item.Tr_teknis_logistik_id +
-                        '/' +
+                        '/master/item/detail/' +
                         item._id
                       "
                     >
@@ -225,6 +223,25 @@ onMounted(async () => {
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path :d="mdiEyeOutline" fill="" />
+                      </svg>
+                    </router-link>
+                    
+                    <router-link
+                      class="hover:text-primary"
+                      :to="
+                        '/master/item/edit/' +
+                        item._id
+                      "
+                    >
+                      <svg
+                        class="fill-current"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path :d="mdiSquareEditOutline" fill="" />
                       </svg>
                     </router-link>
                   </div>

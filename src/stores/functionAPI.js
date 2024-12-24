@@ -125,3 +125,18 @@ export const item_getAllItemWithStatus = async (company, status) => {
   var suppData = response.data;
   return suppData
 }
+export const item_getItemById = async (id) => {
+  const response = await axios.get(API+'/api/item/getItemById/'+ id)
+  var suppData = response.data;
+  return suppData
+}
+export const item_CreateDataWithImages = async (data) => {
+  const response = await axios.post(API+'/api/item/createImage', data)
+  var suppData = response.data;
+  return suppData
+}
+export const item_UpdateDataWithImages = async (data, id) => {
+  const response = await axios.put(API+'/api/item/updateImage/'+id, data)
+  var suppData = response.data;
+  return suppData
+}

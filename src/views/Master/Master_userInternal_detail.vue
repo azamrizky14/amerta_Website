@@ -178,7 +178,7 @@ const removeImage = (field: string) => {
     <div class="grid grid-cols-1 gap-9 sm:grid-cols-2">
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Input Data">
+        <DefaultCard cardTitle="Masukan Data">
           <div class="flex flex-col gap-2 p-6.5">
             <div class="flex flex-col gap-6 xl:flex-row">
               <div class="w-full">
@@ -259,7 +259,7 @@ const removeImage = (field: string) => {
       </div>
       <div class="flex flex-col gap-9">
   <!-- Textarea Fields Start -->
-  <DefaultCard cardTitle="Input Data Pribadi">
+  <DefaultCard cardTitle="Masukan Data Pribadi">
     <div class="flex flex-col gap-2 p-6.5">
       <!-- Flex Container untuk Gambar dan Form -->
       <div class="flex flex-col lg:flex-row gap-6">
@@ -276,14 +276,6 @@ const removeImage = (field: string) => {
               @update:file="(file) => (savedData.imageName = file)"
               disabled
             />
-            <!-- Tombol Hapus -->
-            <button
-              v-if="savedData.userImage"
-              @click="removeImage('userImage')"
-              class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-            >
-              X
-            </button>
           </div>
         </div>
         

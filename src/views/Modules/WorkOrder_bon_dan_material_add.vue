@@ -241,7 +241,7 @@ const submitData = async () => {
     <div class="grid grid-cols-1 gap-9 sm:grid-cols-2">
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Input Data">
+        <DefaultCard cardTitle="Masukan Data">
           <div class="flex flex-col gap-2 p-6.5">
             <div class="flex flex-col gap-3 xl:flex-row">
               <div class="lg:w-1/3">
@@ -312,7 +312,7 @@ const submitData = async () => {
       </div>
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Input Material">
+        <DefaultCard cardTitle="Masukan Material">
           <div class="p-6.5">
             <div
               class="flex flex-col gap-2 xl:flex-row"

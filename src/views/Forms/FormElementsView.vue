@@ -31,7 +31,7 @@ const pageTitle = ref('Form Elements')
     <div class="grid grid-cols-1 gap-9 sm:grid-cols-2">
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Input Fields">
+        <DefaultCard cardTitle="Masukan Fields">
           <div class="flex flex-col gap-5.5 p-6.5">
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">

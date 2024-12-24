@@ -3,19 +3,22 @@ import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import ButtonDynamic from "@/components/Buttons/ButtonDynamic.vue";
-import inputImageWithPreview from "@/components/Forms/SelectGroup/inputImageWithPreview.vue";
+import imageWithPreview from "@/components/Forms/SelectGroup/imageWithPreview.vue";
 import Swal from "sweetalert2";
 
 import { getDateToday } from "@/stores/date";
 import { showLoading, confirmDelete, successCreate, failedCreate } from "@/stores/swal";
-import { item_CreateDataWithImages, getUtilByName } from "@/stores/functionAPI";
+import { item_getItemById } from "@/stores/functionAPI";
 import { mdiPlusCircleOutline, mdiTrashCanOutline } from "@mdi/js";
 import multiselectOption from "@/components/Forms/SelectGroup/multiselectOption.vue";
 import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
 import { useIndexStore } from "@/stores";
+import { useRoute } from "vue-router";
 
 import { ref, onMounted } from "vue";
 import router from "@/router";
+
+const route = useRoute();
 
 const indexStore = useIndexStore();
 
@@ -38,8 +41,9 @@ const optionsType = [
   { label: "Aset", value: "Aset" },
 ];
 
-const pageTitle = ref("Tambah Item");
-const pageList = ref(["Master", "Item", "Tambah"]);
+const imageUrl = 'images/master_item';
+const pageTitle = ref("Detail Item");
+const pageList = ref(["Master", "Item", "Detail"]);
 
 // Saved Data
 const savedData = ref({
@@ -67,9 +71,9 @@ const materialData = ref([
 ]);
 
 onMounted(async () => {
-  const date = await getDateToday("yyyy-MM-dd");
-  // savedData.value.Tr_teknis_tanggal = date;
-  savedData.value.item_created = date;
+  const data = await item_getItemById(route.params.id)
+  console.log('data', data)
+  savedData.value = data
 });
 
 // Function
@@ -89,144 +93,6 @@ const handleRemoveMaterialTerpakai = async (index) => {
   });
 };
 
-const cancelAdd = async () => {
-  const result = await Swal.fire({
-    title: "Batalkan?",
-    text: "anda yakin membatalkan tambah data?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#FF0000",
-    cancelButtonColor: "#",
-    confirmButtonText: "Batalkan",
-    cancelButtonText: "Kembali",
-  });
-
-  if (result.isConfirmed) {
-    await router.push("/master/item");
-  }
-};
-
-// Array validator untuk field wajib
-const dataValidator = ref([
-  { key: "item_id", label: "Kode Item" },
-  { key: "item_nama", label: "Nama Item" },
-  { key: "item_tipe", label: "Tipe Item" },
-  { key: "item_satuan", label: "Satuan Item" },
-]);
-
-const dataError = ref([]); // Array untuk menyimpan error
-
-// Validasi qtyKeluar tidak boleh kurang dari 1
-const validateQtyKeluar = (index) => {
-  // Hanya lakukan validasi jika qtyKeluar tidak kosong
-  if (materialData.value[index].qty !== "" && materialData.value[index].qty < 1) {
-    Swal.fire({
-      title: "Error!",
-      text: "Minimal jumlah input adalah 1",
-      icon: "error",
-      position: "top-end",
-      timer: 1000,
-      showConfirmButton: false,
-      toast: true,
-    }).then(() => {
-      // Setelah SweetAlert muncul, ganti nilai qtyKeluar menjadi 1
-      materialData.value[index].qty = 1;
-    });
-  }
-};
-
-const submitData = async () => {
-  console.log(savedData.value)
-  // Clear previous errors
-  dataError.value.splice(0, dataError.value.length);
-
-  // Validasi field wajib dari data utama
-  dataValidator.value.forEach((validator) => {
-    if (!savedData.value[validator.key] || savedData.value[validator.key].length === 0) {
-      dataError.value.push(`${validator.label} tidak boleh kosong!`);
-    }
-  });
-
-  // // Validasi untuk setiap objek dalam materialData
-  // materialData.value.forEach((item, index) => {
-  //   // Validasi label
-  //   if (!item.satuan_awal || item.satuan_awal.trim() === "") {
-  //     dataError.value.push(`Konversi ${index + 1}: Satuan Awal tidak boleh kosong!`);
-  //   }
-  //   // Validasi qty
-  //   if (!item.qty_awal || String(item.qty_awal).trim() === "") {
-  //     dataError.value.push(`Konversi ${index + 1}: Qty. Keluar tidak boleh kosong!`);
-  //   }
-  //   if (!item.satuan_akhir || item.satuan_akhir.trim() === "") {
-  //     dataError.value.push(`Konversi ${index + 1}: Satuan Awal tidak boleh kosong!`);
-  //   }
-  //   // Validasi qty
-  //   if (!item.qty_akhir || String(item.qty_akhir).trim() === "") {
-  //     dataError.value.push(`Konversi ${index + 1}: Qty. Keluar tidak boleh kosong!`);
-  //   }
-
-  //   // Tambahkan validasi qtyKeluar tidak boleh kurang dari 1
-  //   validateQtyKeluar(index);
-  // });
-
-  // Jika ada error, tampilkan di halaman dan hentikan submit
-  if (dataError.value.length > 0) {
-    return; // Jangan lanjutkan jika ada error
-  }
-
-  // Jika tidak ada error, lanjutkan dengan SweetAlert konfirmasi
-  const result = await Swal.fire({
-    title: "Tambah Data?",
-    text: "",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#10B981",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Tambah!",
-    cancelButtonText: "Batal",
-  });
-
-  if (result.isConfirmed) {
-    try {
-      showLoading();
-
-      const fixData = { ...savedData.value };
-
-      if (materialData.value && materialData.value.length > 0) {
-        const cleanedArray = materialData.value.filter((item) => {
-          return Object.values(item).some((value) => value !== "");
-        });
-        fixData.item_konversi = fixData.item_konversi.concat(cleanedArray);
-      }
-
-      if (fixData.item_tipe && fixData.item_tipe.value) {
-        fixData.item_tipe = fixData.item_tipe.value
-      }
-      fixData.item_konversi = JSON.stringify(fixData.item_konversi)
-      fixData.item_harga = JSON.stringify(fixData.item_harga)
-      fixData.item_bundle = JSON.stringify(fixData.item_bundle)
-
-      const sendData = new FormData();
-
-      // Append all fields to FormData
-      Object.keys(fixData).forEach((key) => {
-        if (Array.isArray(fixData[key])) {
-          sendData.append(key, JSON.stringify(fixData[key])); // Ensure arrays are stringified
-        } else {
-          sendData.append(key, fixData[key]);
-        }
-      });
-
-      await item_CreateDataWithImages(sendData);
-      await successCreate().then(() => {
-        router.push("/master/item");
-      });
-    } catch (error) {
-      await failedCreate(error);
-    }
-  }
-};
-
 // Fungsi untuk menghapus gambar
 const removeImage = (field: string) => {
   savedData.value[field] = null;
@@ -244,15 +110,16 @@ const removeImage = (field: string) => {
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Masukan Data">
+        <DefaultCard cardTitle="Detail Data">
           <div class="flex flex-col gap-2 p-6.5">
             <div class="flex flex-col gap-3 xl:flex-row">
               <div class="lg:w-1/3">
                 <div class="flex border flex-col items-center p-2 justify-end relative">
-                  <inputImageWithPreview
+                  <imageWithPreview
                     label="Gambar"
+                    disabled
                     v-model="savedData.item_gambar"
-                    @update:file="(file) => (savedData.item_gambar = file)"
+                    :url="imageUrl"
                   />
                 </div>
               </div>
@@ -261,8 +128,9 @@ const removeImage = (field: string) => {
                   Kode Item
                 </label>
                 <input
+                disabled
                   type="text"
-                  placeholder="Masukan Kode Item"
+                  placeholder="Detail Kode Item"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.item_id"
                 />
@@ -272,8 +140,9 @@ const removeImage = (field: string) => {
                   Nama Item
                 </label>
                 <input
+                disabled
                   type="text"
-                  placeholder="Masukan Nama Item"
+                  placeholder="Detail Nama Item"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.item_nama"
                 />
@@ -286,9 +155,11 @@ const removeImage = (field: string) => {
                 >
                   Tipe Item
                 </label>
-                <SelectGroup
-                  placeholder="Pilih Tim"
-                  :options="optionsType"
+                <input
+                disabled
+                  type="text"
+                  placeholder="Detail Nama Item"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.item_tipe"
                 />
               </div>
@@ -299,8 +170,9 @@ const removeImage = (field: string) => {
                   Satuan
                 </label>
                 <input
+                disabled
                   type="text"
-                  placeholder="Masukan Satuan Item"
+                  placeholder="Detail Satuan Item"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.item_satuan"
                 />
@@ -314,8 +186,9 @@ const removeImage = (field: string) => {
                 Brand Item
               </label>
               <input
+                disabled
                 type="text"
-                placeholder="Masukan Merk Item"
+                placeholder="Detail Merk Item"
                 class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="savedData.item_brand"
               />
@@ -340,8 +213,9 @@ const removeImage = (field: string) => {
                   Keterangan
                 </label>
                 <textarea
+                disabled
                   rows="3"
-                  placeholder="Masukan keterangan disini!"
+                  placeholder="Detail keterangan disini!"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.item_keterangan"
                 ></textarea>
@@ -353,12 +227,12 @@ const removeImage = (field: string) => {
       </div>
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Masukan Konversi">
+        <DefaultCard cardTitle="Detail Konversi">
           <div class="p-6.5">
             <div
               class="flex flex-col gap-2 xl:flex-row"
-              v-for="(data, index) in materialData"
-              v-if="materialData.length > 0"
+              v-for="(data, index) in savedData.item_konversi"
+              v-if="savedData.item_konversi.length > 0"
               :class="index === 0 ? '' : 'pt-2'"
             >
               <div class="w-3/12">
@@ -369,6 +243,7 @@ const removeImage = (field: string) => {
                   Qty. Awal
                 </label>
                 <input
+                disabled
                   type="number"
                   placeholder="Qty"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-3 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -384,6 +259,7 @@ const removeImage = (field: string) => {
                   Satuan
                 </label>
                 <input
+                disabled
                   type="text"
                   placeholder="Satuan"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-2 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -399,6 +275,7 @@ const removeImage = (field: string) => {
                   Qty. Akhir
                 </label>
                 <input
+                disabled
                   type="number"
                   placeholder="Qty"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-3 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -414,6 +291,7 @@ const removeImage = (field: string) => {
                   Satuan
                 </label>
                 <input
+                disabled
                   type="text"
                   placeholder="Satuan"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-2 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -446,6 +324,9 @@ const removeImage = (field: string) => {
                 />
               </div>
             </div>
+            <div v-else>
+              Tidak Ada Konversi Satuan!
+            </div>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->
@@ -454,26 +335,13 @@ const removeImage = (field: string) => {
       <div class="flex flex-col gap-9 col-span-2">
         <!-- Input Fields Start -->
         <DefaultCard>
-          <div v-if="dataError.length > 0" class="mt-4 mb-4">
-            <ul>
-              <li v-for="(error, index) in dataError" :key="index" class="ml-5 text-red">
-                <b>- {{ error }}</b>
-              </li>
-            </ul>
-          </div>
-          <div class="pb-6 px-4 grid grid-cols-2 gap-2">
-            <button
-              @click="cancelAdd"
+          <div class="pb-6 px-4 grid gap-2">
+            <router-link
+              to="/master/item"
               class="flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90"
             >
-              Batalkan
-            </button>
-            <button
-              @click="submitData"
-              class="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
-            >
-              Tambah Data
-            </button>
+              Kembali
+            </router-link>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->

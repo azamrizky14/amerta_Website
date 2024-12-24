@@ -510,7 +510,6 @@ const removeImage = (field: string) => {
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Sebelum"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sebelum"
-                  @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sebelum = file)"
                 />
               </div>
 
@@ -519,7 +518,6 @@ const removeImage = (field: string) => {
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Kendala 1"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_1"
-                  @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_1 = file)"
                 />
               </div>
             </div>
@@ -530,7 +528,6 @@ const removeImage = (field: string) => {
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Kendala 2"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_2"
-                  @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_2 = file)"
                 />
               </div>
 
@@ -539,7 +536,6 @@ const removeImage = (field: string) => {
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Kendala 3"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_3"
-                  @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_3 = file)"
                 />
               </div>
             </div>
@@ -553,9 +549,6 @@ const removeImage = (field: string) => {
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Splicer - Proses Sambung"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_proses_sambung"
-                  @update:file="
-                    (file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_proses_sambung = file)
-                  "
                 />
               </div>
             </div>
@@ -569,7 +562,6 @@ const removeImage = (field: string) => {
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Sesudah"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sesudah"
-                  @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sesudah = file)"
                 />
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
@@ -577,7 +569,6 @@ const removeImage = (field: string) => {
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Out ODP"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_out_odp"
-                  @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_out_odp = file)"
                 />
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
@@ -585,7 +576,6 @@ const removeImage = (field: string) => {
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Pelanggan"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_pelanggan"
-                  @update:file="(file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_pelanggan = file)"
                 />
               </div>
             </div>
@@ -599,9 +589,6 @@ const removeImage = (field: string) => {
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Start"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_start"
-                  @update:file="
-                    (file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_start = file)
-                  "
                 />
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
@@ -609,9 +596,6 @@ const removeImage = (field: string) => {
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="End"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_end"
-                  @update:file="
-                    (file) => (savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_end = file)
-                  "
                 />
               </div>
             </div>

@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import { ref, watch, defineProps, defineEmits, onUnmounted } from 'vue';
+import { ref, watch, defineProps, defineEmits, onUnmounted } from "vue";
 
 const props = defineProps<{
   modelValue: string | File | null;
   label: string;
 }>();
 
-const emits = defineEmits(['update:modelValue', 'update:file', 'remove:image']);
+const emits = defineEmits(["update:modelValue", "update:file", "remove:image"]);
 
-const imageSrc = ref<string | null>(props.modelValue instanceof File ? URL.createObjectURL(props.modelValue) : props.modelValue);
+const imageSrc = ref<string | null>(
+  props.modelValue instanceof File
+    ? URL.createObjectURL(props.modelValue)
+    : props.modelValue
+);
 const fileInput = ref<HTMLInputElement | null>(null); // Add a ref for the input element
 
 // Handle file input change
@@ -17,22 +21,22 @@ const previewImage = (event: Event) => {
   if (file) {
     // Update imageSrc with the preview URL for the new file
     imageSrc.value = URL.createObjectURL(file);
-    emits('update:file', file); // Emit the file
-    emits('update:modelValue', file); // Optionally, update modelValue
+    emits("update:file", file); // Emit the file
+    emits("update:modelValue", file); // Optionally, update modelValue
   }
 };
 
 // Handle removing the image
 const removeImage = () => {
   imageSrc.value = null;
-  emits('update:modelValue', null); // Emit null to reset the modelValue
+  emits("update:modelValue", null); // Emit null to reset the modelValue
   resetFileInput(); // Reset the file input element
 };
 
 // Reset the file input value
 const resetFileInput = () => {
   if (fileInput.value) {
-    fileInput.value.value = ''; // Reset the input field value
+    fileInput.value.value = ""; // Reset the input field value
   }
 };
 
@@ -42,13 +46,16 @@ onUnmounted(() => {
 });
 
 // Watch for changes to modelValue and update image preview
-watch(() => props.modelValue, (newValue) => {
-  if (newValue instanceof File) {
-    imageSrc.value = URL.createObjectURL(newValue); // Create preview URL for File
-  } else {
-    imageSrc.value = newValue as string | null; // Use URL or reset to placeholder
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    if (newValue instanceof File) {
+      imageSrc.value = URL.createObjectURL(newValue); // Create preview URL for File
+    } else {
+      imageSrc.value = newValue as string | null; // Use URL or reset to placeholder
+    }
   }
-});
+);
 </script>
 
 <template>
@@ -74,14 +81,14 @@ watch(() => props.modelValue, (newValue) => {
       class="w-[100px] h-[100px] object-cover rounded cursor-pointer"
       @click="fileInput?.click()"
     />
-  </div>
 
-  <!-- Remove Image Button -->
-  <button
-    v-if="imageSrc"
-    @click="removeImage"
-    class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
-  >
-    X
-  </button>
+    <!-- Remove Image Button -->
+    <button
+      v-if="imageSrc"
+      @click="removeImage"
+      class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
+    >
+      X
+    </button>
+  </div>
 </template>
