@@ -77,21 +77,21 @@ export const successDelete  = async (title, text) => {
 export const failedCreate = async (data) => {
     Swal.fire({
         title: 'Failed!',
-        text: 'Create Failed :'+data,
+        text: 'Create Failed : '+data,
         icon: 'error'
       })
 }
 export const failedEdit = async (data) => {
     Swal.fire({
         title: 'Failed!',
-        text: 'Edit Failed :'+data,
+        text: 'Edit Failed : '+data,
         icon: 'error'
       })
 }
 export const failedJoin = async (data) => {
     Swal.fire({
         title: 'Failed!',
-        text: 'Join Failed :'+data,
+        text: 'Join Failed : '+data,
         icon: 'error'
       })
 }
