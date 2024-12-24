@@ -39,6 +39,8 @@ const savedData = ref({
   Tr_teknis_evident_redaman_ont: null,  
   Tr_teknis_evident_odp_depan: null,  
   Tr_teknis_evident_odp_dalam: null,  
+  Tr_teknis_evident_ont_depan: null,  
+  Tr_teknis_evident_ont_belakang: null,  
   Tr_teknis_evident_pelanggan_dengan_pelanggan: null,  
   Tr_teknis_evident_pelanggan_depan_rumah: null,  
   
@@ -375,6 +377,19 @@ const cancelAdd = async () => {
   
           <div class="flex border flex-col items-center p-2 justify-end relative">  
            <inputImageWithPreview label="ONT" v-model="savedData.Tr_teknis_evident_redaman_ont" />  
+          </div>  
+        </div>  
+        
+        <div class="col-span-3 grid grid-cols-2">  
+          <p class="text-black dark:text-white text-center p-2 col-span-2">  
+           Evident ONT
+          </p>  
+          <div class="flex border flex-col items-center p-2 justify-end relative">  
+           <inputImageWithPreview label="ONT (Tampak Depan)" v-model="savedData.Tr_teknis_evident_ont_depan" />  
+          </div>  
+  
+          <div class="flex border flex-col items-center p-2 justify-end relative">  
+           <inputImageWithPreview label="ONT (Tampak Belakang)" v-model="savedData.Tr_teknis_evident_ont_belakang" />  
           </div>  
         </div>  
   
