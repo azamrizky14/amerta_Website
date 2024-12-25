@@ -14,7 +14,7 @@ const props = defineProps<{
   disabled: boolean,
 }>()
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'option-changed'])
 
 const isOpen = ref(false)
 const selectedLabel = ref(
@@ -30,6 +30,7 @@ const toggleDropdown = () => {
 const selectOption = (option: Option) => {
   selectedLabel.value = option.label
   emit('update:modelValue', option)
+  emit('option-changed', option) // Emit option-changed when an option is selected
   isOpen.value = false
 }
 

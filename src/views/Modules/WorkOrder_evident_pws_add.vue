@@ -88,6 +88,8 @@ onMounted(async () => {
 });  
   
 const handleOptionChange = async (selected) => {  
+  console.log('material data',materialData)
+  console.log('logistik data', logistikData)
   materialData.value.splice(0, materialData.value.length);  
   if (selected.Tr_teknis_work_order_tersedia) {  
    savedData.value.Tr_teknis_logistik_id = selected.Tr_teknis_logistik_id;  
