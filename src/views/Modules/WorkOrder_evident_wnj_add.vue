@@ -307,6 +307,7 @@ const cancelAdd = async () => {
            Keterangan  
           </label>  
           <textarea rows="3" placeholder="Masukan keterangan disini!" class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary" v-model="savedData.Tr_teknis_keterangan"></textarea>  
+          <textarea v-if="logistikData && logistikData.Tr_teknis_keterangan" disabled rows="3" placeholder="Masukan keterangan disini!" class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary" v-model="logistikData.Tr_teknis_keterangan"></textarea>  
         </div>  
        </div>  
       </DefaultCard>  
