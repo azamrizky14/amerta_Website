@@ -24,6 +24,8 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 const indexStore = useIndexStore();
 const optionsTeknisi: Option[] = ref([]);
+
+const imageUrl = 'images/admin_logistik';
 const pageTitle = ref("Evident - Edit INFRA");
 const pageList = ref(["Work Order", "Evident", "INFRA", "Edit"]);
 
@@ -522,6 +524,7 @@ const removeImage = (field: string) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Sebelum"
                   v-model="
@@ -532,6 +535,7 @@ const removeImage = (field: string) => {
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Modem Sebelum"
                   v-model="
@@ -544,6 +548,7 @@ const removeImage = (field: string) => {
             <div class="col-span-3 grid grid-cols-2">
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Kendala 1"
                   v-model="
@@ -554,6 +559,7 @@ const removeImage = (field: string) => {
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Kendala 2"
                   v-model="
@@ -569,6 +575,7 @@ const removeImage = (field: string) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Splicer - Proses Sambung"
                   v-model="
@@ -584,6 +591,7 @@ const removeImage = (field: string) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Sesudah"
                   v-model="
@@ -593,6 +601,7 @@ const removeImage = (field: string) => {
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Out ODP"
                   v-model="
@@ -602,6 +611,7 @@ const removeImage = (field: string) => {
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Pelanggan"
                   v-model="
@@ -617,6 +627,7 @@ const removeImage = (field: string) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Start"
                   v-model="
@@ -627,6 +638,7 @@ const removeImage = (field: string) => {
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="End"
                   v-model="

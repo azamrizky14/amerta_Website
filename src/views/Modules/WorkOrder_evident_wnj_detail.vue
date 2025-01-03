@@ -2,6 +2,7 @@
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";  
 import DefaultCard from "@/components/Forms/DefaultCard.vue";  
 import DefaultLayout from "@/layouts/DefaultLayout.vue";  
+import multiselectReadOnly from "@/components/Forms/SelectGroup/multiselectReadOnly.vue";
 import imageWithPreview from "@/components/Forms/SelectGroup/imageWithPreview.vue";  
   
 import { ref, onMounted } from "vue";  

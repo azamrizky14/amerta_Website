@@ -3,13 +3,9 @@ import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import imageWithPreview from "@/components/Forms/SelectGroup/imageWithPreview.vue";
-import ButtonDynamic from "@/components/Buttons/ButtonDynamic.vue";
 import Swal from "sweetalert2";
-import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
 import multiselectReadOnly from "@/components/Forms/SelectGroup/multiselectReadOnly.vue";
 
-import { domain } from "@/API/";
-import { getDateToday } from "@/stores/date";
 import { showLoading, confirmDelete, successCreate, failedCreate } from "@/stores/swal";
 import {
   adminTeknis_CreateDataEvidentWithImages,
@@ -24,6 +20,7 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 
+const imageUrl = 'images/admin_logistik';
 const pageTitle = ref("Evident - Detail INFRA");
 const pageList = ref(["Work Order", "Evident", "INFRA", "Detail"]);
 
@@ -507,6 +504,7 @@ const removeImage = (field: string) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Sebelum"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sebelum"
@@ -515,6 +513,7 @@ const removeImage = (field: string) => {
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Kendala 1"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_1"
@@ -525,6 +524,7 @@ const removeImage = (field: string) => {
             <div class="col-span-3 grid grid-cols-2">
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Kendala 2"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_2"
@@ -533,6 +533,7 @@ const removeImage = (field: string) => {
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Kendala 3"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_3"
@@ -546,6 +547,7 @@ const removeImage = (field: string) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Splicer - Proses Sambung"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_proses_sambung"
@@ -559,6 +561,7 @@ const removeImage = (field: string) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Sesudah"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sesudah"
@@ -566,6 +569,7 @@ const removeImage = (field: string) => {
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Out ODP"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_out_odp"
@@ -573,6 +577,7 @@ const removeImage = (field: string) => {
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Pelanggan"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_pelanggan"
@@ -586,6 +591,7 @@ const removeImage = (field: string) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Start"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_start"
@@ -593,6 +599,7 @@ const removeImage = (field: string) => {
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="End"
                   v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_end"
