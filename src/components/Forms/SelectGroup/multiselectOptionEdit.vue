@@ -23,13 +23,13 @@ const searchQuery = ref(props.value || ''); // Search query
 const isOpen = ref(false);
 const selectedOptions = ref<Option[]>([]); // Initialize empty
 
-// Update selectedOptions dynamically
 const updateSelectedOptions = () => {
   if (!props.modelValue || !props.options) return;
   selectedOptions.value = props.options.filter((option) =>
-    props.modelValue.some((selected) => selected.id === option.id)
+    props.modelValue.some((selected) => selected.name === option.name)
   );
 };
+
 
 // Watch for changes in parent-provided modelValue and options
 watch(
@@ -53,7 +53,7 @@ const filteredOptions = computed(() =>
 
 // Handle toggling selection of an option
 const toggleSelection = (option: Option) => {
-  const index = selectedOptions.value.findIndex((o) => o.id === option.id);
+  const index = selectedOptions.value.findIndex((o) => o.name === option.name);
   if (index > -1) {
     selectedOptions.value.splice(index, 1);
   } else {
@@ -62,9 +62,10 @@ const toggleSelection = (option: Option) => {
   emit('update:modelValue', selectedOptions.value);
 };
 
+
 // Check if an option is selected
 const isSelected = (option: Option) =>
-  selectedOptions.value.some((o) => o.id === option.id);
+  selectedOptions.value.some((o) => o.name === option.name);
 
 // Handle closing the dropdown when clicking outside
 const dropdownRef = ref(null);

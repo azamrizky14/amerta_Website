@@ -59,6 +59,7 @@ onMounted(async () => {
       name: x.userName,  
       role: x.userRole,  
     }));  
+    console.log(optionsTeknisi.value)
    }  
   } catch (error) {  
    console.error("Error fetching data:", error);  

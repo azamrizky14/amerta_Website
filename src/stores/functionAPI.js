@@ -140,3 +140,10 @@ export const item_UpdateDataWithImages = async (data, id) => {
   var suppData = response.data;
   return suppData
 }
+
+// Location
+export const location_getAllLocationWithStatus = async (company, status) => {
+  const response = await axios.get(API+'/api/location/getAllLocation/'+company+'/'+status)
+  var suppData = response.data;
+  return suppData
+}
