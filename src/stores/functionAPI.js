@@ -108,7 +108,8 @@ export const getUserById = async (id) => {
 }
 
 export const getUserInternalByRole = async (company, role) => {
-  const response = await axios.get(API+'/api/userInternal/getUserByRole/'+company+'/'+role)
+  const newRole = role ? role : ""
+  const response = await axios.get(API+'/api/userInternal/getUserByRole/'+company+'/'+newRole)
   var suppData = response.data;
   return suppData
 }

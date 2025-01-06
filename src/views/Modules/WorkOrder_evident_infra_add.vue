@@ -68,7 +68,7 @@ const optionsTeknisi: any[] = ref([]);
 onMounted(async () => {  
   const data = await getUserInternalByRole(  
    indexStore.user.companyName,  
-   "Teknisi " + savedData.value.Tr_teknis_jenis  
+  //  "Teknisi " + savedData.value.Tr_teknis_jenis  
   );  
   console.log("list user", data);  
   if (data) {  
