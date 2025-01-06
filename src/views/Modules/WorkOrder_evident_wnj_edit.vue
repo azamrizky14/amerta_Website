@@ -48,7 +48,7 @@ onMounted(async () => {
    const [data, listTeknisi] = await Promise.all([  
     getUserInternalByRole(  
       indexStore.user.companyName,  
-      "Teknisi " + savedData.value.Tr_teknis_jenis  
+      // "Teknisi " + savedData.value.Tr_teknis_jenis  
     ),  
     getData(),  
    ]);  
@@ -385,8 +385,8 @@ const submitData = async () => {
   
     <div class="flex flex-col gap-9">  
       <!-- Textarea Fields Start -->  
-      <DefaultCard cardTitle="Edit Gambar">  
-       <div class="grid grid-cols-2" v-if="savedData.Tr_teknis_kategori === 'PSB'">  
+      <DefaultCard cardTitle="Edit Gambar">
+       <div class="grid grid-cols-2" v-if="savedData.Tr_teknis_kategori === 'PSB'">   
         <div class="flex border flex-col items-center p-2 justify-end relative">  
           <imageWithPreview
             :url="imageUrl"  

@@ -76,7 +76,7 @@ onMounted(async () => {
     const [data, listTeknisi] = await Promise.all([
       getUserInternalByRole(
         indexStore.user.companyName,
-        "Teknisi " + savedData.value.Tr_teknis_jenis
+        // "Teknisi " + savedData.value.Tr_teknis_jenis  
       ),
       getData(),
     ]);

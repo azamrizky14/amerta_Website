@@ -10,9 +10,7 @@ import { showLoading, confirmDelete, successCreate, failedCreate } from "@/store
 import {
   adminTeknis_CreateDataEvidentWithImages,
   adminTeknis_GetDataEvidentById,
-  adminTeknis_GetDataByDomainAndDeletedAndTypeAndStatus,
 } from "@/stores/functionAPI";
-import { mdiPlusCircleOutline, mdiTrashCanOutline } from "@mdi/js";
 
 import { ref, onMounted } from "vue";
 import router from "@/router";
@@ -72,7 +70,6 @@ onMounted(async () => {
       route.params.logistikNumber,
     route.params.id
   );
-  console.log(data);
   if (data.Tr_teknis_team) {
     data.Tr_teknis_team = data.Tr_teknis_team.map((x,i) => ({id: i, name: x}))
   }
