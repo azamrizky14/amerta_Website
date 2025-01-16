@@ -116,7 +116,6 @@ onMounted(async () => {
 const dataValidator = ref([
   { key: "Tr_teknis_item", label: "Nama Tas" },
   { key: "Tr_teknis_jenis", label: "Jenis Permintaan" },
-  { key: "Tr_teknis_keterangan", label: "Keterangan" },
 ]);
 
 const getData = async () => {

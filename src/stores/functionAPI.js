@@ -149,8 +149,31 @@ export const item_UpdateDataWithImages = async (data, id) => {
 }
 
 // Location
-export const location_getAllLocationWithStatus = async (company, status) => {
+export const lokasi_getAllLocationWithStatus = async (company, status) => {
   const response = await axios.get(API+'/api/location/getAllLocation/'+company+'/'+status)
+  var suppData = response.data;
+  return suppData
+}
+export const lokasi_getDataByType = async (type, name) => {
+  const response = await axios.get(API+'/api/location/getLocationByType/'+type+'/'+name)
+  var suppData = response.data;
+  return suppData
+}
+
+export const lokasi_getDataById = async (id) => {
+  const response = await axios.get(API+'/api/location/getLocationById/'+id)
+  var suppData = response.data;
+  return suppData
+}
+
+export const lokasi_CreateData = async (data) => {
+  const response = await axios.post(API+'/api/location/create', data)
+  var suppData = response.data;
+  return suppData
+}
+
+export const lokasi_UpdateData = async (data, id) => {
+  const response = await axios.put(API+'/api/location/update/'+id, data)
   var suppData = response.data;
   return suppData
 }

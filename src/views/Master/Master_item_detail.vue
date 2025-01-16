@@ -72,7 +72,6 @@ const materialData = ref([
 
 onMounted(async () => {
   const data = await item_getItemById(route.params.id)
-  console.log('data', data)
   savedData.value = data
 });
 
@@ -320,7 +319,7 @@ const removeImage = (field: string) => {
                   :icon="mdiTrashCanOutline"
                   label=""
                   buttonClass="flex w-full justify-center p-2 cursor-pointer rounded bg-red-500 text-gray-50 hover:bg-red-600"
-                  @click="handleRemoveMaterialTerpakai"
+                  @click="handleRemoveMaterialTerpakai(index)"
                 />
               </div>
             </div>
