@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { onClickOutside } from '@vueuse/core';
 
 interface Option {
@@ -33,6 +33,13 @@ const selectOption = (option: Option) => {
   emit('option-changed', option) // Emit option-changed when an option is selected
   isOpen.value = false
 }
+
+// Watch for changes in modelValue and update selectedLabel
+watch(() => props.modelValue, (newValue) => {
+  selectedLabel.value = typeof newValue === 'string'
+    ? newValue
+    : newValue?.label || ''
+}, { immediate: true })
 
 // Handle closing the dropdown when clicking outside
 const dropdownRef = ref(null);

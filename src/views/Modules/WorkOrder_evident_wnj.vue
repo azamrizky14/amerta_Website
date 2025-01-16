@@ -50,6 +50,21 @@ const changePage = (page: number) => {
   }  
 };  
 
+
+const visiblePages = computed(() => {
+  const pages = [];
+  const range = 2; // Number of pages to show before and after the current page
+
+  let start = Math.max(1, currentPage.value - range);
+  let end = Math.min(totalPages.value, currentPage.value + range);
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+
+  return pages;
+});
+
 // Change page function  
 const getMainData = async () => {  
   const data = await adminTeknis_GetDataEvidentByType("N", "WNJ");  
@@ -164,20 +179,65 @@ onMounted(async () => {
        </table>  
       </div>  
   
-      <div class="mt-4 flex justify-between items-center">  
-       <p class="text-sm">Total Data: {{ totalItems }}</p>  
-       <div class="flex space-x-2">  
-        <button class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">  
-          Prev  
-        </button>  
-        <button v-for="page in Array.from({ length: totalPages }, (_, i) => i + 1)" :key="page" class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600" :class="currentPage === page ? 'bg-primary text-white' : ''" @click="changePage(page)">  
-          {{ page }}  
-        </button>  
-        <button class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">  
-          Next  
-        </button>  
-       </div>  
-      </div>  
+
+        <!-- Pagination and Total Data -->
+        <div class="mt-4 flex justify-between items-center">
+          <p class="text-sm">Total Data: {{ totalItems }}</p>
+          <div class="flex space-x-2">
+            <!-- Previous Button -->
+            <button
+              class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+              :disabled="currentPage === 1"
+              @click="changePage(currentPage - 1)"
+            >
+              Prev
+            </button>
+
+            <!-- First Page -->
+            <button
+              v-if="currentPage > 3"
+              class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+              @click="changePage(1)"
+            >
+              1
+            </button>
+
+            <!-- Ellipsis Before -->
+            <span v-if="currentPage > 4" class="text-xs px-2 py-1">...</span>
+
+            <!-- Visible Page Buttons -->
+            <button
+              v-for="page in visiblePages"
+              :key="page"
+              class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+              :class="currentPage === page ? 'bg-primary text-white' : ''"
+              @click="changePage(page)"
+            >
+              {{ page }}
+            </button>
+
+            <!-- Ellipsis After -->
+            <span v-if="currentPage < totalPages - 3" class="text-xs px-2 py-1">...</span>
+
+            <!-- Last Page -->
+            <button
+              v-if="currentPage < totalPages - 2"
+              class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+              @click="changePage(totalPages)"
+            >
+              {{ totalPages }}
+            </button>
+
+            <!-- Next Button -->
+            <button
+              class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+              :disabled="currentPage === totalPages"
+              @click="changePage(currentPage + 1)"
+            >
+              Next
+            </button>
+          </div>
+        </div>  
     </div>  
    </div>  
   </DefaultLayout>  

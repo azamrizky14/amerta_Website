@@ -10,7 +10,7 @@ import { showLoading, confirmDelete, successCreate, failedCreate } from "@/store
 import {
   adminTeknis_CreateData,
   BonMaterial_GetPrefixByTypeAndDate,
-  getUtilByName
+  getUtilByName,
 } from "@/stores/functionAPI";
 import { mdiPlusCircleOutline, mdiTrashCanOutline } from "@mdi/js";
 import multiselectOption from "@/components/Forms/SelectGroup/multiselectOption.vue";
@@ -72,19 +72,21 @@ const savedData = ref({
 const materialData = ref([{ label: "", qty: "" }]);
 
 onMounted(async () => {
-  const data = await  getUtilByName('bonMaterial')
+  const data = await getUtilByName("bonMaterial");
   if (data && data.utilData.length > 0) {
-    let option  = await data.utilData.find((x) => x.companyName === indexStore.user.companyName)
-    option = option.bonMaterialList.map(x => ({
-      label: x, value:x
-    }))
-    optionsType.value = [...option]
+    let option = await data.utilData.find(
+      (x) => x.companyName === indexStore.user.companyName
+    );
+    option = option.bonMaterialList.map((x) => ({
+      label: x,
+      value: x,
+    }));
+    optionsType.value = [...option];
   }
   const date = await getDateToday("yyyy-MM-dd");
   // savedData.value.Tr_teknis_tanggal = date;
   savedData.value.Tr_teknis_created = date;
   savedData.value.Tr_teknis_user_created = indexStore.user.userName;
-
 });
 
 // Function
@@ -130,21 +132,19 @@ const validateQtyKeluar = (index) => {
   // Hanya lakukan validasi jika qtyKeluar tidak kosong
   if (materialData.value[index].qty !== "" && materialData.value[index].qty < 1) {
     Swal.fire({
-      title: 'Error!',
-      text: 'Minimal jumlah input adalah 1',
-      icon: 'error',
-      position: 'top-end',
+      title: "Error!",
+      text: "Minimal jumlah input adalah 1",
+      icon: "error",
+      position: "top-end",
       timer: 1000,
       showConfirmButton: false,
-      toast: true
+      toast: true,
     }).then(() => {
       // Setelah SweetAlert muncul, ganti nilai qtyKeluar menjadi 1
       materialData.value[index].qty = 1;
     });
   }
 };
-
-
 
 const submitData = async () => {
   // Clear previous errors
@@ -163,11 +163,11 @@ const submitData = async () => {
     if (!item.label || item.label.trim() === "") {
       dataError.value.push(`Material ${index + 1}: Nama Barang tidak boleh kosong!`);
     }
-    // Validasi qty 
+    // Validasi qty
     if (!item.qty || String(item.qty).trim() === "") {
       dataError.value.push(`Material ${index + 1}: Qty. Keluar tidak boleh kosong!`);
     }
-    
+
     // Tambahkan validasi qtyKeluar tidak boleh kurang dari 1
     validateQtyKeluar(index);
   });
@@ -200,8 +200,8 @@ const submitData = async () => {
           return Object.values(item).some((value) => value !== "");
         });
         fixData.Tr_teknis_work_order_terpakai_material = cleanedArray.sort((a, b) => {
-          const aHasONT = a.label.toLowerCase().includes('ont');
-          const bHasONT = b.label.toLowerCase().includes('ont');
+          const aHasONT = a.label.toLowerCase().includes("ont");
+          const bHasONT = b.label.toLowerCase().includes("ont");
 
           if (aHasONT && !bHasONT) return 1; // Move `a` after `b`
           if (!aHasONT && bHasONT) return -1; // Keep `a` before `b`
@@ -280,8 +280,7 @@ const submitData = async () => {
 
             <!-- Qty Keluar Input -->
             <div>
-              
-            <!-- <div>
+              <!-- <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Teknisi
               </label>
@@ -294,18 +293,18 @@ const submitData = async () => {
               </div>
             </div> -->
 
-            <div>
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Keterangan
-              </label>
-              <textarea
-                rows="3"
-                placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_keterangan"
-              ></textarea>
+              <div>
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Keterangan
+                </label>
+                <textarea
+                  rows="3"
+                  placeholder="Masukan keterangan disini!"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_keterangan"
+                ></textarea>
+              </div>
             </div>
-          </div>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->
@@ -352,8 +351,7 @@ const submitData = async () => {
                   placeholder="Qty"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.qty"
-                  
-                @change="validateQtyKeluar(index)"
+                  @change="validateQtyKeluar(index)"
                 />
               </div>
               <div class="w-1/12 flex items-end pb-2 flex-wrap">
@@ -378,7 +376,7 @@ const submitData = async () => {
                   :icon="mdiTrashCanOutline"
                   label=""
                   buttonClass="flex w-full justify-center p-2 cursor-pointer rounded bg-red-500 text-gray-50 hover:bg-red-600"
-                  @click="handleRemoveMaterialTerpakai"
+                  @click="handleRemoveMaterialTerpakai(index)"
                 />
               </div>
             </div>

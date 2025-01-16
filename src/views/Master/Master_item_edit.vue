@@ -292,7 +292,7 @@ const removeImage = (field: string) => {
                   Tipe Item
                 </label>
                 <SelectGroup
-                  placeholder="Pilih Tim"
+                  placeholder="Pilih Tipe"
                   :options="optionsType"
                   v-model="savedData.item_tipe"
                 />
@@ -454,7 +454,7 @@ const removeImage = (field: string) => {
                   :icon="mdiTrashCanOutline"
                   label=""
                   buttonClass="flex w-full justify-center p-2 cursor-pointer rounded bg-red-500 text-gray-50 hover:bg-red-600"
-                  @click="handleRemoveMaterialTerpakai"
+                  @click="handleRemoveMaterialTerpakai(index)"
                 />
               </div>
             </div>

@@ -378,9 +378,27 @@ const routes = [
     }
   },
   {
-    path: '/master/item/edit/:id',
-    name: 'masterItemEdit',
-    component: () => import('@/views/Master/Master_item_edit.vue'),
+    path: '/master/location/add',
+    name: 'masterLokasiAdd',
+    component: () => import('@/views/Master/Master_lokasi_add.vue'),
+    meta: {
+      title: 'Master Lokasi Add',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/master/location/detail/:id',
+    name: 'masterLokasiDetail',
+    component: () => import('@/views/Master/Master_lokasi_detail.vue'),
+    meta: {
+      title: 'Master Lokasi Detail',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/master/location/edit/:id',
+    name: 'masterLokasiEdit',
+    component: () => import('@/views/Master/Master_lokasi_edit.vue'),
     meta: {
       title: 'Master Item Edit',
       requiresAuth: true // Add this line to protect this route
