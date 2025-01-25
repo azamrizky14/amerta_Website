@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, watch } from "vue";
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import { item_getAllItemWithStatus } from "@/stores/functionAPI";
+import { lokasi_getAllLocationWithStatus } from "@/stores/functionAPI";
 import {
   mdiEyeOutline,
   mdiMagnify,
@@ -13,15 +13,13 @@ import {
 import { useIndexStore } from "@/stores";
 import { formatDate } from "@/stores/date";
 
-const pageTitle = ref("Master - Item");
-const pageList = ref(["Master", "Item"]);
+const pageTitle = ref("Gudang");
+const pageList = ref(["Work Order", "Gudang"]);
 const dataHeader = ref([
   { name: "No.", class: "py-2 pl-3" },
-  { name: "Kode Item", class: "min-w-[100px] py-2 px-4" },
-  { name: "Nama. Item", class: "min-w-[150px] py-2 px-4" },
-  { name: "Tipe", class: "min-w-[75px] py-2 px-4" },
-  { name: "Satuan", class: "min-w-[50px] py-2 px-4" },
-  { name: "Merk", class: "py-2 px-4" },
+  { name: "Kode", class: "min-w-[75px] py-2 px-4" },
+  { name: "Nama. Gudang", class: "min-w-[150px] py-2 px-4" },
+  { name: "Alamat", class: "py-2 px-2" },
   { name: "Tgl. Dibuat", class: "min-w-[100px] py-2 px-4" },
   { name: "Dibuat Oleh", class: "py-2 px-4" },
 ]);
@@ -89,12 +87,12 @@ const changePage = (page: number) => {
 };
 
 onMounted(async () => {
-  const data = await item_getAllItemWithStatus(indexStore.user.companyName, "N");
+  const data = await lokasi_getAllLocationWithStatus(indexStore.user.companyName, "N");
 
   dataTable.value = await Promise.all(
-    data.map(async (item) => ({
-      ...item,
-      formattedDate: await formatDate(item.item_created, "dd-MM-yyyy"),
+    data.map(async (lokasi) => ({
+      ...lokasi,
+      formattedDate: await formatDate(lokasi.lokasi_created, "dd-MM-yyyy"),
     }))
   );
 });
@@ -139,7 +137,7 @@ onMounted(async () => {
           </div>
           <div class="right-data flex items-center flex-row-reverse">
             <!-- Add Button -->
-            <router-link to="/master/item/add" class="px-1">
+            <router-link to="/master/location/add" class="px-1">
               <svg
                 class="fill-current hover:text-primary"
                 width="22"
@@ -184,50 +182,51 @@ onMounted(async () => {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in paginatedData" :key="index" class="border">
+              <tr v-for="(lokasi, index) in paginatedData" :key="index" class="border">
                 <td class="pl-3 text-xs border">
                   {{ index + 1 }}
                 </td>
                 <td class="py-1 px-4 border">
                   <p class="text-black dark:text-white text-xs text-center">
-                    {{ item.item_id }}
+                    {{ lokasi.lokasi_id }}
                   </p>
                 </td>
                 <td class="py-1 px-4 border">
                   <p class="text-xs text-black dark:text-white">
-                    {{ item.item_nama }}
+                    {{ lokasi.lokasi_nama }}
                   </p>
                 </td>
-                <td class="py-1 px-4 border">
-                  <p class="text-xs text-black dark:text-white text-center">
-                    {{ item.item_tipe }}
-                  </p>
-                </td>
-                <td class="py-1 px-4 border">
-                  <p class="text-xs text-black dark:text-white text-center">
-                    {{ item.item_satuan }}
-                  </p>
-                </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1 px-2 border">
                   <p class="text-xs text-black dark:text-white">
-                    {{ item.item_brand }}
+                    <span v-if="lokasi.lokasi_tipe === 'gudang'">
+                      {{ lokasi.lokasi_alamat.lokasi_alamat_gudang }}
+                    </span>
+                    <span v-else-if="lokasi.lokasi_tipe === 'ruang'">
+                      {{ lokasi.lokasi_alamat.lokasi_alamat_gudang }},
+                      {{ lokasi.lokasi_alamat.lokasi_alamat_ruang }}
+                    </span>
+                    <span v-else-if="lokasi.lokasi_tipe === 'rak'">
+                      {{ lokasi.lokasi_alamat.lokasi_alamat_gudang }},
+                      {{ lokasi.lokasi_alamat.lokasi_alamat_ruang }},
+                      {{ lokasi.lokasi_alamat.lokasi_alamat_rak }}
+                    </span>
                   </p>
                 </td>
                 <td class="py-1 px-4 border">
                   <p class="text-black dark:text-white text-xs text-center">
-                    {{ item.formattedDate }}
+                    {{ lokasi.formattedDate }}
                   </p>
                 </td>
                 <td class="py-1 px-4 border">
                   <p class="text-xs text-black dark:text-white">
-                    {{ item.item_user_created }}
+                    {{ lokasi.lokasi_user_created }}
                   </p>
                 </td>
                 <td class="py-1 px-4">
                   <div class="flex items-center space-x-3.5 d-flex justify-center">
                     <router-link
                       class="hover:text-primary"
-                      :to="'/master/item/detail/' + item._id"
+                      :to="'/modules/work-order/gudang/detail/' + lokasi._id"
                     >
                       <svg
                         class="fill-current"
@@ -242,8 +241,8 @@ onMounted(async () => {
                     </router-link>
 
                     <router-link
-                      class="hover:text-primary"
-                      :to="'/master/item/edit/' + item._id"
+                      class="hover:text-primary hidden"
+                      :to="'/master/location/edit/' + lokasi._id"
                     >
                       <svg
                         class="fill-current"

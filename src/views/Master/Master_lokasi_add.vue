@@ -37,8 +37,8 @@ const optionsType = [
   { id: 3, label: "rak", value: "rak" },
 ];
 
-const optionsGudang = ref([])
-const optionsRuang = ref([])
+const optionsGudang = ref([]);
+const optionsRuang = ref([]);
 const pageTitle = ref("Tambah Lokasi");
 const pageList = ref(["Master", "Lokasi", "Tambah"]);
 
@@ -50,7 +50,7 @@ const savedData = ref({
   lokasi_alamat: {
     lokasi_alamat_gudang: "",
     lokasi_alamat_ruang: "",
-    lokasi_alamat_rak: ""
+    lokasi_alamat_rak: "",
   },
   lokasi_keterangan: "",
 
@@ -68,14 +68,14 @@ const materialData = ref([
 onMounted(async () => {
   const date = await getDateToday("yyyy-MM-dd");
   // savedData.value.Tr_teknis_tanggal = date;
-  
-  const data = await lokasi_getDataByType('gudang', '')
-  if (data) {  
-   optionsGudang.value = data.data.map((x, i) => ({  
-    id: i,  
-    name: x.lokasi_nama,  
-   }));  
-  }  
+
+  const data = await lokasi_getDataByType(indexStore.user.companyName, "gudang", "");
+  if (data) {
+    optionsGudang.value = data.data.map((x, i) => ({
+      id: i,
+      name: x.lokasi_nama,
+    }));
+  }
 
   savedData.value.lokasi_created = date;
 });
@@ -84,20 +84,24 @@ const handleResetAlamat = async () => {
   savedData.value.lokasi_alamat = {
     lokasi_alamat_gudang: "",
     lokasi_alamat_ruang: "",
-    lokasi_alamat_rak: ""
-  }
+    lokasi_alamat_rak: "",
+  };
 };
 
 const handleChangeGudang = async () => {
   // alert('tes')
-  const gudang = savedData.value.lokasi_alamat.lokasi_alamat_gudang
-  const data = await lokasi_getDataByType('ruang', gudang.name)
-  if (data) {  
-   optionsRuang.value = data.data.map((x, i) => ({  
-    id: i,  
-    name: x.lokasi_nama,  
-   }));  
-  }  
+  const gudang = savedData.value.lokasi_alamat.lokasi_alamat_gudang;
+  const data = await lokasi_getDataByType(
+    indexStore.user.companyName,
+    "ruang",
+    gudang.name
+  );
+  if (data) {
+    optionsRuang.value = data.data.map((x, i) => ({
+      id: i,
+      name: x.lokasi_nama,
+    }));
+  }
 };
 
 const handleRemoveMaterialTerpakai = async (index) => {
@@ -133,7 +137,7 @@ const dataValidator = ref([
 const dataError = ref([]); // Array untuk menyimpan error
 
 const submitData = async () => {
-  console.log(savedData.value)
+  console.log(savedData.value);
   // Clear previous errors
   dataError.value.splice(0, dataError.value.length);
 
@@ -147,20 +151,20 @@ const submitData = async () => {
   if (savedData.value.lokasi_tipe.id > 0) {
     if (!savedData.value.lokasi_alamat.lokasi_alamat_gudang) {
       dataError.value.push(`Alamat gudang tidak boleh kosong!`);
-    } 
-  } 
+    }
+  }
 
   if (savedData.value.lokasi_tipe.id > 1) {
     if (!savedData.value.lokasi_alamat.lokasi_alamat_ruang) {
       dataError.value.push(`Alamat ruang tidak boleh kosong!`);
-    } 
-  } 
+    }
+  }
 
   if (savedData.value.lokasi_tipe.id > 2) {
     if (!savedData.value.lokasi_alamat.lokasi_alamat_rak) {
       dataError.value.push(`Alamat rak tidak boleh kosong!`);
-    } 
-  } 
+    }
+  }
 
   // Jika ada error, tampilkan di halaman dan hentikan submit
   if (dataError.value.length > 0) {
@@ -186,15 +190,17 @@ const submitData = async () => {
       const fixData = { ...savedData.value };
 
       if (fixData.lokasi_tipe && fixData.lokasi_tipe.value) {
-        fixData.lokasi_tipe = fixData.lokasi_tipe.value
+        fixData.lokasi_tipe = fixData.lokasi_tipe.value;
       }
 
       if (typeof fixData.lokasi_alamat.lokasi_alamat_gudang === "object") {
-        fixData.lokasi_alamat.lokasi_alamat_gudang = fixData.lokasi_alamat.lokasi_alamat_gudang.name
+        fixData.lokasi_alamat.lokasi_alamat_gudang =
+          fixData.lokasi_alamat.lokasi_alamat_gudang.name;
       }
 
       if (typeof fixData.lokasi_alamat.lokasi_alamat_ruang === "object") {
-        fixData.lokasi_alamat.lokasi_alamat_ruang = fixData.lokasi_alamat.lokasi_alamat_ruang.name
+        fixData.lokasi_alamat.lokasi_alamat_ruang =
+          fixData.lokasi_alamat.lokasi_alamat_ruang.name;
       }
 
       await lokasi_CreateData(fixData);
@@ -236,12 +242,10 @@ const removeImage = (field: string) => {
                   placeholder="Masukan Kode Lokasi"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.lokasi_id"
-                />  
+                />
               </div>
               <div class="lg:w-1/2">
-                <label
-                  class="mb-3 block text-sm font-medium text-black dark:text-white"
-                >
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                   Tipe Lokasi
                 </label>
                 <SelectGroup
@@ -253,7 +257,7 @@ const removeImage = (field: string) => {
               </div>
             </div>
             <div class="flex flex-col gap-3">
-              <div>    
+              <div>
                 <label
                   class="mb-3 mt-2 block text-sm font-medium text-black dark:text-white"
                 >
@@ -284,8 +288,11 @@ const removeImage = (field: string) => {
                 v-model="savedData.lokasi_alamat.lokasi_alamat_gudang"
               />
               <!-- Input Ruang -->
-              
-              <div class="mb-3" v-if="savedData.lokasi_tipe && savedData.lokasi_tipe.id > 1">
+
+              <div
+                class="mb-3"
+                v-if="savedData.lokasi_tipe && savedData.lokasi_tipe.id > 1"
+              >
                 <selectOption
                   :options="optionsGudang"
                   v-model="savedData.lokasi_alamat.lokasi_alamat_gudang"
@@ -302,8 +309,11 @@ const removeImage = (field: string) => {
                 v-model="savedData.lokasi_alamat.lokasi_alamat_ruang"
               />
               <!-- Input Rak -->
-              
-              <div class="mb-3" v-if="savedData.lokasi_tipe && savedData.lokasi_tipe.id > 2">
+
+              <div
+                class="mb-3"
+                v-if="savedData.lokasi_tipe && savedData.lokasi_tipe.id > 2"
+              >
                 <selectOption
                   :options="optionsRuang"
                   v-model="savedData.lokasi_alamat.lokasi_alamat_ruang"
@@ -333,7 +343,6 @@ const removeImage = (field: string) => {
                 />
               </div>
             </div> -->
-
             </div>
           </div>
         </DefaultCard>
@@ -343,17 +352,17 @@ const removeImage = (field: string) => {
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="Data Tambahan">
           <div class="p-6.5">
-              <div>
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Keterangan
-                </label>
-                <textarea
-                  rows="3"
-                  placeholder="Masukan keterangan disini!"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.lokasi_keterangan"
-                ></textarea>
-              </div>
+            <div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Keterangan
+              </label>
+              <textarea
+                rows="3"
+                placeholder="Masukan keterangan disini!"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.lokasi_keterangan"
+              ></textarea>
+            </div>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->

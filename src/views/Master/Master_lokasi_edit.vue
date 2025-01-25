@@ -6,16 +6,20 @@ import Swal from "sweetalert2";
 
 import { getDateToday } from "@/stores/date";
 import { showLoading, successCreate, failedCreate } from "@/stores/swal";
-import { lokasi_UpdateData, lokasi_getDataByType, lokasi_getDataById } from "@/stores/functionAPI";
+import {
+  lokasi_UpdateData,
+  lokasi_getDataByType,
+  lokasi_getDataById,
+} from "@/stores/functionAPI";
 import selectOption from "@/components/Forms/SelectGroup/selectOption.vue";
 import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
 import { useIndexStore } from "@/stores";
 
 import { ref, onMounted } from "vue";
 import router from "@/router";
-import { useRoute } from "vue-router";  
-  
-const route = useRoute();  
+import { useRoute } from "vue-router";
+
+const route = useRoute();
 
 const indexStore = useIndexStore();
 
@@ -39,10 +43,10 @@ const optionsType = [
   { id: 3, label: "rak", value: "rak" },
 ];
 
-const optionsGudang = ref([])
-const optionsRuang = ref([])
+const optionsGudang = ref([]);
+const optionsRuang = ref([]);
 const pageTitle = ref("Edit Lokasi");
-const pageList = ref(["Master", "Lokasi", "Tambah"]);
+const pageList = ref(["Master", "Lokasi", "Edit"]);
 
 // Saved Data
 const savedData = ref({
@@ -52,7 +56,7 @@ const savedData = ref({
   lokasi_alamat: {
     lokasi_alamat_gudang: "",
     lokasi_alamat_ruang: "",
-    lokasi_alamat_rak: ""
+    lokasi_alamat_rak: "",
   },
   lokasi_keterangan: "",
 
@@ -64,14 +68,18 @@ const savedData = ref({
 });
 
 onMounted(async () => {
-  const dataGudang = await lokasi_getDataByType('gudang', '')
-  if (dataGudang) {  
-   optionsGudang.value = dataGudang.data.map((x, i) => ({  
-    id: i,  
-    name: x.lokasi_nama,  
-   }));  
-  }  
-  await handleGetOldData()
+  const dataGudang = await lokasi_getDataByType(
+    indexStore.user.companyName,
+    "gudang",
+    ""
+  );
+  if (dataGudang) {
+    optionsGudang.value = dataGudang.data.map((x, i) => ({
+      id: i,
+      name: x.lokasi_nama,
+    }));
+  }
+  await handleGetOldData();
   const date = await getDateToday("yyyy-MM-dd");
   // savedData.value.Tr_teknis_tanggal = date;
 
@@ -79,23 +87,27 @@ onMounted(async () => {
 });
 
 const handleGetOldData = async () => {
-  const newData = await lokasi_getDataById(route.params.id)
-  savedData.value = newData
-  
-  const data = optionsType.find(x => x.value === savedData.value.lokasi_tipe) 
-  console.log('data',data)
-  savedData.value.lokasi_tipe = data
+  const newData = await lokasi_getDataById(route.params.id);
+  savedData.value = newData;
 
-  console.log(savedData.value.lokasi_tipe)
+  const data = optionsType.find((x) => x.value === savedData.value.lokasi_tipe);
+  console.log("data", data);
+  savedData.value.lokasi_tipe = data;
+
+  console.log(savedData.value.lokasi_tipe);
   if (savedData.value.lokasi_tipe && savedData.value.lokasi_tipe.id > 1) {
-    const dataGudang = optionsGudang.value.find(x => x.name === savedData.value.lokasi_alamat.lokasi_alamat_gudang)
-    savedData.value.lokasi_alamat.lokasi_alamat_gudang = dataGudang
+    const dataGudang = optionsGudang.value.find(
+      (x) => x.name === savedData.value.lokasi_alamat.lokasi_alamat_gudang
+    );
+    savedData.value.lokasi_alamat.lokasi_alamat_gudang = dataGudang;
   }
 
   if (savedData.value.lokasi_tipe && savedData.value.lokasi_tipe.id > 2) {
-    await handleChangeGudang()
-    const dataRuang = optionsRuang.value.find(x => x.name === savedData.value.lokasi_alamat.lokasi_alamat_ruang)
-    savedData.value.lokasi_alamat.lokasi_alamat_ruang = dataRuang
+    await handleChangeGudang();
+    const dataRuang = optionsRuang.value.find(
+      (x) => x.name === savedData.value.lokasi_alamat.lokasi_alamat_ruang
+    );
+    savedData.value.lokasi_alamat.lokasi_alamat_ruang = dataRuang;
   }
 };
 
@@ -103,20 +115,24 @@ const handleResetAlamat = async () => {
   savedData.value.lokasi_alamat = {
     lokasi_alamat_gudang: "",
     lokasi_alamat_ruang: "",
-    lokasi_alamat_rak: ""
-  }
+    lokasi_alamat_rak: "",
+  };
 };
 
 const handleChangeGudang = async () => {
   // alert('tes')
-  const gudang = savedData.value.lokasi_alamat.lokasi_alamat_gudang
-  const data = await lokasi_getDataByType('ruang', gudang.name)
-  if (data) {  
-   optionsRuang.value = data.data.map((x, i) => ({  
-    id: i,  
-    name: x.lokasi_nama,  
-   }));  
-  }  
+  const gudang = savedData.value.lokasi_alamat.lokasi_alamat_gudang;
+  const data = await lokasi_getDataByType(
+    indexStore.user.companyName,
+    "ruang",
+    gudang.name
+  );
+  if (data) {
+    optionsRuang.value = data.data.map((x, i) => ({
+      id: i,
+      name: x.lokasi_nama,
+    }));
+  }
 };
 
 const cancelEdit = async () => {
@@ -149,7 +165,7 @@ const resetEdit = async () => {
   });
 
   if (result.isConfirmed) {
-    await handleGetOldData(); 
+    await handleGetOldData();
   }
 };
 
@@ -163,7 +179,7 @@ const dataValidator = ref([
 const dataError = ref([]); // Array untuk menyimpan error
 
 const submitData = async () => {
-  console.log(savedData.value)
+  console.log(savedData.value);
   // Clear previous errors
   dataError.value.splice(0, dataError.value.length);
 
@@ -177,20 +193,20 @@ const submitData = async () => {
   if (savedData.value.lokasi_tipe.id > 0) {
     if (!savedData.value.lokasi_alamat.lokasi_alamat_gudang) {
       dataError.value.push(`Alamat gudang tidak boleh kosong!`);
-    } 
-  } 
+    }
+  }
 
   if (savedData.value.lokasi_tipe.id > 1) {
     if (!savedData.value.lokasi_alamat.lokasi_alamat_ruang) {
       dataError.value.push(`Alamat ruang tidak boleh kosong!`);
-    } 
-  } 
+    }
+  }
 
   if (savedData.value.lokasi_tipe.id > 2) {
     if (!savedData.value.lokasi_alamat.lokasi_alamat_rak) {
       dataError.value.push(`Alamat rak tidak boleh kosong!`);
-    } 
-  } 
+    }
+  }
 
   // Jika ada error, tampilkan di halaman dan hentikan submit
   if (dataError.value.length > 0) {
@@ -216,15 +232,17 @@ const submitData = async () => {
       const fixData = { ...savedData.value };
 
       if (fixData.lokasi_tipe && fixData.lokasi_tipe.value) {
-        fixData.lokasi_tipe = fixData.lokasi_tipe.value
+        fixData.lokasi_tipe = fixData.lokasi_tipe.value;
       }
 
       if (typeof fixData.lokasi_alamat.lokasi_alamat_gudang === "object") {
-        fixData.lokasi_alamat.lokasi_alamat_gudang = fixData.lokasi_alamat.lokasi_alamat_gudang.name
+        fixData.lokasi_alamat.lokasi_alamat_gudang =
+          fixData.lokasi_alamat.lokasi_alamat_gudang.name;
       }
 
       if (typeof fixData.lokasi_alamat.lokasi_alamat_ruang === "object") {
-        fixData.lokasi_alamat.lokasi_alamat_ruang = fixData.lokasi_alamat.lokasi_alamat_ruang.name
+        fixData.lokasi_alamat.lokasi_alamat_ruang =
+          fixData.lokasi_alamat.lokasi_alamat_ruang.name;
       }
 
       await lokasi_UpdateData(fixData, route.params.id);
@@ -261,12 +279,10 @@ const submitData = async () => {
                   placeholder="Masukan Kode Lokasi"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.lokasi_id"
-                />  
+                />
               </div>
               <div class="lg:w-1/2">
-                <label
-                  class="mb-3 block text-sm font-medium text-black dark:text-white"
-                >
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                   Tipe Lokasi
                 </label>
                 <SelectGroup
@@ -278,7 +294,7 @@ const submitData = async () => {
               </div>
             </div>
             <div class="flex flex-col gap-3">
-              <div>    
+              <div>
                 <label
                   class="mb-3 mt-2 block text-sm font-medium text-black dark:text-white"
                 >
@@ -309,8 +325,11 @@ const submitData = async () => {
                 v-model="savedData.lokasi_alamat.lokasi_alamat_gudang"
               />
               <!-- Input Ruang -->
-              
-              <div class="mb-3" v-if="savedData.lokasi_tipe && savedData.lokasi_tipe.id > 1">
+
+              <div
+                class="mb-3"
+                v-if="savedData.lokasi_tipe && savedData.lokasi_tipe.id > 1"
+              >
                 <selectOption
                   :options="optionsGudang"
                   v-model="savedData.lokasi_alamat.lokasi_alamat_gudang"
@@ -327,8 +346,11 @@ const submitData = async () => {
                 v-model="savedData.lokasi_alamat.lokasi_alamat_ruang"
               />
               <!-- Input Rak -->
-              
-              <div class="mb-3" v-if="savedData.lokasi_tipe && savedData.lokasi_tipe.id > 2">
+
+              <div
+                class="mb-3"
+                v-if="savedData.lokasi_tipe && savedData.lokasi_tipe.id > 2"
+              >
                 <selectOption
                   :options="optionsRuang"
                   v-model="savedData.lokasi_alamat.lokasi_alamat_ruang"
@@ -358,7 +380,6 @@ const submitData = async () => {
                 />
               </div>
             </div> -->
-
             </div>
           </div>
         </DefaultCard>
@@ -368,17 +389,17 @@ const submitData = async () => {
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="Data Tambahan">
           <div class="p-6.5">
-              <div>
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Keterangan
-                </label>
-                <textarea
-                  rows="3"
-                  placeholder="Masukan keterangan disini!"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.lokasi_keterangan"
-                ></textarea>
-              </div>
+            <div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Keterangan
+              </label>
+              <textarea
+                rows="3"
+                placeholder="Masukan keterangan disini!"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.lokasi_keterangan"
+              ></textarea>
+            </div>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->

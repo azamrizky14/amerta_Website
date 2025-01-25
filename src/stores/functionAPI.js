@@ -177,3 +177,11 @@ export const lokasi_UpdateData = async (data, id) => {
   var suppData = response.data;
   return suppData
 }
+
+// Purchase
+
+export const po_getAllDataWithoutItem = async (company, deleted, status) => {
+  const response = await axios.get(API+'/api/Tr_po/TrPo/getdata/'+company+'/'+deleted+'/'+status)
+  var suppData = response.data;
+  return suppData
+}
