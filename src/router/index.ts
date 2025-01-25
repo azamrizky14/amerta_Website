@@ -271,6 +271,45 @@ const routes = [
     }
   },
   
+  // Gudang
+  {
+    path: '/modules/work-order/gudang',
+    name: 'woGudang',
+    component: () => import('@/views/Modules/WorkOrder_gudang.vue'),
+    meta: {
+      title: 'Gudang',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/gudang/detail/:id',
+    name: 'woGudangDetail',
+    component: () => import('@/views/Modules/WorkOrder_gudang_detail.vue'),
+    meta: {
+      title: 'Gudang Detail',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  
+  {
+    path: '/modules/work-order/purchase/po',
+    name: 'woPurchaseOrder',
+    component: () => import('@/views/Modules/WorkOrder_purchase_po.vue'),
+    meta: {
+      title: 'Purchase Order',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/purchase/po/add',
+    name: 'woPurchaseOrderAdd',
+    component: () => import('@/views/Modules/WorkOrder_purchase_po_add.vue'),
+    meta: {
+      title: 'Purchase Order Add',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  
   // Master User Internal
   {
     path: '/modules/master/user-internal',
@@ -404,6 +443,7 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
+  
 ]
 
 

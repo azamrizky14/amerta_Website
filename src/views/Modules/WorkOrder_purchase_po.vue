@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, watch } from "vue";
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import { item_getAllItemWithStatus } from "@/stores/functionAPI";
+import { po_getAllDataWithoutItem } from "@/stores/functionAPI";
 import {
   mdiEyeOutline,
   mdiMagnify,
@@ -13,17 +13,16 @@ import {
 import { useIndexStore } from "@/stores";
 import { formatDate } from "@/stores/date";
 
-const pageTitle = ref("Master - Item");
-const pageList = ref(["Master", "Item"]);
+const pageTitle = ref("Purchase - Purchase Order");
+const pageList = ref(["Work Order", "Purchase", "Purchase Order"]);
 const dataHeader = ref([
   { name: "No.", class: "py-2 pl-3" },
-  { name: "Kode Item", class: "min-w-[100px] py-2 px-4" },
-  { name: "Nama. Item", class: "min-w-[150px] py-2 px-4" },
-  { name: "Tipe", class: "min-w-[75px] py-2 px-4" },
-  { name: "Satuan", class: "min-w-[50px] py-2 px-4" },
-  { name: "Merk", class: "py-2 px-4" },
+  { name: "Kode PO", class: "min-w-[75px] py-2 px-4" },
   { name: "Tgl. Dibuat", class: "min-w-[100px] py-2 px-4" },
+  { name: "Tgl. Perlu", class: "min-w-[100px] py-2 px-4" },
+  { name: "Supplier", class: "min-w-[150px] py-2 px-4" },
   { name: "Dibuat Oleh", class: "py-2 px-4" },
+  { name: "Status", class: "py-2 px-2" },
 ]);
 let dataTable = ref([]);
 const indexStore = useIndexStore();
@@ -89,12 +88,13 @@ const changePage = (page: number) => {
 };
 
 onMounted(async () => {
-  const data = await item_getAllItemWithStatus(indexStore.user.companyName, "N");
+  const data = await po_getAllDataWithoutItem(indexStore.user.companyName, "N", "open");
 
   dataTable.value = await Promise.all(
-    data.map(async (item) => ({
-      ...item,
-      formattedDate: await formatDate(item.item_created, "dd-MM-yyyy"),
+    data.map(async (po) => ({
+      ...po,
+      formattedCreate: await formatDate(po.Tr_po_created, "dd-MM-yyyy"),
+      formattedNeed: await formatDate(po.Tr_po_tanggal, "dd-MM-yyyy"),
     }))
   );
 });
@@ -139,7 +139,7 @@ onMounted(async () => {
           </div>
           <div class="right-data flex items-center flex-row-reverse">
             <!-- Add Button -->
-            <router-link to="/master/item/add" class="px-1">
+            <router-link to="/modules/work-order/purchase/po/add" class="px-1">
               <svg
                 class="fill-current hover:text-primary"
                 width="22"
@@ -184,50 +184,45 @@ onMounted(async () => {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in paginatedData" :key="index" class="border">
+              <tr v-for="(po, index) in paginatedData" :key="index" class="border">
                 <td class="pl-3 text-xs border">
                   {{ index + 1 }}
                 </td>
                 <td class="py-1 px-4 border">
                   <p class="text-black dark:text-white text-xs text-center">
-                    {{ item.item_id }}
-                  </p>
-                </td>
-                <td class="py-1 px-4 border">
-                  <p class="text-xs text-black dark:text-white">
-                    {{ item.item_nama }}
-                  </p>
-                </td>
-                <td class="py-1 px-4 border">
-                  <p class="text-xs text-black dark:text-white text-center">
-                    {{ item.item_tipe }}
-                  </p>
-                </td>
-                <td class="py-1 px-4 border">
-                  <p class="text-xs text-black dark:text-white text-center">
-                    {{ item.item_satuan }}
-                  </p>
-                </td>
-                <td class="py-1 px-4 border">
-                  <p class="text-xs text-black dark:text-white">
-                    {{ item.item_brand }}
+                    {{ po.Tr_po_id }}
                   </p>
                 </td>
                 <td class="py-1 px-4 border">
                   <p class="text-black dark:text-white text-xs text-center">
-                    {{ item.formattedDate }}
+                    {{ po.formattedCreate }}
                   </p>
                 </td>
                 <td class="py-1 px-4 border">
                   <p class="text-xs text-black dark:text-white">
-                    {{ item.item_user_created }}
+                    {{ po.formattedNeed }}
+                  </p>
+                </td>
+                <td class="py-1 px-4 border">
+                  <p class="text-black dark:text-white text-xs text-center">
+                    {{ po.Tr_po_supplier }}
+                  </p>
+                </td>
+                <td class="py-1 px-4 border">
+                  <p class="text-xs text-black dark:text-white">
+                    {{ po.Tr_po_user_created }}
+                  </p>
+                </td>
+                <td class="py-1 px-4 border">
+                  <p class="text-xs text-black dark:text-white">
+                    {{ po.Tr_po_status }}
                   </p>
                 </td>
                 <td class="py-1 px-4">
                   <div class="flex items-center space-x-3.5 d-flex justify-center">
                     <router-link
                       class="hover:text-primary"
-                      :to="'/master/item/detail/' + item._id"
+                      :to="'/modules/work-order/gudang/detail/' + po._id"
                     >
                       <svg
                         class="fill-current"
@@ -242,8 +237,8 @@ onMounted(async () => {
                     </router-link>
 
                     <router-link
-                      class="hover:text-primary"
-                      :to="'/master/item/edit/' + item._id"
+                      class="hover:text-primary hidden"
+                      :to="'/master/location/edit/' + po._id"
                     >
                       <svg
                         class="fill-current"

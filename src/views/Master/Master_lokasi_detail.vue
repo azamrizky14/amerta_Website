@@ -9,15 +9,15 @@ import { useIndexStore } from "@/stores";
 
 import { ref, onMounted } from "vue";
 import router from "@/router";
-import { useRoute } from "vue-router";  
-  
-const route = useRoute();  
+import { useRoute } from "vue-router";
+
+const route = useRoute();
 
 const indexStore = useIndexStore();
 
-const optionsGudang = ref([])
+const optionsGudang = ref([]);
 const pageTitle = ref("Detail Lokasi");
-const pageList = ref(["Master", "Lokasi", "Tambah"]);
+const pageList = ref(["Master", "Lokasi", "Detail"]);
 
 // Saved Data
 const savedData = ref({
@@ -27,7 +27,7 @@ const savedData = ref({
   lokasi_alamat: {
     lokasi_alamat_gudang: "",
     lokasi_alamat_ruang: "",
-    lokasi_alamat_rak: ""
+    lokasi_alamat_rak: "",
   },
   lokasi_keterangan: "",
 
@@ -39,23 +39,22 @@ const savedData = ref({
 });
 
 onMounted(async () => {
-  const newData = await lokasi_getDataById(route.params.id)
-  savedData.value = newData
-  // console.log(route.params.id) 
+  const newData = await lokasi_getDataById(route.params.id);
+  savedData.value = newData;
+  // console.log(route.params.id)
   const date = await getDateToday("yyyy-MM-dd");
   // savedData.value.Tr_teknis_tanggal = date;
-  
-  const data = await lokasi_getDataByType('gudang', '')
-  if (data) {  
-   optionsGudang.value = data.data.map((x, i) => ({  
-    id: i,  
-    name: x.lokasi_nama,  
-   }));  
-  }  
+
+  const data = await lokasi_getDataByType(indexStore.user.companyName, "gudang", "");
+  if (data) {
+    optionsGudang.value = data.data.map((x, i) => ({
+      id: i,
+      name: x.lokasi_nama,
+    }));
+  }
 
   savedData.value.lokasi_created = date;
 });
-
 </script>
 
 <template>
@@ -77,17 +76,15 @@ onMounted(async () => {
                   Kode Lokasi
                 </label>
                 <input
-                 disabled
+                  disabled
                   type="text"
                   placeholder="Masukan Kode Lokasi"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.lokasi_id"
-                />  
+                />
               </div>
               <div class="lg:w-1/2">
-                <label
-                  class="mb-3 block text-sm font-medium text-black dark:text-white"
-                >
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                   Tipe Lokasi
                 </label>
                 <input
@@ -96,11 +93,11 @@ onMounted(async () => {
                   placeholder="Masukan Tipe Lokasi"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.lokasi_tipe"
-                />  
+                />
               </div>
             </div>
             <div class="flex flex-col gap-3">
-              <div>    
+              <div>
                 <label
                   class="mb-3 mt-2 block text-sm font-medium text-black dark:text-white"
                 >
@@ -154,9 +151,7 @@ onMounted(async () => {
               />
             </div>
             <!-- Qty Keluar Input -->
-            <div>
-
-            </div>
+            <div></div>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->
@@ -165,18 +160,18 @@ onMounted(async () => {
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="Data Tambahan">
           <div class="p-6.5">
-              <div>
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Keterangan
-                </label>
-                <textarea
-                  disabled
-                  rows="3"
-                  placeholder="Masukan keterangan disini!"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.lokasi_keterangan"
-                ></textarea>
-              </div>
+            <div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Keterangan
+              </label>
+              <textarea
+                disabled
+                rows="3"
+                placeholder="Masukan keterangan disini!"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.lokasi_keterangan"
+              ></textarea>
+            </div>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->

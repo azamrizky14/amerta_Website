@@ -6,8 +6,8 @@ import multiselectReadOnly from "@/components/Forms/SelectGroup/multiselectReadO
 import imageWithPreview from "@/components/Forms/SelectGroup/imageWithPreview.vue";  
   
 import { ref, onMounted } from "vue";  
-import { useRoute } from "vue-router";  
 import { adminTeknis_GetDataEvidentById } from "@/stores/functionAPI";  
+import { useRoute } from "vue-router";  
   
 const route = useRoute();  
   

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import { adminTeknis_GetDataByDomainAndDeleted } from "@/stores/functionAPI";
@@ -29,7 +29,22 @@ const searchQuery = ref("");
 
 // Pagination state
 const currentPage = ref(1);
-const itemsPerPage = 5;
+const itemsPerPageOptions = [5, 10, 20, 50]; // Pilihan jumlah data per halaman
+const itemsPerPage = ref(5);
+const pageInput = ref(currentPage.value);
+
+watch(itemsPerPage, () => {
+  currentPage.value = 1; // Reset to the first page
+});
+
+const jumpToPage = () => {
+  if (pageInput.value >= 1 && pageInput.value <= totalPages.value) {
+    changePage(pageInput.value);
+  } else {
+    // Reset to the current page if input is invalid
+    pageInput.value = currentPage.value;
+  }
+};
 
 // Filtered data based on search query
 const filteredData = computed(() => {
@@ -55,12 +70,12 @@ const visiblePages = computed(() => {
 
 // Total items based on the filtered data
 const totalItems = computed(() => filteredData.value.length);
-const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage));
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
 
 // Paginated data based on filtered results
 const paginatedData = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
   return filteredData.value.slice(start, end);
 });
 
@@ -271,10 +286,24 @@ onMounted(async () => {
           </table>
         </div>
 
-        <!-- Pagination and Total Data -->
         <div class="mt-4 flex justify-between items-center">
-          <p class="text-sm">Total Data: {{ totalItems }}</p>
-          <div class="flex space-x-2">
+          <!-- Menampilkan Data -->
+          <div class="flex items-center text-sm">
+            <label for="itemsPerPage" class="mr-2">Menampilkan</label>
+            <select
+              id="itemsPerPage"
+              v-model="itemsPerPage"
+              class="px-2 py-1 border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            >
+              <option v-for="option in itemsPerPageOptions" :key="option" :value="option">
+                {{ option }}
+              </option>
+            </select>
+            <span class="ml-2">dari {{ totalItems }} data</span>
+          </div>
+
+          <!-- Navigasi Pagination -->
+          <div class="flex space-x-2 items-center">
             <!-- Previous Button -->
             <button
               class="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
@@ -327,6 +356,20 @@ onMounted(async () => {
             >
               Next
             </button>
+
+            <!-- Page Number Input -->
+            <div class="flex items-center ml-4">
+              <label for="pageInput" class="mr-2">Go to:</label>
+              <input
+                id="pageInput"
+                type="number"
+                v-model.number="pageInput"
+                @keyup.enter="jumpToPage"
+                min="1"
+                :max="totalPages"
+                class="w-16 px-2 py-1 text-center border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              />
+            </div>
           </div>
         </div>
       </div>
