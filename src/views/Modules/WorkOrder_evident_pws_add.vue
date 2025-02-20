@@ -77,7 +77,7 @@ const options = [
 
 onMounted(async () => {
   const data = await getUserInternalByRole(
-    indexStore.user.companyName,
+    indexStore.user.companyName
     // "Teknisi " + savedData.value.Tr_teknis_jenis
   );
   optionsTeknisi.value = data.map((x, i) => ({
@@ -89,7 +89,9 @@ onMounted(async () => {
   const options = await adminTeknis_GetDataByDomainAndDeletedAndTypeAndStatus(
     "N",
     "PWS",
-    "open"
+    "open",
+    indexStore.company.companyCode,
+    indexStore.user.hierarchyCode
   );
   options.forEach((option) => {
     option.label = option.Tr_teknis_logistik_id + " - " + option.Tr_teknis_item;

@@ -161,6 +161,80 @@ const routes = [
   },
   // Evident PSB
   {
+    path: '/modules/work-order/evident/psb',
+    name: 'evidentPsb',
+    component: () => import('@/views/Modules/WorkOrder_evident_psb.vue'),
+    meta: {
+      title: 'Evident PSB',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/evident/psb/add',
+    name: 'EvidentPsbAdd',
+    component: () => import('@/views/Modules/WorkOrder_evident_psb_add.vue'),
+    meta: {
+      title: 'Evident PSB Add',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/evident/psb/detail/:logistikType/:logistikDate/:logistikNumber/:id',
+    name: 'EvidentPsbDetail',
+    component: () => import('@/views/Modules/WorkOrder_evident_psb_detail.vue'),
+    meta: {
+      title: 'Evident PSB Detail',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/evident/psb/edit/:logistikType/:logistikDate/:logistikNumber/:id',
+    name: 'EvidentPsbEdit',
+    component: () => import('@/views/Modules/WorkOrder_evident_psb_edit.vue'),
+    meta: {
+      title: 'Evident PSB Edit',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  // Evident MT
+  {
+    path: '/modules/work-order/evident/mt',
+    name: 'evidentMt',
+    component: () => import('@/views/Modules/WorkOrder_evident_mt.vue'),
+    meta: {
+      title: 'Evident MT',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/evident/mt/add',
+    name: 'EvidentMtAdd',
+    component: () => import('@/views/Modules/WorkOrder_evident_mt_add.vue'),
+    meta: {
+      title: 'Evident MT Add',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/evident/mt/detail/:logistikType/:logistikDate/:logistikNumber/:id',
+    name: 'EvidentMtDetail',
+    component: () => import('@/views/Modules/WorkOrder_evident_mt_detail.vue'),
+    meta: {
+      title: 'Evident MT Detail',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/evident/mt/edit/:logistikType/:logistikDate/:logistikNumber/:id',
+    name: 'EvidentMtEdit',
+    component: () => import('@/views/Modules/WorkOrder_evident_mt_edit.vue'),
+    meta: {
+      title: 'Evident MT Edit',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  // Evident PWS
+  {
     path: '/modules/work-order/evident/pws',
     name: 'evidentPws',
     component: () => import('@/views/Modules/WorkOrder_evident_pws.vue'),
@@ -306,6 +380,15 @@ const routes = [
     component: () => import('@/views/Modules/WorkOrder_purchase_po_add.vue'),
     meta: {
       title: 'Purchase Order Add',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/purchase/po/detail/:id',
+    name: 'woPurchaseOrderDetail',
+    component: () => import('@/views/Modules/WorkOrder_purchase_po_detail.vue'),
+    meta: {
+      title: 'Purchase Order Detail',
       requiresAuth: true // Add this line to protect this route
     }
   },

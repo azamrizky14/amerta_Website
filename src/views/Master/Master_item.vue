@@ -21,7 +21,6 @@ const dataHeader = ref([
   { name: "Nama. Item", class: "min-w-[150px] py-2 px-4" },
   { name: "Tipe", class: "min-w-[75px] py-2 px-4" },
   { name: "Satuan", class: "min-w-[50px] py-2 px-4" },
-  { name: "Merk", class: "py-2 px-4" },
   { name: "Tgl. Dibuat", class: "min-w-[100px] py-2 px-4" },
   { name: "Dibuat Oleh", class: "py-2 px-4" },
 ]);
@@ -89,7 +88,11 @@ const changePage = (page: number) => {
 };
 
 onMounted(async () => {
-  const data = await item_getAllItemWithStatus(indexStore.user.companyName, "N");
+  const data = await item_getAllItemWithStatus(
+    indexStore.company.companyCode,
+    indexStore.user.hierarchyCode,
+    "N"
+  );
 
   dataTable.value = await Promise.all(
     data.map(async (item) => ({
@@ -206,11 +209,6 @@ onMounted(async () => {
                 <td class="py-1 px-4 border">
                   <p class="text-xs text-black dark:text-white text-center">
                     {{ item.item_satuan }}
-                  </p>
-                </td>
-                <td class="py-1 px-4 border">
-                  <p class="text-xs text-black dark:text-white">
-                    {{ item.item_brand }}
                   </p>
                 </td>
                 <td class="py-1 px-4 border">

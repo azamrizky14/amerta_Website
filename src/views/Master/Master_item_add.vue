@@ -46,7 +46,6 @@ const savedData = ref({
   item_gambar: null,
   item_id: "",
   item_nama: "",
-  item_brand: "",
   item_tipe: "",
   item_satuan: "",
   item_keterangan: "",
@@ -60,6 +59,7 @@ const savedData = ref({
   item_updated: "",
   item_deleted: "N",
   companyName: indexStore.user.companyName,
+  companyCode: indexStore.company.companyCode,
 });
 
 const materialData = ref([
@@ -136,7 +136,7 @@ const validateQtyKeluar = (index) => {
 };
 
 const submitData = async () => {
-  console.log(savedData.value)
+  console.log(savedData.value);
   // Clear previous errors
   dataError.value.splice(0, dataError.value.length);
 
@@ -146,28 +146,6 @@ const submitData = async () => {
       dataError.value.push(`${validator.label} tidak boleh kosong!`);
     }
   });
-
-  // // Validasi untuk setiap objek dalam materialData
-  // materialData.value.forEach((item, index) => {
-  //   // Validasi label
-  //   if (!item.satuan_awal || item.satuan_awal.trim() === "") {
-  //     dataError.value.push(`Konversi ${index + 1}: Satuan Awal tidak boleh kosong!`);
-  //   }
-  //   // Validasi qty
-  //   if (!item.qty_awal || String(item.qty_awal).trim() === "") {
-  //     dataError.value.push(`Konversi ${index + 1}: Qty. Keluar tidak boleh kosong!`);
-  //   }
-  //   if (!item.satuan_akhir || item.satuan_akhir.trim() === "") {
-  //     dataError.value.push(`Konversi ${index + 1}: Satuan Awal tidak boleh kosong!`);
-  //   }
-  //   // Validasi qty
-  //   if (!item.qty_akhir || String(item.qty_akhir).trim() === "") {
-  //     dataError.value.push(`Konversi ${index + 1}: Qty. Keluar tidak boleh kosong!`);
-  //   }
-
-  //   // Tambahkan validasi qtyKeluar tidak boleh kurang dari 1
-  //   validateQtyKeluar(index);
-  // });
 
   // Jika ada error, tampilkan di halaman dan hentikan submit
   if (dataError.value.length > 0) {
@@ -200,11 +178,12 @@ const submitData = async () => {
       }
 
       if (fixData.item_tipe && fixData.item_tipe.value) {
-        fixData.item_tipe = fixData.item_tipe.value
+        fixData.item_tipe = fixData.item_tipe.value;
       }
-      fixData.item_konversi = JSON.stringify(fixData.item_konversi)
-      fixData.item_harga = JSON.stringify(fixData.item_harga)
-      fixData.item_bundle = JSON.stringify(fixData.item_bundle)
+      fixData.item_konversi = JSON.stringify(fixData.item_konversi);
+      fixData.item_harga = JSON.stringify(fixData.item_harga);
+      fixData.item_bundle = JSON.stringify(fixData.item_bundle);
+      fixData.companyCode = JSON.stringify(fixData.companyCode);
 
       const sendData = new FormData();
 
@@ -307,7 +286,7 @@ const removeImage = (field: string) => {
               </div>
             </div>
 
-            <div>
+            <div class="hidden">
               <label
                 class="mb-3 mt-2 block text-sm font-medium text-black dark:text-white"
               >

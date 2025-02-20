@@ -88,7 +88,11 @@ const changePage = (page: number) => {
 };
 
 onMounted(async () => {
-  const data = await lokasi_getAllLocationWithStatus(indexStore.user.companyName, "N");
+  const data = await lokasi_getAllLocationWithStatus(
+    indexStore.company.companyCode,
+    indexStore.user.hierarchyCode,
+    "N"
+  );
 
   dataTable.value = await Promise.all(
     data.map(async (lokasi) => ({

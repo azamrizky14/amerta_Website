@@ -41,7 +41,7 @@ const optionsType = [
   { label: "Aset", value: "Aset" },
 ];
 
-const imageUrl = 'images/master_item';
+const imageUrl = "images/master_item";
 const pageTitle = ref("Detail Item");
 const pageList = ref(["Master", "Item", "Detail"]);
 
@@ -50,7 +50,6 @@ const savedData = ref({
   item_gambar: null,
   item_id: "",
   item_nama: "",
-  item_brand: "",
   item_tipe: "",
   item_satuan: "",
   item_keterangan: "",
@@ -71,8 +70,8 @@ const materialData = ref([
 ]);
 
 onMounted(async () => {
-  const data = await item_getItemById(route.params.id)
-  savedData.value = data
+  const data = await item_getItemById(route.params.id);
+  savedData.value = data;
 });
 
 // Function
@@ -127,7 +126,7 @@ const removeImage = (field: string) => {
                   Kode Item
                 </label>
                 <input
-                disabled
+                  disabled
                   type="text"
                   placeholder="Detail Kode Item"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -139,7 +138,7 @@ const removeImage = (field: string) => {
                   Nama Item
                 </label>
                 <input
-                disabled
+                  disabled
                   type="text"
                   placeholder="Detail Nama Item"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -155,7 +154,7 @@ const removeImage = (field: string) => {
                   Tipe Item
                 </label>
                 <input
-                disabled
+                  disabled
                   type="text"
                   placeholder="Detail Nama Item"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -169,7 +168,7 @@ const removeImage = (field: string) => {
                   Satuan
                 </label>
                 <input
-                disabled
+                  disabled
                   type="text"
                   placeholder="Detail Satuan Item"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -178,7 +177,7 @@ const removeImage = (field: string) => {
               </div>
             </div>
 
-            <div>
+            <div class="hidden">
               <label
                 class="mb-3 mt-2 block text-sm font-medium text-black dark:text-white"
               >
@@ -212,7 +211,7 @@ const removeImage = (field: string) => {
                   Keterangan
                 </label>
                 <textarea
-                disabled
+                  disabled
                   rows="3"
                   placeholder="Detail keterangan disini!"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -242,7 +241,7 @@ const removeImage = (field: string) => {
                   Qty. Awal
                 </label>
                 <input
-                disabled
+                  disabled
                   type="number"
                   placeholder="Qty"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-3 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -258,7 +257,7 @@ const removeImage = (field: string) => {
                   Satuan
                 </label>
                 <input
-                disabled
+                  disabled
                   type="text"
                   placeholder="Satuan"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-2 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -274,7 +273,7 @@ const removeImage = (field: string) => {
                   Qty. Akhir
                 </label>
                 <input
-                disabled
+                  disabled
                   type="number"
                   placeholder="Qty"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-3 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -290,7 +289,7 @@ const removeImage = (field: string) => {
                   Satuan
                 </label>
                 <input
-                disabled
+                  disabled
                   type="text"
                   placeholder="Satuan"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-2 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -323,9 +322,7 @@ const removeImage = (field: string) => {
                 />
               </div>
             </div>
-            <div v-else>
-              Tidak Ada Konversi Satuan!
-            </div>
+            <div v-else>Tidak Ada Konversi Satuan!</div>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->

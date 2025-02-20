@@ -326,7 +326,7 @@ onMounted(async () => {
           <div class="w-6/12">
             <label
               class="mb-3 block text-sm font-medium text-black dark:text-white"
-              v-if="data.label.toLowerCase().includes('ont') && data.qty === 1"
+              v-if="data.label.toLowerCase().includes('ont') && index > 0"
             >
               ONT
             </label>

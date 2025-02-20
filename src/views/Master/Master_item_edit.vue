@@ -40,7 +40,7 @@ const optionsType = [
   { label: "Aset", value: "Aset" },
 ];
 
-const imageUrl = 'images/master_item';
+const imageUrl = "images/master_item";
 const pageTitle = ref("Edit Item");
 const pageList = ref(["Master", "Item", "Edit"]);
 
@@ -49,7 +49,6 @@ const savedData = ref({
   item_gambar: null,
   item_id: "",
   item_nama: "",
-  item_brand: "",
   item_tipe: "",
   item_satuan: "",
   item_keterangan: "",
@@ -70,8 +69,8 @@ const materialData = ref([
 ]);
 
 onMounted(async () => {
-  const data = await item_getItemById(route.params.id)
-  savedData.value = data
+  const data = await item_getItemById(route.params.id);
+  savedData.value = data;
 });
 
 // Function
@@ -138,7 +137,7 @@ const validateQtyKeluar = (index) => {
 };
 
 const submitData = async () => {
-  console.log(savedData.value)
+  console.log(savedData.value);
   // Clear previous errors
   dataError.value.splice(0, dataError.value.length);
 
@@ -202,11 +201,13 @@ const submitData = async () => {
       }
 
       if (fixData.item_tipe && fixData.item_tipe.value) {
-        fixData.item_tipe = fixData.item_tipe.value
+        fixData.item_tipe = fixData.item_tipe.value;
       }
-      fixData.item_konversi = JSON.stringify(fixData.item_konversi)
-      fixData.item_harga = JSON.stringify(fixData.item_harga)
-      fixData.item_bundle = JSON.stringify(fixData.item_bundle)
+      fixData.item_konversi = JSON.stringify(fixData.item_konversi);
+      fixData.item_harga = JSON.stringify(fixData.item_harga);
+      fixData.item_bundle = JSON.stringify(fixData.item_bundle);
+      fixData.item_detail = JSON.stringify(fixData.item_detail);
+      fixData.companyCode = JSON.stringify(fixData.companyCode);
 
       const sendData = new FormData();
 
@@ -224,8 +225,8 @@ const submitData = async () => {
         router.push("/master/item");
       });
     } catch (error) {
-      console.log(error)
-      if (error.status === 400) await failedCreate(error.response.data.message)
+      console.log(error);
+      if (error.status === 400) await failedCreate(error.response.data.message);
       else await failedCreate(error);
     }
   }
@@ -254,7 +255,7 @@ const removeImage = (field: string) => {
               <div class="lg:w-1/3">
                 <div class="flex border flex-col items-center p-2 justify-end relative">
                   <imageWithPreview
-                    :url="imageUrl" 
+                    :url="imageUrl"
                     label="Gambar"
                     v-model="savedData.item_gambar"
                     @update:file="(file) => (savedData.item_gambar = file)"
@@ -312,7 +313,7 @@ const removeImage = (field: string) => {
               </div>
             </div>
 
-            <div>
+            <div class="hidden">
               <label
                 class="mb-3 mt-2 block text-sm font-medium text-black dark:text-white"
               >
@@ -362,31 +363,23 @@ const removeImage = (field: string) => {
           <div class="p-6.5">
             <div class="flex flex-col gap-2 xl:flex-row">
               <div class="w-3/12">
-                <div
-                  class="block text-sm font-medium text-black dark:text-white"
-                >
+                <div class="block text-sm font-medium text-black dark:text-white">
                   Qty. Awal
                 </div>
               </div>
               <div class="w-2/12">
-                <div
-                  class="block text-sm font-medium text-black dark:text-white"
-                >
+                <div class="block text-sm font-medium text-black dark:text-white">
                   Satuan
                 </div>
               </div>
               <div class="flex items-center"></div>
               <div class="w-3/12">
-                <div
-                  class="block text-sm font-medium text-black dark:text-white"
-                >
+                <div class="block text-sm font-medium text-black dark:text-white">
                   Qty. Akhir
                 </div>
               </div>
               <div class="w-2/12">
-                <div
-                  class="block text-sm font-medium text-black dark:text-white"
-                >
+                <div class="block text-sm font-medium text-black dark:text-white">
                   Satuan
                 </div>
               </div>

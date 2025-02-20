@@ -57,7 +57,7 @@ watch(() => props.modelValue, (newValue) => {
     <div class="mt-4">
       <img
         v-if="typeof props.modelValue === 'string'"
-        :src="imageSrc ? API+'/'+ url +'/'+imageSrc : 'https://via.placeholder.com/150'"
+        :src="imageSrc ? API+'/'+ url +'/'+imageSrc : 'https://placehold.co/150'"
         alt="Uploaded Preview"
         class="w-[100px] h-[100px] object-cover rounded"
         :class="props.disabled ? 'cursor-default' : 'cursor-pointer'"
@@ -65,7 +65,7 @@ watch(() => props.modelValue, (newValue) => {
       />
       <img
         v-else
-        :src="imageSrc || 'https://via.placeholder.com/150'"
+        :src="imageSrc || 'https://placehold.co/150'"
         alt="Uploaded Preview"
         :class="props.disabled ? 'cursor-default' : 'cursor-pointer'"
         class="w-[100px] h-[100px] object-cover rounded"

@@ -222,7 +222,7 @@ onMounted(async () => {
                   <div class="flex items-center space-x-3.5 d-flex justify-center">
                     <router-link
                       class="hover:text-primary"
-                      :to="'/modules/work-order/gudang/detail/' + po._id"
+                      :to="'/modules/work-order/purchase/po/detail/' + po._id"
                     >
                       <svg
                         class="fill-current"
@@ -238,7 +238,7 @@ onMounted(async () => {
 
                     <router-link
                       class="hover:text-primary hidden"
-                      :to="'/master/location/edit/' + po._id"
+                      :to="'/modules/work-order/purchase/po/detail/' + po._id"
                     >
                       <svg
                         class="fill-current"

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API, domain } from "@/API/";
+import { API } from "@/API/";
 
 export const userInternal_Login = async (data) => {
   const response = await axios.post(API+'/api/userInternal/login', data)
@@ -8,33 +8,33 @@ export const userInternal_Login = async (data) => {
 }
 
 // Bon & Material
-export const BonMaterial_GetPrefixByTypeAndDate = async (type, date) => {
-  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getBonPrefix/'+ type + '/' +date)
+export const BonMaterial_GetPrefixByTypeAndDate = async (type, date, domain) => {
+  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getBonPrefix/'+ type + '/' +date+  '/' +domain)
   var suppData = response.data;
   return suppData
 }
 
 // Admin Teknisi
-export const adminTeknis_GetDataByDomainAndDeleted = async (deleted) => {
-  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdata/'+ domain + '/' + deleted)
+export const adminTeknis_GetDataByDomainAndDeleted = async (deleted, domain, hierarchy) => {
+  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdata/'+ domain + '/' + hierarchy + '/' + deleted)
   var suppData = response.data;
   return suppData
 }
 
-export const adminTeknis_GetDataByDomainAndDeletedAndType = async (deleted, type) => {
+export const adminTeknis_GetDataByDomainAndDeletedAndType = async (deleted, type, domain) => {
   const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdata/'+ domain + '/' + deleted + '/' + type)
   var suppData = response.data;
   return suppData
 }
 
-export const adminTeknis_GetDataEvidentByType = async (deleted, type) => {
-  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdataEvident/'+ domain + '/' + deleted + '/' + type)
+export const adminTeknis_GetDataEvidentByType = async (deleted, type, domain, hierarchy) => {
+  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdataEvident/'+ domain + '/' + hierarchy + '/' + deleted + '/' + type)
   var suppData = response.data;
   return suppData
 }
 
-export const adminTeknis_GetDataByDomainAndDeletedAndTypeAndStatus = async (deleted, type, status) => {
-  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdata/'+ domain + '/' + deleted + '/' + type + '/' + status)
+export const adminTeknis_GetDataByDomainAndDeletedAndTypeAndStatus = async (deleted, type, status, domain, hierarchy) => {
+  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getdata/'+ domain + '/' + hierarchy + '/' + deleted + '/' + type + '/' + status)
   var suppData = response.data;
   return suppData
 }
@@ -47,6 +47,12 @@ export const adminTeknis_GetDataEvidentById = async (logistik, id) => {
 
 export const adminTeknis_GetDataById = async (id) => {
   const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getbyid/'+ id)
+  var suppData = response.data;
+  return suppData
+}
+
+export const adminTeknis_GetTotalDataPerMonth = async (domain, hierarchy,  type, month) => {
+  const response = await axios.get(API+'/api/Tr_teknis/Trteknis/getTotalData/'+ domain + '/' + hierarchy +'/'+ type + '/' + month)
   var suppData = response.data;
   return suppData
 }
@@ -114,15 +120,23 @@ export const getUserInternalByRole = async (company, role) => {
   return suppData
 }
 
+// Company
+export const company_getDataByCode = async (code) => {
+  const response = await axios.get(API+'/api/company/detailByCode/'+ code)
+  var suppData = response.data;
+  return suppData
+}
+
 // User Role
 export const getAllRole = async (data) => {
   const response = await axios.get(API+'/api/role/', data)
   var suppData = response.data;
   return suppData
 }
+
 // Item
-export const item_getAllItemWithStatus = async (company, status) => {
-  const response = await axios.get(API+'/api/item/getAllItem/'+company+'/'+status)
+export const item_getAllItemWithStatus = async (company, hierarchy, status) => {
+  const response = await axios.get(API+'/api/item/getAllItem/'+company+'/'+hierarchy+'/'+status)
   var suppData = response.data;
   return suppData
 }
@@ -135,7 +149,7 @@ export const item_CreateDataWithImages = async (data) => {
   const response = await axios.post(API+'/api/item/createImage', data)
   var suppData = response.data;
   return suppData
-}
+} 
 export const item_UpdateDataWithImages = async (data, id) => {
   const response = await axios.put(API+'/api/item/updateImage/'+id, data)
   var suppData = response.data;
@@ -143,8 +157,8 @@ export const item_UpdateDataWithImages = async (data, id) => {
 }
 
 // Location
-export const lokasi_getAllLocationWithStatus = async (company, status) => {
-  const response = await axios.get(API+'/api/location/getAllLocation/'+company+'/'+status)
+export const lokasi_getAllLocationWithStatus = async (domain, hierarchy, status) => {
+  const response = await axios.get(API+'/api/location/getAllLocation/'+domain+'/'+hierarchy+'/'+status)
   var suppData = response.data;
   return suppData
 }
@@ -176,6 +190,24 @@ export const lokasi_UpdateData = async (data, id) => {
 
 export const po_getAllDataWithoutItem = async (company, deleted, status) => {
   const response = await axios.get(API+'/api/Tr_po/TrPo/getdata/'+company+'/'+deleted+'/'+status)
+  var suppData = response.data;
+  return suppData
+}
+
+export const po_getDataById = async (id) => {
+  const response = await axios.get(API+'/api/Tr_po/TrPo/getDataById/'+id)
+  var suppData = response.data;
+  return suppData
+}
+
+export const po_GetPrefixByDate = async (date) => {
+  const response = await axios.get(API+'/api/Tr_po/TrPo/getPoPrefix/'+date)
+  var suppData = response.data;
+  return suppData
+}
+
+export const po_CreatePO = async (data) => {
+  const response = await axios.post(API+'/api/Tr_po/TrPo/create', data)
   var suppData = response.data;
   return suppData
 }
