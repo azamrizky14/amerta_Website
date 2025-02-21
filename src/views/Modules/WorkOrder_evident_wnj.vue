@@ -10,7 +10,9 @@ import {
   mdiPlusCircleOutline,
   mdiSquareEditOutline,
 } from "@mdi/js";
+import { useIndexStore } from "@/stores";
 
+const indexStore = useIndexStore();
 const pageTitle = ref("Evident - WNJ");
 const pageList = ref(["Work Order", "Evident", "WNJ"]);
 const dataHeader = ref([
@@ -87,7 +89,12 @@ const visiblePages = computed(() => {
 
 // Change page function
 const getMainData = async () => {
-  const data = await adminTeknis_GetDataEvidentByType("N", "WNJ");
+  const data = await adminTeknis_GetDataEvidentByType(
+    "N",
+    "WNJ",
+    indexStore.company.companyCode,
+    indexStore.user.hierarchyCode
+  );
   dataTable.value = data;
 };
 

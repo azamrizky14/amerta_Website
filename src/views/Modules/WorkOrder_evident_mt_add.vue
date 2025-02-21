@@ -19,8 +19,8 @@ import { getDateToday } from "@/stores/date";
 import { showLoading, successCreate, failedCreate } from "@/stores/swal";
 
 const indexStore = useIndexStore();
-const pageTitle = ref("Evident - Tambah WNJ");
-const pageList = ref(["Work Order", "Evident", "WNJ", "Tambah"]);
+const pageTitle = ref("Evident - Tambah MT");
+const pageList = ref(["Work Order", "Evident", "MT", "Tambah"]);
 
 const savedData = ref({
   Tr_teknis_pelanggan_id: "",
@@ -29,8 +29,8 @@ const savedData = ref({
   Tr_teknis_user_updated: "",
   Tr_teknis_keterangan: "",
   Tr_teknis_logistik_id: "",
-  Tr_teknis_jenis: "WNJ",
-  Tr_teknis_kategori: "",
+  Tr_teknis_jenis: "MT",
+  Tr_teknis_kategori: "MT",
   Tr_teknis_trouble: "",
   Tr_teknis_action: "",
   Tr_teknis_team: [],
@@ -88,7 +88,7 @@ onMounted(async () => {
 
   const options = await adminTeknis_GetDataByDomainAndDeletedAndTypeAndStatus(
     "N",
-    "WNJ",
+    "MT",
     "open",
     indexStore.company.companyCode,
     indexStore.user.hierarchyCode
@@ -105,6 +105,8 @@ onMounted(async () => {
 });
 
 const handleOptionChange = async (selected) => {
+  console.log("material data", materialData);
+  console.log("logistik data", logistikData);
   materialData.value.splice(0, materialData.value.length);
   if (selected.Tr_teknis_work_order_tersedia) {
     savedData.value.Tr_teknis_logistik_id = selected.Tr_teknis_logistik_id;
@@ -160,16 +162,14 @@ const validateForm = () => {
     { key: "Tr_teknis_action", label: "Solusi" },
   ];
 
-  if (savedData.value.Tr_teknis_kategori.label === "MT") {
-    validatorMT.forEach((validator) => {
-      if (
-        (validator.key === "logistikData" && !logistikData.value) ||
-        (!savedData.value[validator.key] && validator.key !== "logistikData")
-      ) {
-        dataError.value.push(`${validator.label} tidak boleh kosong!`);
-      }
-    });
-  }
+  validatorMT.forEach((validator) => {
+    if (
+      (validator.key === "logistikData" && !logistikData.value) ||
+      (!savedData.value[validator.key] && validator.key !== "logistikData")
+    ) {
+      dataError.value.push(`${validator.label} tidak boleh kosong!`);
+    }
+  });
 
   return dataError.value.length === 0;
 };
@@ -232,7 +232,6 @@ const submitData = async () => {
         );
       }
 
-      fixData.Tr_teknis_kategori = fixData.Tr_teknis_kategori.label;
       fixData.Tr_teknis_team = JSON.stringify(fixData.Tr_teknis_team.map((x) => x.name));
 
       const sendData = new FormData();
@@ -248,7 +247,7 @@ const submitData = async () => {
       await adminTeknis_CreateDataEvidentWithImages(sendData);
 
       await successCreate().then(() => {
-        router.push("/modules/work-order/evident/wnj");
+        router.push("/modules/work-order/evident/mt");
       });
     } catch (error) {
       await failedCreate(error);
@@ -269,7 +268,7 @@ const cancelAdd = async () => {
   });
 
   if (result.isConfirmed) {
-    await router.push("/modules/work-order/evident/wnj");
+    await router.push("/modules/work-order/evident/mt");
   }
 };
 </script>
@@ -282,8 +281,8 @@ const cancelAdd = async () => {
       <div class="flex flex-col gap-9">
         <DefaultCard cardTitle="Masukan Data">
           <div class="flex flex-col gap-2 p-6.5">
-            <div class="flex flex-col gap-6 xl:flex-row">
-              <div class="w-2/3">
+            <div class="flex flex-col gap-6">
+              <div>
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                   Kode Bon Material
                 </label>
@@ -292,16 +291,6 @@ const cancelAdd = async () => {
                   :options="optionsType"
                   v-model="logistikData"
                   @option-changed="handleOptionChange"
-                />
-              </div>
-              <div class="w-1/3">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Kategori
-                </label>
-                <SelectGroup
-                  placeholder="Pilih Kategori"
-                  :options="options"
-                  v-model="savedData.Tr_teknis_kategori"
                 />
               </div>
             </div>
@@ -354,7 +343,7 @@ const cancelAdd = async () => {
               />
             </div>
 
-            <div v-if="savedData.Tr_teknis_kategori.label === 'MT'">
+            <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Masalah (Trouble)
               </label>
@@ -365,7 +354,7 @@ const cancelAdd = async () => {
                 v-model="savedData.Tr_teknis_trouble"
               ></textarea>
             </div>
-            <div v-if="savedData.Tr_teknis_kategori.label === 'MT'">
+            <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Solusi (Action)
               </label>
@@ -479,143 +468,7 @@ const cancelAdd = async () => {
 
       <div class="flex flex-col gap-9">
         <DefaultCard cardTitle="Masukan Gambar">
-          <div
-            class="grid grid-cols-2"
-            v-if="
-              savedData.Tr_teknis_kategori && savedData.Tr_teknis_kategori.value === 'PSB'
-            "
-          >
-            <div class="flex border flex-col items-center p-2 justify-end relative">
-              <inputImageWithPreview
-                label="Evident Progress"
-                v-model="savedData.Tr_teknis_evident_progress"
-              />
-            </div>
-
-            <div class="flex border flex-col items-center p-2 justify-end relative">
-              <inputImageWithPreview
-                label="Evident SpeedTest"
-                v-model="savedData.Tr_teknis_evident_speed_test"
-              />
-            </div>
-
-            <div class="col-span-3 grid grid-cols-2">
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="Review Google"
-                  v-model="savedData.Tr_teknis_evident_review_google"
-                />
-              </div>
-
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="Kertas Form PSB"
-                  v-model="savedData.Tr_teknis_evident_kertas_psb"
-                />
-              </div>
-            </div>
-
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">
-                Evident Redaman
-              </p>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="ODP"
-                  v-model="savedData.Tr_teknis_evident_redaman_odp"
-                />
-              </div>
-
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="ONT"
-                  v-model="savedData.Tr_teknis_evident_redaman_ont"
-                />
-              </div>
-            </div>
-
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">
-                Evident ONT
-              </p>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="ONT (Tampak Depan)"
-                  v-model="savedData.Tr_teknis_evident_ont_depan"
-                />
-              </div>
-
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="ONT (Tampak Belakang)"
-                  v-model="savedData.Tr_teknis_evident_ont_belakang"
-                />
-              </div>
-            </div>
-
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">
-                Evident ODP
-              </p>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="ODP (Tampak Depan)"
-                  v-model="savedData.Tr_teknis_evident_odp_depan"
-                />
-              </div>
-
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="PORT (Tampak Dalam)"
-                  v-model="savedData.Tr_teknis_evident_odp_dalam"
-                />
-              </div>
-            </div>
-
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">
-                Evident Customer
-              </p>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="Dengan Pelanggan"
-                  v-model="savedData.Tr_teknis_evident_pelanggan_dengan_pelanggan"
-                />
-              </div>
-
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="Depan Rumah Pelanggan"
-                  v-model="savedData.Tr_teknis_evident_pelanggan_depan_rumah"
-                />
-              </div>
-            </div>
-
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">
-                Evident Marking Kabel
-              </p>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="Start"
-                  v-model="savedData.Tr_teknis_evident_marking_dc_start"
-                />
-              </div>
-
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <inputImageWithPreview
-                  label="End"
-                  v-model="savedData.Tr_teknis_evident_marking_dc_end"
-                />
-              </div>
-            </div>
-          </div>
-          <div
-            class="grid grid-cols-2"
-            v-else-if="
-              savedData.Tr_teknis_kategori && savedData.Tr_teknis_kategori.value === 'MT'
-            "
-          >
+          <div class="grid grid-cols-2">
             <div class="col-span-3 grid grid-cols-2">
               <p class="text-black dark:text-white text-center p-2 col-span-2">
                 Evident Sebelum

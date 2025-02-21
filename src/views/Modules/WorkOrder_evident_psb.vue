@@ -1,30 +1,29 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import { adminTeknis_GetDataByDomainAndDeleted } from "@/stores/functionAPI";
-import { formatDate } from "@/stores/date";
+import { adminTeknis_GetDataEvidentByType } from "@/stores/functionAPI";
 import {
   mdiEyeOutline,
-  mdiSquareEditOutline,
   mdiMagnify,
   mdiRefresh,
   mdiPlusCircleOutline,
+  mdiSquareEditOutline,
 } from "@mdi/js";
 import { useIndexStore } from "@/stores";
 
 const indexStore = useIndexStore();
-const pageTitle = ref("Bon & Material");
-const pageList = ref(["Work Order", "Bon & Material"]);
+const pageTitle = ref("Evident - PSB");
+const pageList = ref(["Work Order", "Evident", "PSB"]);
 const dataHeader = ref([
   { name: "No.", class: "py-2 pl-3" },
   { name: "Tgl. Dibuat", class: "min-w-[100px] py-2 px-4" },
-  { name: "No. Logistik", class: "min-w-[160px] py-2 px-4" },
-  { name: "Jenis", class: "min-w-[50px] py-2 px-4" },
-  { name: "PIC", class: "min-w-[200px] py-2 px-4 xl:pl-11" },
-  // { name: 'Teknisi', class: 'min-w-[90px] py-2 px-4' },
-  { name: "Tas", class: "min-w-[100px] py-2 px-4" },
-  { name: "Status", class: "min-w-[100px] py-2 px-4" },
+  { name: "No. Logistik", class: "min-w-[150px] py-2 px-4" },
+  { name: "Id. User", class: "min-w-[100px] py-2 px-4" },
+  { name: "Nama. User", class: "min-w-[150px] py-2 px-4" },
+  { name: "Server", class: "py-2 px-4" },
+  { name: "Kategori", class: "py-2 px-4" },
+  { name: "Tr Teknis", class: "py-2 px-4" },
 ]);
 let dataTable = ref([]);
 const searchQuery = ref("");
@@ -56,20 +55,6 @@ const filteredData = computed(() => {
   );
 });
 
-const visiblePages = computed(() => {
-  const pages = [];
-  const range = 2; // Number of pages to show before and after the current page
-
-  let start = Math.max(1, currentPage.value - range);
-  let end = Math.min(totalPages.value, currentPage.value + range);
-
-  for (let i = start; i <= end; i++) {
-    pages.push(i);
-  }
-
-  return pages;
-});
-
 // Total items based on the filtered data
 const totalItems = computed(() => filteredData.value.length);
 const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
@@ -88,34 +73,44 @@ const changePage = (page: number) => {
   }
 };
 
-// Fetch data on mount
-onMounted(async () => {
-  const data = await adminTeknis_GetDataByDomainAndDeleted(
+const visiblePages = computed(() => {
+  const pages = [];
+  const range = 2; // Number of pages to show before and after the current page
+
+  let start = Math.max(1, currentPage.value - range);
+  let end = Math.min(totalPages.value, currentPage.value + range);
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+
+  return pages;
+});
+
+// Change page function
+const getMainData = async () => {
+  const data = await adminTeknis_GetDataEvidentByType(
     "N",
+    "PSB",
     indexStore.company.companyCode,
     indexStore.user.hierarchyCode
   );
+  dataTable.value = data;
+};
 
-  dataTable.value = await Promise.all(
-    data.map(async (item) => ({
-      ...item,
-      formattedDate: await formatDate(item.Tr_teknis_tanggal, "dd-MM-yyyy"),
-    }))
-  );
+onMounted(async () => {
+  await getMainData();
 });
 </script>
 
 <template>
   <DefaultLayout>
-    <!-- Breadcrumb Start -->
     <BreadcrumbDefault :pageTitle="pageTitle" :pageList="pageList" />
-    <!-- Breadcrumb End -->
 
     <div class="flex flex-col gap-10">
       <div
         class="rounded-sm border border-stroke bg-white px-5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5"
       >
-        <!-- Search and Helper -->
         <div
           class="helper border-2 flex justify-between bg-gray-2 text-left dark:bg-meta-4 text-black dark:text-white py-2 px-4"
         >
@@ -143,8 +138,7 @@ onMounted(async () => {
             </div>
           </div>
           <div class="right-data flex items-center flex-row-reverse">
-            <!-- Add Button -->
-            <router-link to="/modules/work-order/bon-dan-material/add" class="px-1">
+            <router-link to="/modules/work-order/evident/psb/add" class="px-1">
               <svg
                 class="fill-current hover:text-primary"
                 width="22"
@@ -156,8 +150,7 @@ onMounted(async () => {
                 <path :d="mdiPlusCircleOutline" fill="" />
               </svg>
             </router-link>
-            <!-- Refresh Button -->
-            <button class="px-1">
+            <button class="px-1" @click="getMainData()">
               <svg
                 class="fill-current hover:text-primary"
                 width="24"
@@ -172,7 +165,6 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- Table -->
         <div class="max-w-full overflow-x-auto">
           <table class="w-full table-auto">
             <thead>
@@ -192,11 +184,11 @@ onMounted(async () => {
             <tbody>
               <tr v-for="(item, index) in paginatedData" :key="index" class="border">
                 <td class="pl-3 text-xs border">
-                  {{ (currentPage - 1) * itemsPerPage + index + 1 }}
+                  {{ index + 1 }}
                 </td>
                 <td class="py-1 px-4 border">
                   <p class="text-black dark:text-white text-xs text-center">
-                    {{ item.formattedDate }}
+                    {{ item.Tr_teknis_created }}
                   </p>
                 </td>
                 <td class="py-1 px-4 border">
@@ -205,44 +197,40 @@ onMounted(async () => {
                   </p>
                 </td>
                 <td class="py-1 px-4 border">
-                  <p class="text-black dark:text-white text-xs text-center">
-                    {{ item.Tr_teknis_jenis }}
-                  </p>
-                </td>
-                <td class="py-1 px-4 border">
                   <p class="text-xs text-black dark:text-white">
-                    {{ item.Tr_teknis_user_created }}
+                    {{ item.Tr_teknis_pelanggan_id }}
                   </p>
                 </td>
-                <!-- <td class="py-1 px-4 border">
-                  <h5
-                    class="font-medium text-black text-xs dark:text-white text-center"
-                  >
-                    {{ item.Tr_teknis_team.length }}
-                  </h5>
-                </td> -->
                 <td class="py-1 px-4 border">
                   <h5 class="font-medium text-black text-xs dark:text-white">
-                    {{ item.Tr_teknis_item }}
+                    {{ item.Tr_teknis_pelanggan_nama }}
                   </h5>
                 </td>
                 <td class="py-1 px-4 text-center border">
-                  <p
-                    class="inline-flex rounded-full bg-opacity-10 py-1 px-3 text-xs font-medium"
-                    :class="{
-                      'bg-warning text-warning': item.Tr_teknis_status === 'pending',
-                      'bg-danger text-danger': item.Tr_teknis_status === 'closed',
-                      'bg-success text-success': item.Tr_teknis_status === 'open',
-                    }"
-                  >
-                    {{ item.Tr_teknis_status }}
-                  </p>
+                  <h5 class="font-medium text-black text-xs dark:text-white">
+                    {{ item.Tr_teknis_pelanggan_server }}
+                  </h5>
+                </td>
+                <td class="py-1 px-4 text-center border">
+                  <h5 class="font-medium text-black text-xs dark:text-white">
+                    {{ item.Tr_teknis_kategori }}
+                  </h5>
+                </td>
+                <td class="py-1 px-4 border">
+                  <h5 class="font-medium text-black text-xs dark:text-white">
+                    {{ item.Tr_teknis_user_updated }}
+                  </h5>
                 </td>
                 <td class="py-1 px-4">
                   <div class="flex items-center space-x-3.5 d-flex justify-center">
                     <router-link
                       class="hover:text-primary"
-                      :to="'/modules/work-order/bon-dan-material/detail/' + item._id"
+                      :to="
+                        '/modules/work-order/evident/psb/detail/' +
+                        item.Tr_teknis_logistik_id +
+                        '/' +
+                        item._id
+                      "
                     >
                       <svg
                         class="fill-current"
@@ -255,18 +243,13 @@ onMounted(async () => {
                         <path :d="mdiEyeOutline" fill="" />
                       </svg>
                     </router-link>
-
                     <router-link
-                      :class="
-                        item.Tr_teknis_status === 'closed'
-                          ? 'cursor-default opacity-50'
-                          : 'hover:text-primary'
-                      "
-                      class=""
+                      class="hover:text-primary"
                       :to="
-                        item.Tr_teknis_status !== 'closed'
-                          ? '/modules/work-order/bon-dan-material/closing/' + item._id
-                          : ''
+                        '/modules/work-order/evident/psb/edit/' +
+                        item.Tr_teknis_logistik_id +
+                        '/' +
+                        item._id
                       "
                     >
                       <svg
@@ -277,12 +260,7 @@ onMounted(async () => {
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
                       >
-                        <path
-                          fill-rule="evenodd"
-                          clip-rule="evenodd"
-                          :d="mdiSquareEditOutline"
-                          fill=""
-                        />
+                        <path :d="mdiSquareEditOutline" fill="" />
                       </svg>
                     </router-link>
                   </div>

@@ -8,10 +8,7 @@ import Swal from "sweetalert2";
 import { useRoute } from "vue-router";
 import { getDateToday } from "@/stores/date";
 import { showLoading, successCreate, failedCreate } from "@/stores/swal";
-import {
-  adminTeknis_UpdateData,
-  adminTeknis_GetDataById,
-} from "@/stores/functionAPI";
+import { adminTeknis_UpdateData, adminTeknis_GetDataById } from "@/stores/functionAPI";
 import multiselectReadOnly from "@/components/Forms/SelectGroup/multiselectReadOnly.vue";
 import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
 import { useIndexStore } from "@/stores";
@@ -60,7 +57,7 @@ const savedData = ref({
   Tr_teknis_status: "closed", // otomatis
   Tr_teknis_jenis: "", // otomatis
   Tr_teknis_deleted: "N", // otomatis
-  Tr_teknis_domain: "AMERTA-PASURUAN", // otomatis
+  Tr_teknis_domain: indexStore.user.companyName, // otomatis
 
   // Array WO Terpakai
   Tr_teknis_work_order_terpakai: [],
@@ -81,7 +78,7 @@ onMounted(async () => {
     (x) => ({
       label: x.label,
       qtySisa: x.qty,
-      qty: ""
+      qty: "",
     })
   );
 
@@ -106,10 +103,10 @@ onMounted(async () => {
       }
     });
   }
-  
-  savedData.value.Tr_teknis_user_closed = indexStore.user.userName
+
+  savedData.value.Tr_teknis_user_closed = indexStore.user.userName;
   const date = await getDateToday("yyyy-MM-dd");
-  savedData.value.Tr_teknis_closed = date
+  savedData.value.Tr_teknis_closed = date;
 });
 
 // Array validator untuk field wajib
@@ -133,10 +130,14 @@ const dataError = ref([]); // Array untuk menyimpan error
 // Validasi qtyKeluar tidak boleh kurang dari 1
 const validateQtyKeluar = (index, qtySisa) => {
   // Hanya lakukan validasi jika qtyKeluar tidak kosong
-  if (savedData.value.Tr_teknis_work_order_kembali[index].qty !== "" && (savedData.value.Tr_teknis_work_order_kembali[index].qty < 0 || savedData.value.Tr_teknis_work_order_kembali[index].qty > qtySisa)) {
+  if (
+    savedData.value.Tr_teknis_work_order_kembali[index].qty !== "" &&
+    (savedData.value.Tr_teknis_work_order_kembali[index].qty < 0 ||
+      savedData.value.Tr_teknis_work_order_kembali[index].qty > qtySisa)
+  ) {
     Swal.fire({
       title: "Error!",
-      text: 'Jumlah input harus antara 0 - '+qtySisa,
+      text: "Jumlah input harus antara 0 - " + qtySisa,
       icon: "error",
       position: "top-end",
       timer: 1000,
@@ -144,7 +145,7 @@ const validateQtyKeluar = (index, qtySisa) => {
       toast: true,
     }).then(() => {
       // Setelah SweetAlert muncul, ganti nilai qtyKeluar menjadi 1
-      savedData.value.Tr_teknis_work_order_kembali[index].qty = 0;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+      savedData.value.Tr_teknis_work_order_kembali[index].qty = 0;
     });
   }
 };
@@ -199,13 +200,14 @@ const submitData = async () => {
       showLoading();
 
       const fixData = { ...savedData.value };
-      fixData.Tr_teknis_status = "closed"
-      fixData.Tr_teknis_work_order_kembali = fixData.Tr_teknis_work_order_kembali.map(x => ({
-        label: x.label,
-        qty: x.qty ? x.qty : 0
-      }))
+      fixData.Tr_teknis_status = "closed";
+      fixData.Tr_teknis_work_order_kembali = fixData.Tr_teknis_work_order_kembali.map(
+        (x) => ({
+          label: x.label,
+          qty: x.qty ? x.qty : 0,
+        })
+      );
 
-      
       await adminTeknis_UpdateData(fixData, route.params.id);
       await successCreate().then(() => {
         router.push("/modules/work-order/bon-dan-material");
@@ -242,32 +244,32 @@ const submitData = async () => {
                 v-model="savedData.Tr_teknis_logistik_id"
               />
             </div>
-            
+
             <div class="flex flex-col gap-6 xl:flex-row">
-            <div class="lg:w-1/2">
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Tgl. Dibuat
-              </label>
-              <input
-                disabled
-                type="date"
-                placeholder="Nama Tas"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_tanggal"
-              />
-            </div>
-            <div class="lg:w-1/2">
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Dibuat Oleh
-              </label>
-              <input
-                disabled
-                type="text"
-                placeholder="Nama Tas"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_user_created"
-              />
-            </div>
+              <div class="lg:w-1/2">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Tgl. Dibuat
+                </label>
+                <input
+                  disabled
+                  type="date"
+                  placeholder="Nama Tas"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_tanggal"
+                />
+              </div>
+              <div class="lg:w-1/2">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Dibuat Oleh
+                </label>
+                <input
+                  disabled
+                  type="text"
+                  placeholder="Nama Tas"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_user_created"
+                />
+              </div>
             </div>
             <div class="flex flex-col gap-6 xl:flex-row">
               <div class="lg:w-1/2">
@@ -301,20 +303,19 @@ const submitData = async () => {
                 />
               </div>
             </div>
-     
+
             <div>
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Keterangan
-                </label>
-                <textarea
-                  disabled
-                  rows="3"
-                  placeholder="Masukan keterangan disini!"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.Tr_teknis_keterangan"
-                ></textarea>
-              </div>
-                     
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Keterangan
+              </label>
+              <textarea
+                disabled
+                rows="3"
+                placeholder="Masukan keterangan disini!"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_keterangan"
+              ></textarea>
+            </div>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->
@@ -377,18 +378,20 @@ const submitData = async () => {
                 />
               </div>
             </div>
-            
+
             <div>
-                <label class="mb-3 pt-6.5 block text-sm font-medium text-black dark:text-white">
-                  Catatan Closing
-                </label>
-                <textarea
-                  rows="3"
-                  placeholder="Masukan keterangan disini!"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.Tr_teknis_keterangan_closing"
-                ></textarea>
-              </div>
+              <label
+                class="mb-3 pt-6.5 block text-sm font-medium text-black dark:text-white"
+              >
+                Catatan Closing
+              </label>
+              <textarea
+                rows="3"
+                placeholder="Masukan keterangan disini!"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_keterangan_closing"
+              ></textarea>
+            </div>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->

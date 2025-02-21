@@ -1,31 +1,30 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
 
-import DefaultAuthCard from '@/components/Auths/DefaultAuthCard.vue'
-import InputGroup from '@/components/Auths/InputGroup.vue'
-import { useIndexStore } from "@/stores/index"
-import { userInternal_Login } from "@/stores/functionAPI";
+import DefaultAuthCard from "@/components/Auths/DefaultAuthCard.vue";
+import InputGroup from "@/components/Auths/InputGroup.vue";
+import { useIndexStore } from "@/stores/index";
+import { userInternal_Login, company_getDataByCode } from "@/stores/functionAPI";
 
 import Swal from "sweetalert2";
-
 
 const indexStore = useIndexStore();
 const router = useRouter();
 
-const pageTitle = ref('Sign In')
-const recoverPass = ref(false)
+const pageTitle = ref("Sign In");
+const recoverPass = ref(false);
 const form = reactive({
-    username: "",
-    password: ""
-})
+  username: "",
+  password: "",
+});
 
 const logCredentials = async () => {
   const data = {
     email: form.username,
     password: form.password,
   };
-  
+
   Swal.fire({
     title: "Logging in...",
     allowOutsideClick: false,
@@ -46,7 +45,15 @@ const logCredentials = async () => {
         indexStore.setToken(loginData.token);
         const currentTime = new Date().toISOString();
         indexStore.setLoginTime(currentTime);
-        indexStore.refreshUtilPage()
+        indexStore.refreshUtilPage();
+
+        console.log(loginData);
+        const company = await company_getDataByCode(
+          JSON.stringify(loginData.user.companyCode)
+        );
+        indexStore.setCompany({
+          companyCode: company.companyCode,
+        });
         Swal.fire({
           title: "Success",
           text: "Logged in successfully!",
@@ -72,7 +79,12 @@ const logCredentials = async () => {
 <template>
   <DefaultAuthCard subtitle="Start now" title="Sign In to Amerta">
     <form>
-      <InputGroup label="Email" type="email" placeholder="Enter your email" v-model="form.username">
+      <InputGroup
+        label="Email"
+        type="email"
+        placeholder="Enter your email"
+        v-model="form.username"
+      >
         <svg
           class="fill-current"
           width="22"
@@ -90,7 +102,12 @@ const logCredentials = async () => {
         </svg>
       </InputGroup>
 
-      <InputGroup label="Password" type="password" placeholder="6+ Characters, 1 Capital letter" v-model="form.password">
+      <InputGroup
+        label="Password"
+        type="password"
+        placeholder="6+ Characters, 1 Capital letter"
+        v-model="form.password"
+      >
         <svg
           class="fill-current"
           width="22"
@@ -116,13 +133,19 @@ const logCredentials = async () => {
         <button
           class="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 font-medium text-white transition hover:bg-opacity-90"
           @click.prevent="logCredentials"
-        >Sign In</button>
+        >
+          Sign In
+        </button>
       </div>
 
       <div class="mt-6 text-center">
         <p class="font-medium">
           Forget Password?
-          <router-link :to="recoverPass ? '/auth/signup' : ''" :class="recoverPass ? 'text-primary' : 'text-gray-400 cursor-default'">Recover your password</router-link>
+          <router-link
+            :to="recoverPass ? '/auth/signup' : ''"
+            :class="recoverPass ? 'text-primary' : 'text-gray-400 cursor-default'"
+            >Recover your password</router-link
+          >
         </p>
       </div>
     </form>

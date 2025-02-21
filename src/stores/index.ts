@@ -85,6 +85,7 @@ export const useIndexStore = defineStore('index', () => {
   });
 
   function setCompany(companyData: Partial<Company>) {
+    console.log(company, companyData)
     Object.assign(company, companyData);
     localStorage.setItem('company', JSON.stringify(company));
   }

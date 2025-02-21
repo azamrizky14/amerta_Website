@@ -76,7 +76,7 @@ watch(
   <!-- Image preview with placeholder support and click to change -->
   <div class="mt-4">
     <img
-      :src="imageSrc || 'https://via.placeholder.com/150'"
+      :src="imageSrc || 'https://placehold.co/150'"
       alt="Uploaded Preview"
       class="w-[100px] h-[100px] object-cover rounded cursor-pointer"
       @click="fileInput?.click()"

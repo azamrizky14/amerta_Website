@@ -12,7 +12,7 @@ import {
   adminTeknis_CreateData,
   adminTeknis_GetDataById,
   BonMaterial_GetPrefixByTypeAndDate,
-  getUtilByName
+  getUtilByName,
 } from "@/stores/functionAPI";
 import { mdiPlusCircleOutline, mdiTrashCanOutline } from "@mdi/js";
 import multiselectReadOnly from "@/components/Forms/SelectGroup/multiselectReadOnly.vue";
@@ -60,7 +60,7 @@ const savedData = ref({
   Tr_teknis_status: "open", // otomatis
   Tr_teknis_jenis: "", // otomatis
   Tr_teknis_deleted: "N", // otomatis
-  Tr_teknis_domain: "AMERTA-PASURUAN", // otomatis
+  Tr_teknis_domain: indexStore.user.companyName, // otomatis
 
   // Array WO Terpakai
   Tr_teknis_work_order_terpakai: [],
@@ -75,13 +75,16 @@ const savedData = ref({
 const materialData = ref([{ label: "", qty: "" }]);
 
 onMounted(async () => {
-  const data = await  getUtilByName('bonMaterial')
+  const data = await getUtilByName("bonMaterial");
   if (data && data.utilData.length > 0) {
-    let option  = await data.utilData.find((x) => x.companyName === indexStore.user.companyName)
-    option = option.bonMaterialList.map(x => ({
-      label: x, value:x
-    }))
-    optionsType.value = [...option]
+    let option = await data.utilData.find(
+      (x) => x.companyName === indexStore.user.companyName
+    );
+    option = option.bonMaterialList.map((x) => ({
+      label: x,
+      value: x,
+    }));
+    optionsType.value = [...option];
   }
   await getData();
 
@@ -101,10 +104,10 @@ onMounted(async () => {
     const mergedMaterials = savedData.value.Tr_teknis_work_order_terpakai.flatMap(
       (item) => item.Tr_teknis_work_order_terpakai_material || []
     );
-    
+
     if (savedData.value.Tr_teknis_work_order_kembali) {
-      savedData.value.Tr_teknis_work_order_kembali.forEach(element => {
-        mergedMaterials.push(element)
+      savedData.value.Tr_teknis_work_order_kembali.forEach((element) => {
+        mergedMaterials.push(element);
       });
     }
 
@@ -276,46 +279,46 @@ const submitData = async () => {
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="Detail Data">
-          <div class="flex flex-col gap-2 p-6.5">          
+          <div class="flex flex-col gap-2 p-6.5">
             <div class="flex flex-col gap-6">
-            <div>
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Id Logistik
-              </label>
-              <input
-                disabled
-                type="text"
-                placeholder="Nama Tas"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_logistik_id"
-              />
-            </div>
+              <div>
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Id Logistik
+                </label>
+                <input
+                  disabled
+                  type="text"
+                  placeholder="Nama Tas"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_logistik_id"
+                />
+              </div>
             </div>
             <div class="flex flex-col gap-6 xl:flex-row">
-            <div class="lg:w-1/2">
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Tgl. Dibuat
-              </label>
-              <input
-                disabled
-                type="date"
-                placeholder="Nama Tas"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_tanggal"
-              />
-            </div>
-            <div class="lg:w-1/2">
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Dibuat Oleh
-              </label>
-              <input
-                disabled
-                type="text"
-                placeholder="Nama Tas"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_user_created"
-              />
-            </div>
+              <div class="lg:w-1/2">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Tgl. Dibuat
+                </label>
+                <input
+                  disabled
+                  type="date"
+                  placeholder="Nama Tas"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_tanggal"
+                />
+              </div>
+              <div class="lg:w-1/2">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Dibuat Oleh
+                </label>
+                <input
+                  disabled
+                  type="text"
+                  placeholder="Nama Tas"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_user_created"
+                />
+              </div>
             </div>
             <div class="flex flex-col gap-6 xl:flex-row">
               <div class="lg:w-1/2">
@@ -350,7 +353,6 @@ const submitData = async () => {
               </div>
             </div>
 
-
             <!-- <div>
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                   Teknisi
@@ -363,19 +365,19 @@ const submitData = async () => {
                   />
                 </div>
               </div> -->
-                          
+
             <div>
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Keterangan
-                </label>
-                <textarea
-                  disabled
-                  rows="3"
-                  placeholder="Masukan keterangan disini!"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.Tr_teknis_keterangan"
-                ></textarea>
-              </div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Keterangan
+              </label>
+              <textarea
+                disabled
+                rows="3"
+                placeholder="Masukan keterangan disini!"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.Tr_teknis_keterangan"
+              ></textarea>
+            </div>
           </div>
         </DefaultCard>
 

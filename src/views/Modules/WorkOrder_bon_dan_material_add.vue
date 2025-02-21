@@ -57,7 +57,8 @@ const savedData = ref({
   Tr_teknis_status: "open", // otomatis
   Tr_teknis_jenis: "", // otomatis
   Tr_teknis_deleted: "N", // otomatis
-  Tr_teknis_domain: indexStore.user.companyName, // otomatis
+  companyName: indexStore.user.companyName, // otomatis
+  companyCode: indexStore.company.companyCode, // otomatis
 
   // Array WO Terpakai
   Tr_teknis_work_order_terpakai: [],
@@ -75,7 +76,13 @@ onMounted(async () => {
   const data = await getUtilByName("bonMaterial");
   if (data && data.utilData.length > 0) {
     let option = await data.utilData.find(
-      (x) => x.companyName === indexStore.user.companyName
+      (x) =>
+        Array.isArray(x.companyCode) &&
+        Array.isArray(indexStore.company.companyCode) &&
+        x.companyCode.length === indexStore.company.companyCode.length &&
+        x.companyCode.every(
+          (value, index) => value === indexStore.company.companyCode[index]
+        )
     );
     option = option.bonMaterialList.map((x) => ({
       label: x,

@@ -59,6 +59,7 @@ const savedData = ref({
   lokasi_updated: "",
   lokasi_deleted: "N",
   companyName: indexStore.user.companyName,
+  companyCode: indexStore.company.companyCode,
 });
 
 const materialData = ref([
