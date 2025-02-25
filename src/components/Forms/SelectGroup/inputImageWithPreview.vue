@@ -3,26 +3,51 @@ import { ref, watch, defineProps, defineEmits, onUnmounted } from "vue";
 
 const props = defineProps<{
   modelValue: string | File | null;
+  url: string;
   label: string;
 }>();
 
-const emits = defineEmits(["update:modelValue", "update:file", "remove:image"]);
+const emits = defineEmits(["update:modelValue", "update:file"]);
 
 const imageSrc = ref<string | null>(
   props.modelValue instanceof File
     ? URL.createObjectURL(props.modelValue)
     : props.modelValue
 );
-const fileInput = ref<HTMLInputElement | null>(null); // Add a ref for the input element
 
-// Handle file input change
+const fileInput = ref<HTMLInputElement | null>(null);
+const imageUrlInput = ref<string>("");
+
+// **Fungsi untuk mendeteksi apakah URL berasal dari Google Drive**
+const isGoogleDriveUrl = (url: string) => {
+  return url.includes("drive.google.com");
+};
+
+const getGoogleDriveDirectLink = (url: string) => {
+  const match = url.match(/(?:file\/d\/|id=)([\w-]+)/);
+  return match ? `https://lh3.googleusercontent.com/d/${match[1]}=w150-h150` : url;
+};
+
+// **Fungsi menangani input URL**
+const processImageUrl = () => {
+  let inputUrl = imageUrlInput.value.trim();
+  if (!inputUrl) return;
+
+  if (isGoogleDriveUrl(inputUrl)) {
+    imageSrc.value = getGoogleDriveDirectLink(inputUrl);
+  } else {
+    imageSrc.value = inputUrl; // URL biasa
+  }
+
+  emits("update:modelValue", imageSrc.value);
+};
+
 const previewImage = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (file) {
-    // Update imageSrc with the preview URL for the new file
     imageSrc.value = URL.createObjectURL(file);
-    emits("update:file", file); // Emit the file
-    emits("update:modelValue", file); // Optionally, update modelValue
+    emits("update:file", file);
+    emits("update:modelValue", file);
   }
 };
 
@@ -31,6 +56,7 @@ const removeImage = () => {
   imageSrc.value = null;
   emits("update:modelValue", null); // Emit null to reset the modelValue
   resetFileInput(); // Reset the file input element
+  imageUrlInput.value = "";
 };
 
 // Reset the file input value
@@ -75,7 +101,14 @@ watch(
 
   <!-- Image preview with placeholder support and click to change -->
   <div class="mt-4">
+    <!-- Jika gambar berasal dari Google Drive, ubah ke direct link -->
     <img
+      v-if="imageSrc"
+      :src="imageSrc"
+      class="w-[100px] h-[100px] object-cover rounded border"
+    />
+    <img
+      v-else
       :src="imageSrc || 'https://placehold.co/150'"
       alt="Uploaded Preview"
       class="w-[100px] h-[100px] object-cover rounded cursor-pointer"
@@ -89,6 +122,22 @@ watch(
       class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
     >
       X
+    </button>
+  </div>
+
+  <!-- Input URL -->
+  <div class="mt-2 flex gap-2">
+    <input
+      type="url"
+      v-model="imageUrlInput"
+      placeholder="Masukkan URL gambar..."
+      class="border px-2 py-1 rounded w-full text-sm"
+    />
+    <button
+      @click="processImageUrl"
+      class="bg-blue-500 text-white px-3 py-1 rounded text-sm"
+    >
+      Gunakan
     </button>
   </div>
 </template>
