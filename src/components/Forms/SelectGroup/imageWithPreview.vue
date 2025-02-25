@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, defineProps, defineEmits, onUnmounted } from 'vue';
+import { ref, watch, defineProps, defineEmits, onUnmounted } from "vue";
 import { API } from "@/API/";
 
 const props = defineProps<{
@@ -9,7 +9,7 @@ const props = defineProps<{
   disabled: boolean;
 }>();
 
-const emits = defineEmits(['update:modelValue', 'update:file']);
+const emits = defineEmits(["update:modelValue", "update:file"]);
 
 const imageSrc = ref<string | null>(
   props.modelValue instanceof File
@@ -17,43 +17,70 @@ const imageSrc = ref<string | null>(
     : props.modelValue
 );
 
-const fileInput = ref<HTMLInputElement | null>(null); // Ref for file input
+const fileInput = ref<HTMLInputElement | null>(null);
+const imageUrlInput = ref<string>("");
+
+// **Fungsi untuk mendeteksi apakah URL berasal dari Google Drive**
+const isGoogleDriveUrl = (url: string) => {
+  return url.includes("drive.google.com");
+};
+
+const getGoogleDriveDirectLink = (url: string) => {
+  const match = url.match(/(?:file\/d\/|id=)([\w-]+)/);
+  return match ? `https://lh3.googleusercontent.com/d/${match[1]}=w150-h150` : url;
+};
+
+// **Fungsi menangani input URL**
+const processImageUrl = () => {
+  let inputUrl = imageUrlInput.value.trim();
+  if (!inputUrl) return;
+
+  if (isGoogleDriveUrl(inputUrl)) {
+    emits("update:modelValue", getGoogleDriveDirectLink(inputUrl));
+  } else {
+    emits("update:modelValue", inputUrl);
+  }
+
+  imageSrc.value = inputUrl; // URL biasa
+};
 
 const previewImage = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (file) {
-    // Update imageSrc with the preview URL for the new file
     imageSrc.value = URL.createObjectURL(file);
-    emits('update:file', file); // Emit the file
-    emits('update:modelValue', file); // Update modelValue
+    emits("update:file", file);
+    emits("update:modelValue", file);
   }
 };
 
 const removeImage = () => {
-  if (imageSrc.value) URL.revokeObjectURL(imageSrc.value); // Cleanup the URL
-  imageSrc.value = null; // Clear the image preview
-  emits('update:file', null); // Emit null to reset the file
-  emits('update:modelValue', null); // Update modelValue to null
-  if (fileInput.value) fileInput.value.value = ''; // Reset the input value
+  if (imageSrc.value) URL.revokeObjectURL(imageSrc.value);
+  imageSrc.value = null;
+  emits("update:file", null);
+  emits("update:modelValue", null);
+  if (fileInput.value) fileInput.value.value = "";
+  imageUrlInput.value = "";
 };
 
-// Cleanup URL objects to prevent memory leaks
 onUnmounted(() => {
   if (imageSrc.value) URL.revokeObjectURL(imageSrc.value);
 });
 
-// Watch for changes to modelValue and update the image preview
-watch(() => props.modelValue, (newValue) => {
-  if (newValue instanceof File) {
-    imageSrc.value = URL.createObjectURL(newValue); // Create preview URL for File
-  } else {
-    imageSrc.value = newValue as string | null; // Use URL or reset to placeholder
+// Watch perubahan modelValue
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    if (newValue instanceof File) {
+      imageSrc.value = URL.createObjectURL(newValue);
+    } else {
+      imageSrc.value = newValue as string | null;
+    }
   }
-});
+);
 </script>
 
 <template>
-  <!-- Hidden file input with click-triggering label -->
+  <!-- Hidden File Input -->
   <input
     :disabled="disabled"
     type="file"
@@ -63,6 +90,8 @@ watch(() => props.modelValue, (newValue) => {
     @change="previewImage"
     ref="fileInput"
   />
+
+  <!-- Upload Button -->
   <label
     :for="label"
     class="px-4 py-2 rounded transition text-center"
@@ -71,24 +100,35 @@ watch(() => props.modelValue, (newValue) => {
     {{ label }}
   </label>
 
-  <!-- Image preview with placeholder support -->
+  <!-- Image Preview -->
   <div class="mt-4 relative">
+    <!-- Jika gambar berasal dari Google Drive, ubah ke direct link -->
     <img
-      v-if="typeof modelValue === 'string'"
-      :src="imageSrc ? `${API}/${url}/${imageSrc}` : 'https://placehold.co/150'"
+      v-if="imageSrc && isGoogleDriveUrl(imageSrc)"
+      :src="getGoogleDriveDirectLink(imageSrc)"
+      class="w-[100px] h-[100px] object-cover rounded border"
+    />
+
+    <!-- Jika gambar berasal dari URL biasa atau hasil upload -->
+    <img
+      v-else-if="imageSrc"
+      :src="imageSrc.startsWith('http') ? imageSrc : `${API}/${url}/${imageSrc}`"
       alt="Uploaded Preview"
       class="w-[100px] h-[100px] object-cover rounded"
       :class="disabled ? 'cursor-default' : 'cursor-pointer'"
       @click="!disabled && fileInput?.click()"
     />
+
+    <!-- Placeholder jika tidak ada gambar -->
     <img
       v-else
-      :src="imageSrc || 'https://placehold.co/150'"
-      alt="Uploaded Preview"
+      src="https://placehold.co/150"
+      alt="Placeholder"
       class="w-[100px] h-[100px] object-cover rounded"
       :class="disabled ? 'cursor-default' : 'cursor-pointer'"
       @click="!disabled && fileInput?.click()"
     />
+
     <!-- Remove button -->
     <button
       v-if="imageSrc && !disabled"
@@ -96,6 +136,24 @@ watch(() => props.modelValue, (newValue) => {
       class="absolute top-2 right-2 w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-md text-xs"
     >
       X
+    </button>
+  </div>
+
+  <!-- Input URL -->
+  <div class="mt-2 flex gap-2" v-if="!disabled">
+    <input
+      type="url"
+      v-model="imageUrlInput"
+      placeholder="Masukkan URL gambar..."
+      class="border px-2 py-1 rounded w-full text-sm"
+      :disabled="disabled"
+    />
+    <button
+      @click="processImageUrl"
+      class="bg-blue-500 text-white px-3 py-1 rounded text-sm"
+      :disabled="disabled"
+    >
+      Gunakan
     </button>
   </div>
 </template>

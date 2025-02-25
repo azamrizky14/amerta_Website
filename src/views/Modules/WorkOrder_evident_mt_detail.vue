@@ -274,6 +274,7 @@ onMounted(async () => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Sebelum"
@@ -285,6 +286,7 @@ onMounted(async () => {
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Kendala 1"
@@ -298,6 +300,7 @@ onMounted(async () => {
             <div class="col-span-3 grid grid-cols-2">
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Kendala 2"
@@ -309,6 +312,7 @@ onMounted(async () => {
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Kendala 3"
@@ -325,6 +329,7 @@ onMounted(async () => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Splicer - Proses Sambung"
@@ -341,6 +346,7 @@ onMounted(async () => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Sesudah"
@@ -351,6 +357,7 @@ onMounted(async () => {
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Out ODP"
@@ -361,6 +368,7 @@ onMounted(async () => {
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Pelanggan"
@@ -377,6 +385,7 @@ onMounted(async () => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Start"
@@ -388,6 +397,7 @@ onMounted(async () => {
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="End"

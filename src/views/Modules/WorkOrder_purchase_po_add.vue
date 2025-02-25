@@ -34,6 +34,7 @@ const savedData = ref({
   Tr_po_id: "",
   Tr_po_status: "open",
   Tr_po_keterangan: "",
+  Tr_po_lokasi: "",
   Tr_po_item: [],
 
   Tr_po_user_created: indexStore.user.userName,
@@ -46,6 +47,7 @@ const savedData = ref({
 const materialData = ref<Row[]>([]);
 
 const itemList = ref([]);
+const lokasiList = ref([]);
 
 onMounted(async () => {
   const data = await item_getAllItemWithStatus(
@@ -59,6 +61,7 @@ onMounted(async () => {
     indexStore.user.hierarchyCode,
     "N"
   );
+  lokasiList.value = dataLokasi;
   const date = await getDateToday("yyyy-MM-dd");
   // savedData.value.Tr_po_created = date;
 
@@ -276,8 +279,30 @@ const calculateTotal = (row: Row) => {
             <div class="flex flex-col gap-3">
               <div>
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Lokasi Tujuan
+                </label>
+
+                <v-select
+                  v-model="savedData.Tr_po_lokasi"
+                  :options="lokasiList"
+                  :reduce="(item) => item.lokasi_nama"
+                  label="lokasi_nama"
+                  placeholder="Masukan Tujuan PO"
+                  class="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-2 px-5 font-normal outline-none transition disabled:cursor-default disabled:bg-whiter"
+                  @update:modelValue="(value) => changeRowItem('id', index, value)"
+                >
+                  <template #selected-option>
+                    <span class="dark:text-white">{{ savedData.Tr_po_lokasi }}</span>
+                  </template>
+                </v-select>
+              </div>
+            </div>
+            <div class="flex flex-col gap-3">
+              <div>
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                   Tgl. Dibutuhkan
                 </label>
+
                 <input
                   type="date"
                   placeholder="Masukan Nama Supplier"
