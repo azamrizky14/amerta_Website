@@ -117,11 +117,9 @@ onMounted( async () => {
             </td>
             <td class="py-1 px-4 border">
               <h5 class="font-medium text-black text-xs dark:text-white">{{ item.email }}</h5>
-              <!-- <p class="text-xs">{{ item.picId }}</p> -->
             </td>
             <td class="py-1 px-4 text-center border">
               <h5 class="font-medium text-black text-xs dark:text-white text-left">{{ item.userPhone }}</h5>
-              <!-- <p class="text-xs">{{ item.picId }}</p> -->
             </td>
             <td class="py-1 px-4">
               <div class="flex items-center space-x-3.5 d-flex justify-center">              
@@ -139,7 +137,7 @@ onMounted( async () => {
                 </svg>
               </router-link>
 
-              <router-link :class="item.Tr_teknis_status === 'closed' ? 'cursor-default opacity-50' : 'hover:text-primary'" class="" :to="item.Tr_teknis_status !== 'closed' ? '/modules/work-order/bon-dan-material/closing/'+item._id : ''">
+              <router-link :class="item.Tr_teknis_status === 'closed' ? 'cursor-default opacity-50' : 'hover:text-primary'" class="" :to="'/modules/master/user-internal/edit/'+item._id">
                 <svg
                   class="fill-current"
                   width="24"

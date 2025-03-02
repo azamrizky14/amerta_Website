@@ -2,6 +2,7 @@
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
+import { mdiEyeOutline , mdiEyeOffOutline   } from '@mdi/js';
 import inputImageWithPreview from "@/components/Forms/SelectGroup/inputImageWithPreview.vue";
 import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
 import multiselectReadOnly from "@/components/Forms/SelectGroup/multiselectReadOnly.vue";
@@ -71,6 +72,14 @@ const handleOptionChange = (selected: {
     savedData.value.hierarchyCode = selected.hierarchyCode; // Set hierarchyCode from selected role
     savedData.value.userAccess = selected.roleAccess; // Set userAccess from roleAccess
   }
+};
+
+// Fungsi untuk toggle visibilitas password
+const showPassword = ref(false);
+
+// Fungsi untuk toggle visibilitas password
+const togglePassword = () => {
+  showPassword.value = !showPassword.value;
 };
 
 // Validators for required fields
@@ -144,16 +153,35 @@ const submitData = async () => {
         formData.append(key, fixData[key]);
       });
 
+      // Send request to create user
+      
       await createUser(formData);
-
+      
       await successCreate().then(() => {
         router.push("/modules/master/user-internal");
       });
     } catch (error) {
-      await failedCreate(error);
+      if (error.response && error.response.status === 401) {
+        // Menangkap error status 401 dan menampilkan SweetAlert untuk email duplikat
+        await Swal.fire({
+          title: "Email Sudah Digunakan!",
+          text: "Silakan gunakan email yang lain.",
+          icon: "error",
+          confirmButtonColor: "#d33",
+        });
+      } else {
+        await failedCreate(error);  // Error lainnya
+      }
     }
   }
 };
+
+
+// Remove image function
+const removeImage = (field: string) => {
+  savedData.value[field] = null;
+};
+
 </script>
 
 <template>

@@ -421,6 +421,15 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
+  {
+    path: '/modules/master/user-internal/edit/:id',
+    name: 'userInternalEdit',
+    component: () => import('@/views/Master/Master_userInternal_edit.vue'),
+    meta: {
+      title: 'Master User Internal Edit',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
 
   // Master User Role
   {

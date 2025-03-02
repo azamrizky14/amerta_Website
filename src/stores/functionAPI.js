@@ -107,6 +107,12 @@ export const createUser = async (data) => {
   return suppData
 }
 
+export const updateUser = async (data, id) => {
+  const response = await axios.put(API+'/api/userInternal/update/' + id, data)
+  var suppData = response.data;
+  return suppData
+}
+
 export const getUserById = async (id) => {
   const response = await axios.get(API+'/api/userInternal/detail/' + id)
   var suppData = response.data;
