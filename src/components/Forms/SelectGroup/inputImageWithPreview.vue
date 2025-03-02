@@ -25,7 +25,7 @@ const isGoogleDriveUrl = (url: string) => {
 
 const getGoogleDriveDirectLink = (url: string) => {
   const match = url.match(/(?:file\/d\/|id=)([\w-]+)/);
-  return match ? `https://lh3.googleusercontent.com/d/${match[1]}=w150-h150` : url;
+  return match ? `https://lh3.googleusercontent.com/d/${match[1]}=w500-h500` : url;
 };
 
 // **Fungsi menangani input URL**
@@ -45,6 +45,7 @@ const processImageUrl = () => {
 const previewImage = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (file) {
+    if (imageSrc.value) URL.revokeObjectURL(imageSrc.value); // Hapus URL lama
     imageSrc.value = URL.createObjectURL(file);
     emits("update:file", file);
     emits("update:modelValue", file);
@@ -53,10 +54,11 @@ const previewImage = (event: Event) => {
 
 // Handle removing the image
 const removeImage = () => {
+  if (imageSrc.value) URL.revokeObjectURL(imageSrc.value); // Bersihkan URL objek
   imageSrc.value = null;
-  emits("update:modelValue", null); // Emit null to reset the modelValue
-  resetFileInput(); // Reset the file input element
+  emits("update:modelValue", null);
   imageUrlInput.value = "";
+  fileInput.value = null; // Reset input file sepenuhnya
 };
 
 // Reset the file input value
@@ -71,14 +73,14 @@ onUnmounted(() => {
   if (imageSrc.value) URL.revokeObjectURL(imageSrc.value);
 });
 
-// Watch for changes to modelValue and update image preview
 watch(
   () => props.modelValue,
   (newValue) => {
+    if (imageSrc.value) URL.revokeObjectURL(imageSrc.value); // Hapus URL lama
     if (newValue instanceof File) {
-      imageSrc.value = URL.createObjectURL(newValue); // Create preview URL for File
+      imageSrc.value = URL.createObjectURL(newValue);
     } else {
-      imageSrc.value = newValue as string | null; // Use URL or reset to placeholder
+      imageSrc.value = newValue as string | null;
     }
   }
 );

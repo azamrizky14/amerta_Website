@@ -232,10 +232,6 @@ const submitData = async () => {
   }
 };
 
-// Fungsi untuk menghapus gambar
-const removeImage = (field: string) => {
-  savedData.value[field] = null;
-};
 </script>
 
 <template>

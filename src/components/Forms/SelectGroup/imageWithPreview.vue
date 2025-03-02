@@ -27,7 +27,7 @@ const isGoogleDriveUrl = (url: string) => {
 
 const getGoogleDriveDirectLink = (url: string) => {
   const match = url.match(/(?:file\/d\/|id=)([\w-]+)/);
-  return match ? `https://lh3.googleusercontent.com/d/${match[1]}=w150-h150` : url;
+  return match ? `https://lh3.googleusercontent.com/d/${match[1]}=w500-h500` : url;
 };
 
 // **Fungsi menangani input URL**
@@ -47,6 +47,7 @@ const processImageUrl = () => {
 const previewImage = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (file) {
+    if (imageSrc.value) URL.revokeObjectURL(imageSrc.value); // Hapus URL lama
     imageSrc.value = URL.createObjectURL(file);
     emits("update:file", file);
     emits("update:modelValue", file);
@@ -70,6 +71,7 @@ onUnmounted(() => {
 watch(
   () => props.modelValue,
   (newValue) => {
+    if (imageSrc.value) URL.revokeObjectURL(imageSrc.value); // Hapus URL lama
     if (newValue instanceof File) {
       imageSrc.value = URL.createObjectURL(newValue);
     } else {

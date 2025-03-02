@@ -57,12 +57,16 @@ onMounted(async () => {
   const date = await getDateToday("yyyy-MM-dd");
   savedData.value.user_created = date;
   const page = await indexStore.getUtilPage();
-  console.log(page)
-
+  console.log(page);
 });
 
 // Function to handle role selection
-const handleOptionChange = (selected: { label: string; value: string; hierarchyCode: string; roleAccess: string }) => {
+const handleOptionChange = (selected: {
+  label: string;
+  value: string;
+  hierarchyCode: string;
+  roleAccess: string;
+}) => {
   if (selected) {
     savedData.value.userRole = selected.value; // Set userRole from roleName
     savedData.value.hierarchyCode = selected.hierarchyCode; // Set hierarchyCode from selected role
@@ -77,6 +81,7 @@ const showPassword = ref(false);
 const togglePassword = () => {
   showPassword.value = !showPassword.value;
 };
+
 // Validators for required fields
 const dataValidator = ref([
   { key: "userName", label: "Nama User" },
@@ -149,6 +154,7 @@ const submitData = async () => {
       });
 
       // Send request to create user
+      
       await createUser(formData);
       
       await successCreate().then(() => {
@@ -171,11 +177,11 @@ const submitData = async () => {
 };
 
 
-
 // Remove image function
 const removeImage = (field: string) => {
   savedData.value[field] = null;
 };
+
 </script>
 
 <template>
@@ -192,15 +198,15 @@ const removeImage = (field: string) => {
           <div class="flex flex-col gap-2 p-6.5">
             <div class="flex flex-col gap-6 xl:flex-row">
               <div class="w-full">
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Nama User
-              </label>
-              <input
-                type="text"
-                placeholder="Nama User"
-                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
-                v-model="savedData.userName"
-              />
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Nama User
+                </label>
+                <input
+                  type="text"
+                  placeholder="Nama User"
+                  class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
+                  v-model="savedData.userName"
+                />
               </div>
             </div>
 
@@ -214,180 +220,188 @@ const removeImage = (field: string) => {
                 class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
                 v-model="savedData.email"
               />
-              </div>
+            </div>
 
-              <div>
+            <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Password
               </label>
-              <div class="relative">
-    <!-- Input password -->
-    <input
-      :type="showPassword ? 'text' : 'password'"
-      placeholder="Password User"
-      class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input pr-10"
-      v-model="savedData.password"
-    />
-    <!-- Icon untuk toggle password -->
-    <button
-      type="button"
-      class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
-      @click="togglePassword"
-    >
-      <svg
-        v-if="showPassword"
-        :d="mdiEyeOffOutline "
-        class="w-6 h-6"
-        fill="currentColor"
-      >
-      <path
-                      :d="mdiEyeOffOutline  "
-                    /></svg>
-      <svg
-        v-else
-        :d="mdiEyeOutline "
-        class="w-6 h-6"
-        fill="currentColor"
-      >
-      <path
-                      :d="mdiEyeOutline  "
-                    /></svg>
-    </button>
-  </div>
+              <input
+                type="text"
+                placeholder="Password User"
+                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
+                v-model="savedData.password"
+              />
+            </div>
+            <div class="w-full">
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Role User
+              </label>
+              <SelectGroup
+                placeholder="Pilih Nama Role"
+                id="userRole"
+                :options="optionsType"
+                v-model="logistikData"
+                @option-changed="handleOptionChange"
+              />
+            </div>
+
+            <div class="hidden">
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Hierarchy Code
+              </label>
+              <div>
+                <input
+                  id="hierarchyCode"
+                  type="text"
+                  placeholder="Kode Hirarki"
+                  class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
+                  v-model="savedData.hierarchyCode"
+                  readonly
+                />
               </div>
-              <div class="w-full">
-  <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-    Role User
-  </label>
-  <SelectGroup
-    placeholder="Pilih Nama Role"
-    id="userRole"
-    :options="optionsType"
-    v-model="logistikData"
-    @option-changed="handleOptionChange"
-  />
-</div>
+            </div>
 
-<div class="hidden">
-  <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-    Hierarchy Code
-  </label>
-  <div>
-    <input
-      id="hierarchyCode"
-      type="text"
-      placeholder="Kode Hirarki"
-      class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
-      v-model="savedData.hierarchyCode"
-      readonly
-    />
-  </div>
-</div>
-
-<div class="hidden">
-  <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-    User Access
-  </label>
-  <div>
-    <input
-      id="userAccess"
-      type="text"
-      placeholder="Hak Akses User"
-      class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
-      v-model="savedData.userAccess"
-      readonly
-    />
-  </div>
-</div>
-
+            <div class="hidden">
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                User Access
+              </label>
+              <div>
+                <input
+                  id="userAccess"
+                  type="text"
+                  placeholder="Hak Akses User"
+                  class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
+                  v-model="savedData.userAccess"
+                  readonly
+                />
+              </div>
+            </div>
           </div>
         </DefaultCard>
         <!-- Input Fields End -->
       </div>
       <div class="flex flex-col gap-9">
-  <!-- Textarea Fields Start -->
-  <DefaultCard cardTitle="Masukan Data Pribadi">
-    <div class="flex flex-col gap-2 p-6.5">
-      <!-- Flex Container untuk Gambar dan Form -->
-      <div class="flex flex-col lg:flex-row gap-6">
-        
-        <!-- Bagian Input Gambar -->
-        <div class="lg:w-2/5 flex items-center justify-center">
-          <div class="relative flex border flex-col items-center p-2 justify-end w-full">
-            <!-- Label untuk Input Gambar -->
-            <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-              Photo User
-            </label>
-            <inputImageWithPreview
-              v-model="savedData.userImage"
-              @update:file="(file) => (savedData.userImage = file)"
-            />
-          </div>
-        </div>
-        
-        <!-- Bagian Form Gender dan Tanggal Lahir -->
-        <div class="lg:w-3/5 flex flex-col gap-6">
-          <!-- Gender -->
-          <div>
-            <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-              Gender
-            </label>
-            <div class="flex items-center space-x-6">
-              <label for="radioPria" class="flex cursor-pointer select-none items-center">
-                <div class="relative">
-                  <input
-                    type="radio"
-                    id="radioPria"
-                    name="gender"
-                    value="pria"
-                    v-model="savedData.userGender"
-                    class="sr-only"
+        <!-- Textarea Fields Start -->
+        <DefaultCard cardTitle="Masukan Data Pribadi">
+          <div class="flex flex-col gap-2 p-6.5">
+            <!-- Flex Container untuk Gambar dan Form -->
+            <div class="flex flex-col lg:flex-row gap-6">
+              <!-- Bagian Input Gambar -->
+              <div class="lg:w-2/5 flex items-center justify-center">
+                <div
+                  class="relative flex border flex-col items-center p-2 justify-end w-full"
+                >
+                  <!-- Label untuk Input Gambar -->
+                  <label
+                    class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  >
+                    Photo User
+                  </label>
+                  <inputImageWithPreview
+                    v-model="savedData.userImage"
+                    @update:file="(file) => (savedData.userImage = file)"
                   />
-                  <div :class="savedData.userGender === 'pria' ? 'border-primary bg-primary' : 'border'"
-                    class="mr-2 flex h-5 w-5 items-center justify-center rounded-full border transition-colors duration-300">
-                    <span :class="savedData.userGender === 'pria' ? 'bg-white' : 'bg-transparent'"
-                      class="h-2.5 w-2.5 rounded-full"></span>
-                  </div>
                 </div>
-                Pria
-              </label>
+              </div>
 
-              <label for="radioWanita" class="flex cursor-pointer select-none items-center">
-                <div class="relative">
-                  <input
-                    type="radio"
-                    id="radioWanita"
-                    name="gender"
-                    value="wanita"
-                    v-model="savedData.userGender"
-                    class="sr-only"
-                  />
-                  <div :class="savedData.userGender === 'wanita' ? 'border-primary bg-primary' : 'border'"
-                    class="mr-2 flex h-5 w-5 items-center justify-center rounded-full border transition-colors duration-300">
-                    <span :class="savedData.userGender === 'wanita' ? 'bg-white' : 'bg-transparent'"
-                      class="h-2.5 w-2.5 rounded-full"></span>
+              <!-- Bagian Form Gender dan Tanggal Lahir -->
+              <div class="lg:w-3/5 flex flex-col gap-6">
+                <!-- Gender -->
+                <div>
+                  <label
+                    class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  >
+                    Gender
+                  </label>
+                  <div class="flex items-center space-x-6">
+                    <label
+                      for="radioPria"
+                      class="flex cursor-pointer select-none items-center"
+                    >
+                      <div class="relative">
+                        <input
+                          type="radio"
+                          id="radioPria"
+                          name="gender"
+                          value="pria"
+                          v-model="savedData.userGender"
+                          class="sr-only"
+                        />
+                        <div
+                          :class="
+                            savedData.userGender === 'pria'
+                              ? 'border-primary bg-primary'
+                              : 'border'
+                          "
+                          class="mr-2 flex h-5 w-5 items-center justify-center rounded-full border transition-colors duration-300"
+                        >
+                          <span
+                            :class="
+                              savedData.userGender === 'pria'
+                                ? 'bg-white'
+                                : 'bg-transparent'
+                            "
+                            class="h-2.5 w-2.5 rounded-full"
+                          ></span>
+                        </div>
+                      </div>
+                      Pria
+                    </label>
+
+                    <label
+                      for="radioWanita"
+                      class="flex cursor-pointer select-none items-center"
+                    >
+                      <div class="relative">
+                        <input
+                          type="radio"
+                          id="radioWanita"
+                          name="gender"
+                          value="wanita"
+                          v-model="savedData.userGender"
+                          class="sr-only"
+                        />
+                        <div
+                          :class="
+                            savedData.userGender === 'wanita'
+                              ? 'border-primary bg-primary'
+                              : 'border'
+                          "
+                          class="mr-2 flex h-5 w-5 items-center justify-center rounded-full border transition-colors duration-300"
+                        >
+                          <span
+                            :class="
+                              savedData.userGender === 'wanita'
+                                ? 'bg-white'
+                                : 'bg-transparent'
+                            "
+                            class="h-2.5 w-2.5 rounded-full"
+                          ></span>
+                        </div>
+                      </div>
+                      Wanita
+                    </label>
                   </div>
                 </div>
-                Wanita
-              </label>
+
+                <!-- Tanggal Lahir -->
+                <div>
+                  <label
+                    class="mb-3 block text-sm font-medium text-black dark:text-white"
+                  >
+                    Tanggal Lahir
+                  </label>
+                  <input
+                    type="date"
+                    placeholder="Server"
+                    class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    v-model="savedData.userBirth"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-
-          <!-- Tanggal Lahir -->
-          <div>
-            <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-              Tanggal Lahir
-            </label>
-            <input
-              type="date"
-              placeholder="Server"
-              class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-              v-model="savedData.userBirth"
-            />
-          </div>
-        </div>
-      </div>
-      <div>
+            <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 No Telp
               </label>
@@ -397,26 +411,23 @@ const removeImage = (field: string) => {
                 class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
                 v-model="savedData.userPhone"
               />
-              </div>
+            </div>
 
-              <div>
-        <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-          Alamat
-        </label>
-        <textarea
-          rows="3"
-          placeholder="Masukan alamat disini!"
-          class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-          v-model="savedData.userAddress"
-        ></textarea>
+            <div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Alamat
+              </label>
+              <textarea
+                rows="3"
+                placeholder="Masukan alamat disini!"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="savedData.userAddress"
+              ></textarea>
+            </div>
+          </div>
+        </DefaultCard>
+        <!-- Textarea Fields End -->
       </div>
-    </div>
-  </DefaultCard>
-  <!-- Textarea Fields End -->
-</div>
-
-
-
 
       <div class="flex flex-col gap-9 col-span-2">
         <!-- Input Fields Start -->

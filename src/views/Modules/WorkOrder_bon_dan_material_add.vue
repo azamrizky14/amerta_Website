@@ -221,7 +221,8 @@ const submitData = async () => {
 
       const prefix = await BonMaterial_GetPrefixByTypeAndDate(
         fixData.Tr_teknis_jenis.value,
-        fixData.Tr_teknis_created
+        fixData.Tr_teknis_created,
+        fixData.companyCode
       );
       fixData.Tr_teknis_logistik_id = prefix.nextId;
       fixData.Tr_teknis_jenis = fixData.Tr_teknis_jenis.value;

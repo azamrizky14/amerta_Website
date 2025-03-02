@@ -161,10 +161,6 @@ const submitData = async () => {
   }
 };
 
-// Remove image function
-const removeImage = (field: string) => {
-  savedData.value[field] = null;
-};
 </script>
 
 <template>

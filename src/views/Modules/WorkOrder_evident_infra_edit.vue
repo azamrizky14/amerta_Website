@@ -2,7 +2,7 @@
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import imageWithPreview from "@/components/Forms/SelectGroup/imageWithPreview.vue";
+import imageWithPreviewInfra from "@/components/Forms/SelectGroup/imageWithPreviewInfra.vue";
 import Swal from "sweetalert2";
 import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
 import multiselectOptionEdit from "@/components/Forms/SelectGroup/multiselectOptionEdit.vue";
@@ -11,6 +11,7 @@ import { domain } from "@/API/";
 import { getDateToday } from "@/stores/date";
 import { useIndexStore } from "@/stores";
 import { showLoading, confirmDelete, successCreate, failedCreate } from "@/stores/swal";
+import { mdiChevronDown, mdiChevronUp } from "@mdi/js";
 import {
   adminTeknis_UpdateDataImage,
   adminTeknis_GetDataEvidentById,
@@ -24,8 +25,11 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 const indexStore = useIndexStore();
 const optionsTeknisi: Option[] = ref([]);
+const evidentStart = ref(true);
+const evidentProgress = ref(true);
+const evidentEnd = ref(true);
 
-const imageUrl = 'images/admin_logistik';
+const imageUrl = "images/admin_logistik";
 const pageTitle = ref("Evident - Edit INFRA");
 const pageList = ref(["Work Order", "Evident", "INFRA", "Edit"]);
 
@@ -43,16 +47,10 @@ const savedData = ref({
   Tr_teknis_team: [],
   Tr_teknis_work_order_images: {},
 
-  Tr_teknis_redaman_sebelum: null,
-  Tr_teknis_evident_kendala_1: null,
-  Tr_teknis_evident_kendala_2: null,
-  Tr_teknis_evident_kendala_3: null,
-  Tr_teknis_evident_proses_sambung: null,
-  Tr_teknis_redaman_sesudah: null,
-  Tr_teknis_redaman_out_odp: null,
-  Tr_teknis_redaman_pelanggan: null,
-  Tr_teknis_evident_marking_dc_start: null,
-  Tr_teknis_evident_marking_dc_end: null,
+  // INFRA
+  Tr_teknis_evident_start: [],
+  Tr_teknis_evident_progress: [],
+  Tr_teknis_evident_end: [],
 
   Tr_teknis_tanggal: "",
   Tr_teknis_created: "",
@@ -75,8 +73,8 @@ onMounted(async () => {
   try {
     const [data, listTeknisi] = await Promise.all([
       getUserInternalByRole(
-        indexStore.user.companyName,
-        // "Teknisi " + savedData.value.Tr_teknis_jenis  
+        indexStore.user.companyName
+        // "Teknisi " + savedData.value.Tr_teknis_jenis
       ),
       getData(),
     ]);
@@ -187,10 +185,9 @@ const cancelAdd = async () => {
 
 // Validators for required fields
 const dataValidator = ref([
-  { key: "Tr_teknis_logistik_id", label: "Kode Bon Material" },
-  { key: "Tr_teknis_pelanggan_id", label: "Id Pelanggan" },
-  { key: "Tr_teknis_pelanggan_server", label: "Server" },
-  { key: "Tr_teknis_pelanggan_nama", label: "Nama Pelanggan" },
+  { key: "logistikData", label: "Kode Bon Material" },
+  { key: "Tr_teknis_pelanggan_server", label: "Titik Koordinat" },
+  { key: "Tr_teknis_pelanggan_nama", label: "Nama Project" },
 ]);
 
 const dataError = ref([]);
@@ -276,8 +273,7 @@ const submitData = async () => {
 
       const fixData = { ...savedData.value };
 
-      
-      fixData.Tr_teknis_team = JSON.stringify(fixData.Tr_teknis_team.map(x => (x.name)))
+      fixData.Tr_teknis_team = JSON.stringify(fixData.Tr_teknis_team.map((x) => x.name));
       fixData.Tr_teknis_team = JSON.stringify(fixData.Tr_teknis_team);
       fixData.Tr_teknis_work_order_terpakai_material = JSON.stringify(
         fixData.Tr_teknis_work_order_terpakai_material
@@ -315,11 +311,6 @@ const submitData = async () => {
       await failedCreate(error);
     }
   }
-};
-
-// Fungsi untuk menghapus gambar
-const removeImage = (field: string) => {
-  savedData.value.Tr_teknis_work_order_images[field] = null;
 };
 </script>
 
@@ -376,43 +367,32 @@ const removeImage = (field: string) => {
               </div>
             </div>
 
-            <div class="flex flex-col gap-6 xl:flex-row">
-              <div class="lg:w-2/3">
+            <div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Nama Project (Wajib Diisi)
+              </label>
+              <input
+                type="text"
+                placeholder="Nama Project"
+                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
+                v-model="savedData.Tr_teknis_pelanggan_nama"
+              />
+            </div>
+
+            <div class="flex flex-col gap-6">
+              <div>
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Id Pelanggan (Wajib Diisi)
+                  Titik Koordinat (Wajib Diisi)
                 </label>
                 <input
                   type="text"
-                  placeholder="Id Pelanggan"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.Tr_teknis_pelanggan_id"
-                />
-              </div>
-              <div class="lg:w-1/3">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Server
-                </label>
-                <input
-                  type="text"
-                  placeholder="Server"
+                  placeholder="Titik Koordinat"
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_teknis_pelanggan_server"
                 />
               </div>
             </div>
 
-            <div>
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Nama Pelanggan (Wajib Diisi)
-              </label>
-              <input
-                type="text"
-                placeholder="Nama Pelanggan"
-                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
-                v-model="savedData.Tr_teknis_pelanggan_nama"
-              />
-            </div>
-            
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Keterangan
@@ -517,133 +497,109 @@ const removeImage = (field: string) => {
       <div class="flex flex-col gap-9">
         <!-- Textarea Fields Start -->
         <DefaultCard cardTitle="Edit Gambar">
-          <div class="grid grid-cols-2">
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">
-                Evident Sebelum
+          <div class="grid grid-cols-1">
+            <!-- Redaman Sebelum -->
+            <div class="col-span-3">
+              <p
+                class="text-black dark:text-white text-center p-2 px-6.5 col-span-2 flex justify-between align-middle cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900"
+                @click="evidentStart = !evidentStart"
+              >
+                <span>Evident Start</span>
+                <span>
+                  <svg
+                    class="fill-current mr-1"
+                    width="25"
+                    height="25"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path :d="evidentStart ? mdiChevronDown : mdiChevronUp" /></svg
+                ></span>
               </p>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <imageWithPreview
+              <div
+                class="flex border flex-col items-center justify-end relative w-full overflow-hidden transition-all duration-150 ease-in-out"
+                :class="{
+                  'max-h-0 opacity-0 p-0': !evidentStart,
+                  'opacity-100 p-2': evidentStart,
+                }"
+              >
+                <imageWithPreviewInfra
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
-                  label="Redaman Sebelum"
-                  v-model="
-                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sebelum
-                  "
+                  v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_start"
                 />
               </div>
-
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <imageWithPreview
+            </div>
+          </div>
+          <div class="grid grid-cols-1">
+            <!-- Redaman Sebelum -->
+            <div class="col-span-3">
+              <p
+                class="text-black dark:text-white text-center p-2 px-6.5 col-span-2 flex justify-between align-middle cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900"
+                @click="evidentProgress = !evidentProgress"
+              >
+                <span>Evident Progress</span>
+                <span>
+                  <svg
+                    class="fill-current mr-1"
+                    width="25"
+                    height="25"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path :d="evidentProgress ? mdiChevronDown : mdiChevronUp" /></svg
+                ></span>
+              </p>
+              <div
+                class="flex border flex-col items-center justify-end relative w-full overflow-hidden transition-all duration-150 ease-in-out"
+                :class="{
+                  'max-h-0 opacity-0 p-0': !evidentProgress,
+                  'opacity-100 p-2': evidentProgress,
+                }"
+              >
+                <imageWithPreviewInfra
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
-                  label="Modem Sebelum"
                   v-model="
-                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_1
+                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_progress
                   "
                 />
               </div>
             </div>
-
-            <div class="col-span-3 grid grid-cols-2">
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <imageWithPreview
-                  :url="imageUrl"
-                  v-if="savedData.Tr_teknis_work_order_images"
-                  label="Kendala 1"
-                  v-model="
-                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_2
-                  "
-                />
-              </div>
-
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <imageWithPreview
-                  :url="imageUrl"
-                  v-if="savedData.Tr_teknis_work_order_images"
-                  label="Kendala 2"
-                  v-model="
-                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_kendala_3
-                  "
-                />
-              </div>
-            </div>
-
-            <div class="col-span-3 grid grid-cols-1">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">
-                Evident Progres
+          </div>
+          <div class="grid grid-cols-1">
+            <!-- Redaman Sebelum -->
+            <div class="col-span-3">
+              <p
+                class="text-black dark:text-white text-center p-2 px-6.5 col-span-2 flex justify-between align-middle cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-900"
+                @click="evidentEnd = !evidentEnd"
+              >
+                <span>Evident End</span>
+                <span>
+                  <svg
+                    class="fill-current mr-1"
+                    width="25"
+                    height="25"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path :d="evidentEnd ? mdiChevronDown : mdiChevronUp" /></svg
+                ></span>
               </p>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <imageWithPreview
+              <div
+                class="flex border flex-col items-center justify-end relative w-full overflow-hidden transition-all duration-150 ease-in-out"
+                :class="{
+                  'max-h-0 opacity-0 p-0': !evidentEnd,
+                  'opacity-100 p-2': evidentEnd,
+                }"
+              >
+                <imageWithPreviewInfra
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
-                  label="Splicer - Proses Sambung"
-                  v-model="
-                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_proses_sambung
-                  "
-                />
-              </div>
-            </div>
-
-            <div class="col-span-2 grid grid-cols-3">
-              <p class="text-black dark:text-white text-center p-2 col-span-3">
-                Evident Sesudah
-              </p>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <imageWithPreview
-                  :url="imageUrl"
-                  v-if="savedData.Tr_teknis_work_order_images"
-                  label="Redaman Sesudah"
-                  v-model="
-                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_sesudah
-                  "
-                />
-              </div>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <imageWithPreview
-                  :url="imageUrl"
-                  v-if="savedData.Tr_teknis_work_order_images"
-                  label="Redaman Out ODP"
-                  v-model="
-                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_out_odp
-                  "
-                />
-              </div>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <imageWithPreview
-                  :url="imageUrl"
-                  v-if="savedData.Tr_teknis_work_order_images"
-                  label="Redaman Pelanggan"
-                  v-model="
-                    savedData.Tr_teknis_work_order_images.Tr_teknis_redaman_pelanggan
-                  "
-                />
-              </div>
-            </div>
-
-            <div class="col-span-3 grid grid-cols-2">
-              <p class="text-black dark:text-white text-center p-2 col-span-2">
-                Evident Marking Kabel
-              </p>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <imageWithPreview
-                  :url="imageUrl"
-                  v-if="savedData.Tr_teknis_work_order_images"
-                  label="Start"
-                  v-model="
-                    savedData.Tr_teknis_work_order_images
-                      .Tr_teknis_evident_marking_dc_start
-                  "
-                />
-              </div>
-              <div class="flex border flex-col items-center p-2 justify-end relative">
-                <imageWithPreview
-                  :url="imageUrl"
-                  v-if="savedData.Tr_teknis_work_order_images"
-                  label="End"
-                  v-model="
-                    savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_end
-                  "
+                  v-model="savedData.Tr_teknis_work_order_images.Tr_teknis_evident_end"
                 />
               </div>
             </div>
