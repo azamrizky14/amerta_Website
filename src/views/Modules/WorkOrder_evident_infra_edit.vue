@@ -62,12 +62,6 @@ const materialData = ref([]);
 const logistikData = ref(null);
 const optionsType = ref([]);
 
-// const optionsType = [
-//   { label: "PSB", value: "PSB" },
-//   { label: "INFRA", value: "INFRA" },
-//   { label: "INFRA", value: "INFRA" },
-// ];
-
 onMounted(async () => {
   console.log("data", indexStore.user);
   try {
@@ -185,7 +179,6 @@ const cancelAdd = async () => {
 
 // Validators for required fields
 const dataValidator = ref([
-  { key: "logistikData", label: "Kode Bon Material" },
   { key: "Tr_teknis_pelanggan_server", label: "Titik Koordinat" },
   { key: "Tr_teknis_pelanggan_nama", label: "Nama Project" },
 ]);
@@ -280,18 +273,51 @@ const submitData = async () => {
       );
 
       Object.keys(fixData.Tr_teknis_work_order_images).forEach((key) => {
-        if (fixData.Tr_teknis_work_order_images[key] === null) {
-          fixData.Tr_teknis_work_order_images[key] = "";
+        const dataKey = fixData.Tr_teknis_work_order_images[key];
+        if (dataKey) {
+          dataKey.forEach((data) => {
+            if (dataKey[data] === null) {
+              dataKey[data] = "";
+            }
+          });
         }
       });
 
       const sendData = new FormData();
 
+      // Function to append array data properly
+      const appendArrayData = (key: string, array: any[]) => {
+        array.forEach((item, index) => {
+          if (item instanceof File) {
+            sendData.append(`${key}[${index}]`, item);
+          } else if (typeof item === "string") {
+            sendData.append(`${key}[${index}]`, item);
+          } else {
+            sendData.append(`${key}[${index}]`, ""); // `{}` dikirim sebagai string kosong
+          }
+        });
+      };
+
+      // Function to handle nested object data
+      const appendObjectData = (parentKey: string, obj: Record<string, any>) => {
+        Object.keys(obj).forEach((key) => {
+          const fullKey = `${parentKey}.${key}`; // Format key untuk object
+          if (Array.isArray(obj[key])) {
+            appendArrayData(fullKey, obj[key]); // Handle array dalam object
+          } else if (typeof obj[key] === "object" && obj[key] !== null) {
+            appendObjectData(fullKey, obj[key]); // Rekursi untuk nested object
+          } else {
+            sendData.append(fullKey, obj[key]); // Append jika bukan object atau array
+          }
+        });
+      };
+
+      // Append each field to FormData
       Object.keys(fixData).forEach((key) => {
-        if (key === "Tr_teknis_work_order_images") {
-          Object.keys(fixData.Tr_teknis_work_order_images).forEach((image) => {
-            sendData.append(image, fixData.Tr_teknis_work_order_images[image]);
-          });
+        if (Array.isArray(fixData[key])) {
+          appendArrayData(key, fixData[key]);
+        } else if (typeof fixData[key] === "object" && fixData[key] !== null) {
+          appendObjectData(key, fixData[key]); // Tangani nested object
         } else {
           sendData.append(key, fixData[key]);
         }

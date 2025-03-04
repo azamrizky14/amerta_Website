@@ -21,7 +21,7 @@ const dataHeader = ref([
   { name: "Tgl. Dibuat", class: "min-w-[100px] py-2 px-4" },
   { name: "No. Logistik", class: "min-w-[160px] py-2 px-4" },
   { name: "Jenis", class: "min-w-[50px] py-2 px-4" },
-  { name: "PIC", class: "min-w-[200px] py-2 px-4 xl:pl-11" },
+  { name: "Dibuat Oleh", class: "min-w-[200px] py-2 px-4 xl:pl-11" },
   // { name: 'Teknisi', class: 'min-w-[90px] py-2 px-4' },
   { name: "Tas", class: "min-w-[100px] py-2 px-4" },
   { name: "Status", class: "min-w-[100px] py-2 px-4" },

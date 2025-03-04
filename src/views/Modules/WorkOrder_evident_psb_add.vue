@@ -148,11 +148,6 @@ const validateForm = () => {
     }
   });
 
-  const validatorMT = [
-    { key: "Tr_teknis_trouble", label: "Masalah" },
-    { key: "Tr_teknis_action", label: "Solusi" },
-  ];
-
   return dataError.value.length === 0;
 };
 
@@ -215,7 +210,6 @@ const submitData = async () => {
       }
 
       fixData.Tr_teknis_team = JSON.stringify(fixData.Tr_teknis_team.map((x) => x.name));
-
       const sendData = new FormData();
 
       Object.keys(fixData).forEach((key) => {

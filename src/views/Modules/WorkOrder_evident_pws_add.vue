@@ -157,11 +157,6 @@ const validateForm = () => {
     }
   });
 
-  const validatorMT = [
-    { key: "Tr_teknis_trouble", label: "Masalah" },
-    { key: "Tr_teknis_action", label: "Solusi" },
-  ];
-
   if (savedData.value.Tr_teknis_kategori.label === "MT") {
     validatorMT.forEach((validator) => {
       if (

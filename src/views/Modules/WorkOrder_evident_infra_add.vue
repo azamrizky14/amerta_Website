@@ -207,11 +207,6 @@ const validateForm = () => {
     }
   });
 
-  const validatorMT = [
-    { key: "Tr_teknis_trouble", label: "Masalah" },
-    { key: "Tr_teknis_action", label: "Solusi" },
-  ];
-
   // Return true if no errors, false otherwise
   return dataError.value.length === 0;
 };

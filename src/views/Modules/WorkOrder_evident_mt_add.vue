@@ -159,7 +159,7 @@ const validateForm = () => {
 
   const validatorMT = [
     { key: "Tr_teknis_trouble", label: "Masalah" },
-    { key: "Tr_teknis_action", label: "Solusi" },
+    // { key: "Tr_teknis_action", label: "Solusi" },
   ];
 
   validatorMT.forEach((validator) => {

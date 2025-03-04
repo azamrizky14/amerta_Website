@@ -142,7 +142,6 @@ const dataValidator = ref([
   { key: "Tr_teknis_pelanggan_server", label: "Server" },
   { key: "Tr_teknis_pelanggan_nama", label: "Nama Pelanggan" },
   { key: "Tr_teknis_trouble", label: "Masalah" },
-  { key: "Tr_teknis_action", label: "Solusi" },
 ]);
 
 const dataError = ref([]);
