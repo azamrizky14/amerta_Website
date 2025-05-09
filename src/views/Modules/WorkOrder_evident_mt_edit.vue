@@ -7,7 +7,7 @@ import Swal from "sweetalert2";
 import multiselectOptionEdit from "@/components/Forms/SelectGroup/multiselectOptionEdit.vue";
 
 import { useIndexStore } from "@/stores";
-import { showLoading, successCreate, failedCreate } from "@/stores/swal";
+import { showLoading, successEdit, failedEdit, cancelEdit } from "@/stores/swal";
 import {
   adminTeknis_UpdateDataImage,
   adminTeknis_GetDataEvidentById,
@@ -101,23 +101,6 @@ const validateForm = () => {
   return dataError.value.length === 0;
 };
 
-const cancelEdit = async () => {
-  const result = await Swal.fire({
-    title: "Batal Edit?",
-    text: "Anda yakin ingin membatalkan edit data ini?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#FF0000",
-    cancelButtonColor: "#",
-    confirmButtonText: "Batalkan",
-    cancelButtonText: "Kembali",
-  });
-
-  if (result.isConfirmed) {
-    await router.push("/modules/work-order/evident/mt");
-  }
-};
-
 const resetData = async () => {
   const result = await Swal.fire({
     title: "Reset Data?",
@@ -184,11 +167,11 @@ const submitData = async () => {
         fixData.Tr_teknis_logistik_id
       );
 
-      await successCreate().then(() => {
+      await successEdit().then(() => {
         router.push("/modules/work-order/evident/mt");
       });
     } catch (error) {
-      await failedCreate(error);
+      await failedEdit(error);
     }
   }
 };
@@ -215,7 +198,7 @@ const submitData = async () => {
                   disabled
                   type="text"
                   placeholder="Nama Tas"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_teknis_logistik_id"
                 />
               </div>
@@ -243,7 +226,7 @@ const submitData = async () => {
                 <input
                   type="text"
                   placeholder="Id Pelanggan"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_teknis_pelanggan_id"
                 />
               </div>
@@ -254,7 +237,7 @@ const submitData = async () => {
                 <input
                   type="text"
                   placeholder="Server"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_teknis_pelanggan_server"
                 />
               </div>
@@ -267,7 +250,7 @@ const submitData = async () => {
               <input
                 type="text"
                 placeholder="Nama Pelanggan"
-                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
+                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
                 v-model="savedData.Tr_teknis_pelanggan_nama"
               />
             </div>
@@ -279,7 +262,7 @@ const submitData = async () => {
               <textarea
                 rows="3"
                 placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="savedData.Tr_teknis_trouble"
               ></textarea>
             </div>
@@ -290,7 +273,7 @@ const submitData = async () => {
               <textarea
                 rows="3"
                 placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="savedData.Tr_teknis_action"
               ></textarea>
             </div>
@@ -302,7 +285,7 @@ const submitData = async () => {
               <textarea
                 rows="3"
                 placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="savedData.Tr_teknis_keterangan"
               ></textarea>
             </div>
@@ -383,7 +366,7 @@ const submitData = async () => {
                   disabled
                   type="text"
                   placeholder="SN"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.snNumber"
                 />
               </div>
@@ -556,7 +539,7 @@ const submitData = async () => {
           </div>
           <div class="pb-6 px-4 grid grid-cols-3 gap-2">
             <button
-              @click="cancelEdit"
+              @click="cancelEdit(router, '/modules/work-order/evident/mt')"
               class="flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90"
             >
               Batal

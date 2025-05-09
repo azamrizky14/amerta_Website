@@ -9,7 +9,6 @@ export const getDateToday = async (formatDate) => {
 }
 
 export const formatDate = async (date, formatDate) => {
-    
     const data = format(date, formatDate);
     return data
 }

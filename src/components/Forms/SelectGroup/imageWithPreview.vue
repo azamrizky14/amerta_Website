@@ -113,8 +113,18 @@ watch(
 
     <!-- Jika gambar berasal dari URL biasa atau hasil upload -->
     <img
-      v-else-if="imageSrc"
+      v-else-if="imageSrc && typeof modelValue !== 'object'"
       :src="imageSrc.startsWith('http') ? imageSrc : `${API}/${url}/${imageSrc}`"
+      alt="Uploaded Preview"
+      class="w-[100px] h-[100px] object-cover rounded"
+      :class="disabled ? 'cursor-default' : 'cursor-pointer'"
+      @click="!disabled && fileInput?.click()"
+    />
+
+    <!-- Jika gambar berasal dari URL biasa atau hasil upload -->
+    <img
+      v-else-if="imageSrc && typeof modelValue === 'object'"
+      :src="`${imageSrc}`"
       alt="Uploaded Preview"
       class="w-[100px] h-[100px] object-cover rounded"
       :class="disabled ? 'cursor-default' : 'cursor-pointer'"
@@ -130,7 +140,6 @@ watch(
       :class="disabled ? 'cursor-default' : 'cursor-pointer'"
       @click="!disabled && fileInput?.click()"
     />
-
     <!-- Remove button -->
     <button
       v-if="imageSrc && !disabled"

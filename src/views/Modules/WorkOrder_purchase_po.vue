@@ -18,7 +18,7 @@ const pageList = ref(["Work Order", "Purchase", "Purchase Order"]);
 const dataHeader = ref([
   { name: "No.", class: "py-2 pl-3" },
   { name: "Kode PO", class: "min-w-[75px] py-2 px-4" },
-  { name: "Tgl. Dibuat", class: "min-w-[100px] py-2 px-4" },
+  { name: "Tgl. Dibuat", class: "min-w-[105px] py-2 px-4" },
   { name: "Tgl. Perlu", class: "min-w-[100px] py-2 px-4" },
   { name: "Supplier", class: "min-w-[150px] py-2 px-4" },
   { name: "Dibuat Oleh", class: "py-2 px-4" },
@@ -87,8 +87,14 @@ const changePage = (page: number) => {
   }
 };
 
-onMounted(async () => {
-  const data = await po_getAllDataWithoutItem(indexStore.user.companyName, "N", "open");
+// Change page function
+const getData = async () => {
+  const data = await po_getAllDataWithoutItem(
+    indexStore.user.companyCode,
+    indexStore.user.hierarchyCode,
+    "N",
+    "open"
+  );
 
   dataTable.value = await Promise.all(
     data.map(async (po) => ({
@@ -97,6 +103,10 @@ onMounted(async () => {
       formattedNeed: await formatDate(po.Tr_po_tanggal, "dd-MM-yyyy"),
     }))
   );
+};
+
+onMounted(async () => {
+  await getData();
 });
 </script>
 
@@ -185,49 +195,57 @@ onMounted(async () => {
             </thead>
             <tbody>
               <tr v-for="(po, index) in paginatedData" :key="index" class="border">
-                <td class="pl-3 text-xs border">
+                <td class="pl-3 py-1.5 text-xs border align-top">
                   {{ index + 1 }}
                 </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-black dark:text-white text-xs text-center">
                     {{ po.Tr_po_id }}
                   </p>
                 </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-black dark:text-white text-xs text-center">
                     {{ po.formattedCreate }}
                   </p>
                 </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-xs text-black dark:text-white">
                     {{ po.formattedNeed }}
                   </p>
                 </td>
-                <td class="py-1 px-4 border">
-                  <p class="text-black dark:text-white text-xs text-center">
+                <td class="py-1.5 px-2 border align-top">
+                  <p class="text-black dark:text-white text-xs">
                     {{ po.Tr_po_supplier }}
                   </p>
                 </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-xs text-black dark:text-white">
                     {{ po.Tr_po_user_created }}
                   </p>
                 </td>
-                <td class="py-1 px-4 border">
-                  <p class="text-xs text-black dark:text-white">
+                <td class="pt-0 pb-1 px-4 text-center border">
+                  <p
+                    class="inline-flex rounded-full bg-opacity-10 pt-0 pb-1 px-3 text-xs font-medium"
+                    :class="{
+                      'bg-warning text-warning': po.Tr_po_status === 'process',
+                      'bg-danger text-danger': po.Tr_po_status === 'cancel',
+                      'bg-primary text-primary': po.Tr_po_status === 'open',
+                      'bg-success text-success': po.Tr_po_status === 'complete',
+                    }"
+                  >
                     {{ po.Tr_po_status }}
                   </p>
                 </td>
-                <td class="py-1 px-4">
-                  <div class="flex items-center space-x-3.5 d-flex justify-center">
+                <td class="py-1 px-2 align-top">
+                  <div class="flex items-center space-x-2.5 d-flex justify-center">
                     <router-link
                       class="hover:text-primary"
                       :to="'/modules/work-order/purchase/po/detail/' + po._id"
                     >
                       <svg
                         class="fill-current"
-                        width="24"
-                        height="24"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -242,8 +260,8 @@ onMounted(async () => {
                     >
                       <svg
                         class="fill-current"
-                        width="24"
-                        height="24"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"

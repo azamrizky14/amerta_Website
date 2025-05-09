@@ -159,6 +159,25 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
+  {
+    path: '/modules/work-order/bon-dan-material-new/closing/:id',
+    name: 'woBonNewClosing',
+    component: () => import('@/views/Modules/WorkOrder_bon_dan_material_new_closing.vue'),
+    meta: {
+      title: 'Closing Bon & Material',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+
+  {
+    path: '/modules/work-order/bon-dan-material-new/add',
+    name: 'woBonNewAdd',
+    component: () => import('@/views/Modules/WorkOrder_bon_dan_material_new_add.vue'),
+    meta: {
+      title: 'Create Bon & Material',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
   // Evident PSB
   {
     path: '/modules/work-order/evident/psb',
@@ -233,40 +252,58 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
-  // Evident PWS
+  // Evident PSN
   {
-    path: '/modules/work-order/evident/pws',
-    name: 'evidentPws',
-    component: () => import('@/views/Modules/WorkOrder_evident_pws.vue'),
+    path: '/modules/work-order/evident/psn',
+    name: 'evidentPsn',
+    component: () => import('@/views/Modules/WorkOrder_evident_psn.vue'),
     meta: {
-      title: 'Evident PWS',
+      title: 'Evident PSN',
       requiresAuth: true // Add this line to protect this route
     }
   },
   {
-    path: '/modules/work-order/evident/pws/add',
-    name: 'EvidentPwsAdd',
-    component: () => import('@/views/Modules/WorkOrder_evident_pws_add.vue'),
+    path: '/modules/work-order/evident/psn/add',
+    name: 'EvidentPsnAdd',
+    component: () => import('@/views/Modules/WorkOrder_evident_psn_add.vue'),
     meta: {
-      title: 'Evident PWS Add',
+      title: 'Evident PSN Add',
       requiresAuth: true // Add this line to protect this route
     }
   },
   {
-    path: '/modules/work-order/evident/pws/detail/:logistikType/:logistikDate/:logistikNumber/:id',
-    name: 'EvidentPwsDetail',
-    component: () => import('@/views/Modules/WorkOrder_evident_pws_detail.vue'),
+    path: '/modules/work-order/evident/psn-new/add',
+    name: 'EvidentPsnNewAdd',
+    component: () => import('@/views/Modules/WorkOrder_evident_psn_new_add.vue'),
     meta: {
-      title: 'Evident PWS Detail',
+      title: 'Evident PSN New Add',
       requiresAuth: true // Add this line to protect this route
     }
   },
   {
-    path: '/modules/work-order/evident/pws/edit/:logistikType/:logistikDate/:logistikNumber/:id',
-    name: 'EvidentPwsEdit',
-    component: () => import('@/views/Modules/WorkOrder_evident_pws_edit.vue'),
+    path: '/modules/work-order/evident/psn/detail/:logistikType/:logistikDate/:logistikNumber/:id',
+    name: 'EvidentPsnDetail',
+    component: () => import('@/views/Modules/WorkOrder_evident_psn_detail.vue'),
     meta: {
-      title: 'Evident PWS Edit',
+      title: 'Evident PSN Detail',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/evident/psn-new/detail/:logistikType/:logistikDate/:logistikNumber/:id',
+    name: 'EvidentPsnNewDetail',
+    component: () => import('@/views/Modules/WorkOrder_evident_psn_new_detail.vue'),
+    meta: {
+      title: 'Evident PSN New Detail',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/evident/psn/edit/:logistikType/:logistikDate/:logistikNumber/:id',
+    name: 'EvidentPsnEdit',
+    component: () => import('@/views/Modules/WorkOrder_evident_psn_edit.vue'),
+    meta: {
+      title: 'Evident PSN Edit',
       requiresAuth: true // Add this line to protect this route
     }
   },
@@ -347,24 +384,54 @@ const routes = [
   
   // Gudang
   {
-    path: '/modules/work-order/gudang',
+    path: '/modules/warehouse/gudang',
     name: 'woGudang',
-    component: () => import('@/views/Modules/WorkOrder_gudang.vue'),
+    component: () => import('@/views/Warehouse/Warehouse_gudang.vue'),
     meta: {
       title: 'Gudang',
       requiresAuth: true // Add this line to protect this route
     }
   },
   {
-    path: '/modules/work-order/gudang/detail/:id',
+    path: '/modules/warehouse/gudang/detail/:id',
     name: 'woGudangDetail',
-    component: () => import('@/views/Modules/WorkOrder_gudang_detail.vue'),
+    component: () => import('@/views/Warehouse/Warehouse_gudang_detail.vue'),
     meta: {
       title: 'Gudang Detail',
       requiresAuth: true // Add this line to protect this route
     }
   },
   
+  // Stock Opname
+  {
+    path: '/modules/warehouse/stock-opname',
+    name: 'woStockOpname',
+    component: () => import('@/views/Warehouse/Warehouse_stock_opname.vue'),
+    meta: {
+      title: 'Gudang',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/warehouse/stock-opname/add',
+    name: 'woStockOpnameDetail',
+    component: () => import('@/views/Warehouse/Warehouse_stock_opname_add.vue'),
+    meta: {
+      title: 'Gudang Create',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  // {
+  //   path: '/modules/warehouse/stock-opname/detail/:id',
+  //   name: 'woStockOpnameDetail',
+  //   component: () => import('@/views/Warehouse/Warehouse_stock_opname_detail.vue'),
+  //   meta: {
+  //     title: 'Gudang Detail',
+  //     requiresAuth: true // Add this line to protect this route
+  //   }
+  // },
+  
+  // Purchase Order
   {
     path: '/modules/work-order/purchase/po',
     name: 'woPurchaseOrder',
@@ -392,10 +459,97 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
+
+  // Good Receipt
+  {
+    path: '/modules/work-order/purchase/gr',
+    name: 'woGoodReceipt',
+    component: () => import('@/views/Modules/WorkOrder_purchase_gr.vue'),
+    meta: {
+      title: 'Good Receipt',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/purchase/gr/add',
+    name: 'woGoodReceiptAdd',
+    component: () => import('@/views/Modules/WorkOrder_purchase_gr_add.vue'),
+    meta: {
+      title: 'Good Receipt Add',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/purchase/gr/detail/:id',
+    name: 'woGoodReceiptDetail',
+    component: () => import('@/views/Modules/WorkOrder_purchase_gr_detail.vue'),
+    meta: {
+      title: 'Good Receipt Detail',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  
+  // Quality Assurance
+  {
+    path: '/modules/work-order/purchase/qa',
+    name: 'woQualityInspection',
+    component: () => import('@/views/Modules/WorkOrder_purchase_qa.vue'),
+    meta: {
+      title: 'Quality Assurance',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/purchase/qa/add',
+    name: 'woQualityInspectionAdd',
+    component: () => import('@/views/Modules/WorkOrder_purchase_qa_add.vue'),
+    meta: {
+      title: 'Quality Assurance Add',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/purchase/qa/detail/:id',
+    name: 'woQualityInspectionDetail',
+    component: () => import('@/views/Modules/WorkOrder_purchase_qa_detail.vue'),
+    meta: {
+      title: 'Quality Assurance Detail',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+
+  // Payment
+  {
+    path: '/modules/work-order/purchase/pp',
+    name: 'woPurchasePayment',
+    component: () => import('@/views/Modules/WorkOrder_purchase_pp.vue'),
+    meta: {
+      title: 'Payment',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/purchase/pp/add',
+    name: 'woPurchasePaymentAdd',
+    component: () => import('@/views/Modules/WorkOrder_purchase_pp_add.vue'),
+    meta: {
+      title: 'Payment Add',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/purchase/pp/detail/:id',
+    name: 'woPurchasePaymentDetail',
+    component: () => import('@/views/Modules/WorkOrder_purchase_pp_detail.vue'),
+    meta: {
+      title: 'Payment Detail',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
   
   // Master User Internal
   {
-    path: '/modules/master/user-internal',
+    path: '/master/user-internal',
     name: 'userInternal',
     component: () => import('@/views/Master/Master_userInternal.vue'),
     meta: {
@@ -404,7 +558,7 @@ const routes = [
     }
   },
   {
-    path: '/modules/master/user-internal/add',
+    path: '/master/user-internal/add',
     name: 'userInternalAdd',
     component: () => import('@/views/Master/Master_userInternal_add.vue'),
     meta: {
@@ -413,7 +567,7 @@ const routes = [
     }
   },
   {
-    path: '/modules/master/user-internal/detail/:id',
+    path: '/master/user-internal/detail/:id',
     name: 'userInternalDetail',
     component: () => import('@/views/Master/Master_userInternal_detail.vue'),
     meta: {
@@ -421,10 +575,57 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
+  {
+    path: '/master/user-internal/edit/:id',
+    name: 'userInternalEdit',
+    component: () => import('@/views/Master/Master_userInternal_edit.vue'),
+    meta: {
+      title: 'Master User Internal Edit',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  
+  // Master User Internal
+  {
+    path: '/master/user-external',
+    name: 'userExternal',
+    component: () => import('@/views/Master/Master_userExternal.vue'),
+    meta: {
+      title: 'Master User External',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/master/user-external/add',
+    name: 'userExternalAdd',
+    component: () => import('@/views/Master/Master_userExternal_add.vue'),
+    meta: {
+      title: 'Master User External Add',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/master/user-external/detail/:id',
+    name: 'userExternalDetail',
+    component: () => import('@/views/Master/Master_userExternal_detail.vue'),
+    meta: {
+      title: 'Master User External Detail',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/master/user-external/edit/:id',
+    name: 'userExternalEdit',
+    component: () => import('@/views/Master/Master_userExternal_edit.vue'),
+    meta: {
+      title: 'Master User External Edit',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
 
   // Master User Role
   {
-    path: '/modules/master/user-role',
+    path: '/master/user-role',
     name: 'userRole',
     component: () => import('@/views/Master/Master_userRole.vue'),
     meta: {

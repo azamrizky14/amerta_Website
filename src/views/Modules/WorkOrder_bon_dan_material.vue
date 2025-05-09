@@ -18,13 +18,13 @@ const pageTitle = ref("Bon & Material");
 const pageList = ref(["Work Order", "Bon & Material"]);
 const dataHeader = ref([
   { name: "No.", class: "py-2 pl-3" },
-  { name: "Tgl. Dibuat", class: "min-w-[100px] py-2 px-4" },
+  { name: "Tgl. Dibuat", class: "min-w-[105px] py-2 px-4" },
   { name: "No. Logistik", class: "min-w-[160px] py-2 px-4" },
   { name: "Jenis", class: "min-w-[50px] py-2 px-4" },
   { name: "Dibuat Oleh", class: "min-w-[200px] py-2 px-4 xl:pl-11" },
   // { name: 'Teknisi', class: 'min-w-[90px] py-2 px-4' },
   { name: "Tas", class: "min-w-[100px] py-2 px-4" },
-  { name: "Status", class: "min-w-[100px] py-2 px-4" },
+  { name: "Status", class: "w-[90px] py-2 px-4" },
 ]);
 let dataTable = ref([]);
 const searchQuery = ref("");
@@ -144,7 +144,14 @@ onMounted(async () => {
           </div>
           <div class="right-data flex items-center flex-row-reverse">
             <!-- Add Button -->
-            <router-link to="/modules/work-order/bon-dan-material/add" class="px-1">
+            <router-link
+              :to="
+                indexStore.user.companyCode.toString() === [0, 2].toString()
+                  ? '/modules/work-order/bon-dan-material-new/add'
+                  : '/modules/work-order/bon-dan-material/add'
+              "
+              class="px-1"
+            >
               <svg
                 class="fill-current hover:text-primary"
                 width="22"
@@ -191,44 +198,44 @@ onMounted(async () => {
             </thead>
             <tbody>
               <tr v-for="(item, index) in paginatedData" :key="index" class="border">
-                <td class="pl-3 text-xs border">
+                <td class="pl-3 py-1.5 text-xs border align-top">
                   {{ (currentPage - 1) * itemsPerPage + index + 1 }}
                 </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-black dark:text-white text-xs text-center">
                     {{ item.formattedDate }}
                   </p>
                 </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-black dark:text-white text-xs text-center">
                     {{ item.Tr_teknis_logistik_id }}
                   </p>
                 </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-black dark:text-white text-xs text-center">
                     {{ item.Tr_teknis_jenis }}
                   </p>
                 </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-xs text-black dark:text-white">
                     {{ item.Tr_teknis_user_created }}
                   </p>
                 </td>
-                <!-- <td class="py-1 px-4 border">
+                <!-- <td class="py-1.5 px-2 border align-top">
                   <h5
                     class="font-medium text-black text-xs dark:text-white text-center"
                   >
                     {{ item.Tr_teknis_team.length }}
                   </h5>
                 </td> -->
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <h5 class="font-medium text-black text-xs dark:text-white">
                     {{ item.Tr_teknis_item }}
                   </h5>
                 </td>
-                <td class="py-1 px-4 text-center border">
+                <td class="pt-0 pb-1 px-4 text-center border">
                   <p
-                    class="inline-flex rounded-full bg-opacity-10 py-1 px-3 text-xs font-medium"
+                    class="inline-flex rounded-full bg-opacity-10 pt-0 pb-1 px-3 text-xs font-medium"
                     :class="{
                       'bg-warning text-warning': item.Tr_teknis_status === 'pending',
                       'bg-danger text-danger': item.Tr_teknis_status === 'closed',
@@ -238,16 +245,16 @@ onMounted(async () => {
                     {{ item.Tr_teknis_status }}
                   </p>
                 </td>
-                <td class="py-1 px-4">
-                  <div class="flex items-center space-x-3.5 d-flex justify-center">
+                <td class="py-1 px-2 align-top">
+                  <div class="flex items-center space-x-2.5 d-flex justify-center">
                     <router-link
                       class="hover:text-primary"
                       :to="'/modules/work-order/bon-dan-material/detail/' + item._id"
                     >
                       <svg
                         class="fill-current"
-                        width="24"
-                        height="24"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -262,17 +269,16 @@ onMounted(async () => {
                           ? 'cursor-default opacity-50'
                           : 'hover:text-primary'
                       "
-                      class=""
                       :to="
-                        item.Tr_teknis_status !== 'closed'
-                          ? '/modules/work-order/bon-dan-material/closing/' + item._id
-                          : ''
+                        indexStore.user.companyCode.toString() === [0, 2].toString()
+                          ? '/modules/work-order/bon-dan-material-new/closing/' + item._id
+                          : '/modules/work-order/bon-dan-material/closing/' + item._id
                       "
                     >
                       <svg
                         class="fill-current"
-                        width="24"
-                        height="24"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"

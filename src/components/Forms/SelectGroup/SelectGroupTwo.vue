@@ -16,7 +16,7 @@ const changeTextColor = () => {
     <div class="relative z-20 bg-transparent dark:bg-form-input">
       <select
         v-model="selectedOption"
-        class="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+        class="relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-1.5 px-4 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
         :class="{ 'text-black dark:text-white': isOptionSelected }"
         @change="changeTextColor"
       >

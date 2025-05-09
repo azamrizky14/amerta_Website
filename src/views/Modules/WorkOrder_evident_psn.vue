@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, watch } from "vue";
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import { lokasi_getAllLocationWithStatus } from "@/stores/functionAPI";
+import { adminTeknis_GetDataEvidentByType } from "@/stores/functionAPI";
 import {
   mdiEyeOutline,
   mdiMagnify,
@@ -11,20 +11,21 @@ import {
   mdiSquareEditOutline,
 } from "@mdi/js";
 import { useIndexStore } from "@/stores";
-import { formatDate } from "@/stores/date";
 
-const pageTitle = ref("Gudang");
-const pageList = ref(["Work Order", "Gudang"]);
+const indexStore = useIndexStore();
+const pageTitle = ref("Evident - PSN");
+const pageList = ref(["Work Order", "Evident", "PSN"]);
 const dataHeader = ref([
   { name: "No.", class: "py-2 pl-3" },
-  { name: "Kode", class: "min-w-[75px] py-2 px-4" },
-  { name: "Nama. Gudang", class: "min-w-[150px] py-2 px-4" },
-  { name: "Alamat", class: "py-2 px-2" },
-  { name: "Tgl. Dibuat", class: "min-w-[100px] py-2 px-4" },
-  { name: "Dibuat Oleh", class: "py-2 px-4" },
+  { name: "Tgl. Dibuat", class: "min-w-[105px] py-2 px-4" },
+  { name: "No. Logistik", class: "min-w-[150px] py-2 px-4" },
+  { name: "Id. User", class: "min-w-[100px] py-2 px-4" },
+  { name: "Nama. User", class: "min-w-[150px] py-2 px-4" },
+  { name: "Server", class: "py-2 px-4" },
+  { name: "Kategori", class: "py-2 px-4" },
+  { name: "Tr Teknis", class: "py-2 px-4" },
 ]);
 let dataTable = ref([]);
-const indexStore = useIndexStore();
 const searchQuery = ref("");
 
 // Pagination state
@@ -54,20 +55,6 @@ const filteredData = computed(() => {
   );
 });
 
-const visiblePages = computed(() => {
-  const pages = [];
-  const range = 2; // Number of pages to show before and after the current page
-
-  let start = Math.max(1, currentPage.value - range);
-  let end = Math.min(totalPages.value, currentPage.value + range);
-
-  for (let i = start; i <= end; i++) {
-    pages.push(i);
-  }
-
-  return pages;
-});
-
 // Total items based on the filtered data
 const totalItems = computed(() => filteredData.value.length);
 const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
@@ -86,29 +73,44 @@ const changePage = (page: number) => {
   }
 };
 
-onMounted(async () => {
-  const data = await lokasi_getAllLocationWithStatus(indexStore.user.companyName, "N");
+const visiblePages = computed(() => {
+  const pages = [];
+  const range = 2; // Number of pages to show before and after the current page
 
-  dataTable.value = await Promise.all(
-    data.map(async (lokasi) => ({
-      ...lokasi,
-      formattedDate: await formatDate(lokasi.lokasi_created, "dd-MM-yyyy"),
-    }))
+  let start = Math.max(1, currentPage.value - range);
+  let end = Math.min(totalPages.value, currentPage.value + range);
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+
+  return pages;
+});
+
+// Change page function
+const getMainData = async () => {
+  const data = await adminTeknis_GetDataEvidentByType(
+    "N",
+    "PSN",
+    indexStore.company.companyCode,
+    indexStore.user.hierarchyCode
   );
+  dataTable.value = data;
+};
+
+onMounted(async () => {
+  await getMainData();
 });
 </script>
 
 <template>
   <DefaultLayout>
-    <!-- Breadcrumb Start -->
     <BreadcrumbDefault :pageTitle="pageTitle" :pageList="pageList" />
-    <!-- Breadcrumb End -->
 
     <div class="flex flex-col gap-10">
       <div
         class="rounded-sm border border-stroke bg-white px-5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5"
       >
-        <!-- Search and Helper -->
         <div
           class="helper border-2 flex justify-between bg-gray-2 text-left dark:bg-meta-4 text-black dark:text-white py-2 px-4"
         >
@@ -136,8 +138,14 @@ onMounted(async () => {
             </div>
           </div>
           <div class="right-data flex items-center flex-row-reverse">
-            <!-- Add Button -->
-            <router-link to="/master/location/add" class="px-1">
+            <router-link
+              class="px-1"
+              :to="
+                indexStore.user.companyCode.toString() === [0, 2].toString()
+                  ? '/modules/work-order/evident/psn-new/add'
+                  : '/modules/work-order/evident/psn/add'
+              "
+            >
               <svg
                 class="fill-current hover:text-primary"
                 width="22"
@@ -149,8 +157,7 @@ onMounted(async () => {
                 <path :d="mdiPlusCircleOutline" fill="" />
               </svg>
             </router-link>
-            <!-- Refresh Button -->
-            <button class="px-1">
+            <button class="px-1" @click="getMainData()">
               <svg
                 class="fill-current hover:text-primary"
                 width="24"
@@ -182,56 +189,74 @@ onMounted(async () => {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(lokasi, index) in paginatedData" :key="index" class="border">
-                <td class="pl-3 text-xs border">
+              <tr v-for="(item, index) in paginatedData" :key="index" class="border">
+                <td class="pl-3 py-1.5 text-xs border align-top">
                   {{ index + 1 }}
                 </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-black dark:text-white text-xs text-center">
-                    {{ lokasi.lokasi_id }}
+                    {{ item.Tr_teknis_created }}
                   </p>
                 </td>
-                <td class="py-1 px-4 border">
-                  <p class="text-xs text-black dark:text-white">
-                    {{ lokasi.lokasi_nama }}
-                  </p>
-                </td>
-                <td class="py-1 px-2 border">
-                  <p class="text-xs text-black dark:text-white">
-                    <span v-if="lokasi.lokasi_tipe === 'gudang'">
-                      {{ lokasi.lokasi_alamat.lokasi_alamat_gudang }}
-                    </span>
-                    <span v-else-if="lokasi.lokasi_tipe === 'ruang'">
-                      {{ lokasi.lokasi_alamat.lokasi_alamat_gudang }},
-                      {{ lokasi.lokasi_alamat.lokasi_alamat_ruang }}
-                    </span>
-                    <span v-else-if="lokasi.lokasi_tipe === 'rak'">
-                      {{ lokasi.lokasi_alamat.lokasi_alamat_gudang }},
-                      {{ lokasi.lokasi_alamat.lokasi_alamat_ruang }},
-                      {{ lokasi.lokasi_alamat.lokasi_alamat_rak }}
-                    </span>
-                  </p>
-                </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-black dark:text-white text-xs text-center">
-                    {{ lokasi.formattedDate }}
+                    {{ item.Tr_teknis_logistik_id }}
                   </p>
                 </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-xs text-black dark:text-white">
-                    {{ lokasi.lokasi_user_created }}
+                    {{ item.Tr_teknis_pelanggan_id }}
                   </p>
                 </td>
-                <td class="py-1 px-4">
-                  <div class="flex items-center space-x-3.5 d-flex justify-center">
+                <td class="py-1.5 px-2 border align-top">
+                  <h5 class="font-medium text-black text-xs dark:text-white">
+                    {{ item.Tr_teknis_pelanggan_nama }}
+                  </h5>
+                </td>
+                <td class="py-1 px-4 text-center border">
+                  <h5 class="font-medium text-black text-xs dark:text-white">
+                    {{ item.Tr_teknis_pelanggan_server }}
+                  </h5>
+                </td>
+                <td class="py-1 px-4 text-center border">
+                  <h5 class="font-medium text-black text-xs dark:text-white">
+                    {{ item.Tr_teknis_kategori }}
+                  </h5>
+                </td>
+                <td class="py-1.5 px-2 border align-top">
+                  <h5 class="font-medium text-black text-xs dark:text-white">
+                    {{ item.Tr_teknis_user_updated }}
+                  </h5>
+                </td>
+                <td class="py-1 px-2 align-top">
+                  <div class="flex items-center space-x-2.5 d-flex justify-center">
+                    <router-link
+                      class="px-1"
+                      :to="
+                        indexStore.user.companyCode.toString() === [0, 2].toString()
+                          ? '/modules/work-order/evident/psn-new/add'
+                          : '/modules/work-order/evident/psn/add'
+                      "
+                    >
+                    </router-link>
                     <router-link
                       class="hover:text-primary"
-                      :to="'/modules/work-order/gudang/detail/' + lokasi._id"
+                      :to="
+                        indexStore.user.companyCode.toString() === [0, 2].toString()
+                          ? '/modules/work-order/evident/psn-new/detail/' +
+                            item.Tr_teknis_logistik_id +
+                            '/' +
+                            item._id
+                          : '/modules/work-order/evident/psn/detail/' +
+                            item.Tr_teknis_logistik_id +
+                            '/' +
+                            item._id
+                      "
                     >
                       <svg
                         class="fill-current"
-                        width="24"
-                        height="24"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -239,15 +264,19 @@ onMounted(async () => {
                         <path :d="mdiEyeOutline" fill="" />
                       </svg>
                     </router-link>
-
                     <router-link
-                      class="hover:text-primary hidden"
-                      :to="'/master/location/edit/' + lokasi._id"
+                      class="hover:text-primary"
+                      :to="
+                        '/modules/work-order/evident/psn/edit/' +
+                        item.Tr_teknis_logistik_id +
+                        '/' +
+                        item._id
+                      "
                     >
                       <svg
                         class="fill-current"
-                        width="24"
-                        height="24"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"

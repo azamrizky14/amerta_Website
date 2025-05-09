@@ -28,7 +28,7 @@ const filteredOptions = computed(() =>
     <!-- Selected Items -->
     <div
       :class="props.disabled?'bg-whiter':''"
-      class="border-[1.5px] rounded-lg p-3 text-black bg-transparent transition focus:border-primary dark:text-white dark:bg-form-input"
+      class="border-[1.5px] rounded-lg py-1.5 px-4 text-black bg-transparent transition focus:border-primary dark:text-white dark:bg-form-input"
     >
       <div class="flex flex-wrap gap-2">
         <template v-if="props.options && props.options.length">

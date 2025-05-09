@@ -95,3 +95,38 @@ export const failedJoin = async (data) => {
         icon: 'error'
       })
 }
+
+
+// Cancel
+export const cancelEdit = async (router, url) => {
+  const result = await Swal.fire({
+    title: "Batal Edit?",
+    text: "Anda yakin ingin membatalkan edit data ini?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#FF0000",
+    confirmButtonText: "Batalkan",
+    cancelButtonText: "Kembali",
+  });
+
+  if (result.isConfirmed) {
+    await router.push(url);
+  }
+};
+
+// Reset
+export const resetFunction = async (resetData) => {
+  const result = await Swal.fire({
+    title: "Reset Data?",
+    text: "Anda yakin ingin mereset perubahan yang Anda buat?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#FF0000",
+    confirmButtonText: "Reset",
+    cancelButtonText: "Kembali",
+  });
+
+  if (result.isConfirmed && typeof resetData === "function") {
+    resetData(); // Panggil fungsi reset yang dikirim dari tombol
+  }
+};

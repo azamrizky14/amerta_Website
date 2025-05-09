@@ -90,7 +90,6 @@ const handleRemoveMaterialTerpakai = async (index) => {
     materialData.value.splice(index, 1);
   });
 };
-
 </script>
 
 <template>
@@ -125,7 +124,7 @@ const handleRemoveMaterialTerpakai = async (index) => {
                   disabled
                   type="text"
                   placeholder="Detail Kode Item"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.item_id"
                 />
                 <label
@@ -137,7 +136,7 @@ const handleRemoveMaterialTerpakai = async (index) => {
                   disabled
                   type="text"
                   placeholder="Detail Nama Item"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.item_nama"
                 />
               </div>
@@ -153,7 +152,7 @@ const handleRemoveMaterialTerpakai = async (index) => {
                   disabled
                   type="text"
                   placeholder="Detail Nama Item"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.item_tipe"
                 />
               </div>
@@ -167,7 +166,7 @@ const handleRemoveMaterialTerpakai = async (index) => {
                   disabled
                   type="text"
                   placeholder="Detail Satuan Item"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.item_satuan"
                 />
               </div>
@@ -182,8 +181,8 @@ const handleRemoveMaterialTerpakai = async (index) => {
               <input
                 disabled
                 type="text"
-                placeholder="Detail Merk Item"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                placeholder="Detail Jenis Item"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="savedData.item_brand"
               />
             </div>
@@ -210,7 +209,7 @@ const handleRemoveMaterialTerpakai = async (index) => {
                   disabled
                   rows="3"
                   placeholder="Detail keterangan disini!"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.item_keterangan"
                 ></textarea>
               </div>
@@ -260,7 +259,9 @@ const handleRemoveMaterialTerpakai = async (index) => {
                   v-model="data.satuan_awal"
                 />
               </div>
-              <div class="flex pt-5 items-center">-</div>
+              <div class="w-1/12 flex justify-center">
+                <div class="flex pt-5 items-center">-</div>
+              </div>
               <div class="w-3/12">
                 <label
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
@@ -292,7 +293,7 @@ const handleRemoveMaterialTerpakai = async (index) => {
                   v-model="data.satuan_akhir"
                 />
               </div>
-              <div class="w-1/12 flex items-end pb-2 flex-wrap">
+              <div class="w-1/12 flex items-end pb-2 flex-wrap hidden">
                 <div
                   class="flex w-full justify-center mb-5 cursor-pointer font-medium text-blue-600 hover:bg-opacity-90"
                   @click="handleAddMaterialTerpakai"

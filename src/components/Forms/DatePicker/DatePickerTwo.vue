@@ -22,7 +22,7 @@ onMounted(() => {
     <label class="mb-3 block text-sm font-medium text-black dark:text-white"> Select date </label>
     <div class="relative">
       <input
-        class="datepicker w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+        class="datepicker w-full rounded border-[1.5px] border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
         placeholder="mm/dd/yyyy"
         data-class="flatpickr-right"
       />

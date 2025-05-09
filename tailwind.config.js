@@ -79,6 +79,8 @@ export default {
         'title-xsm': ['18px', '24px']
       },
       spacing: {
+        1.5: '0.375rem',
+        3: '0.75rem',
         4.5: '1.125rem',
         5.5: '1.375rem',
         6.5: '1.625rem',

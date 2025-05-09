@@ -1,13 +1,13 @@
-# TailAdmin Vue - Free Vue.js Tailwind CSS Admin Dashboard Template
+# AmertaApp Vue - Free Vue.js Tailwind CSS Admin Dashboard Template
 
-TailAdmin Vue is a free, open-source admin dashboard template **built on Vue.js**, popular and progressive JavaScript
+AmertaApp Vue is a free, open-source admin dashboard template **built on Vue.js**, popular and progressive JavaScript
 framework, and **Tailwind CSS**. This **powerful combination** provides developers with an extensive library of
 essential components, elements, and pages to launch a comprehensive and data-centric back-end, dashboard, or admin panel
 solution for any Vue.js based web projects.
 
-[![TailAdmin Vue - Free Vue.js Tailwind CSS Admin Dashboard Template](https://ucarecdn.com/3e01b731-d63b-47f0-ba92-7686ecd49f9b/tailadminvue.png)](https://free-vue-demo.tailadmin.com/)
+[![AmertaApp Vue - Free Vue.js Tailwind CSS Admin Dashboard Template](https://ucarecdn.com/3e01b731-d63b-47f0-ba92-7686ecd49f9b/tailadminvue.png)](https://free-vue-demo.tailadmin.com/)
 
-With TailAdmin Vue, you can leverage **Vue.js 3** features such as declarative rendering, component-based architecture,
+With AmertaApp Vue, you can leverage **Vue.js 3** features such as declarative rendering, component-based architecture,
 Vue Router for routing, and Pinia for state management. It also harnesses the power of Tailwind CSS for rapid UI
 development with its low-level utility classes and responsive design capabilities.
 
@@ -17,10 +17,10 @@ development with its low-level utility classes and responsive design capabilitie
 
 The VueJS admin dashbaord template offers a **diverse set of dashboard UI components**, elements, and pages, including
 forms, tables, charts, maps, and **pre-built pages**, which are critical for creating a high-quality and complete admin
-panel or dashboard. Whether you’re developing a complex web application or a simple website, TailAdmin Vue provides a
+panel or dashboard. Whether you’re developing a complex web application or a simple website, AmertaApp Vue provides a
 robust and flexible foundation to streamline your workflow and enhance your project's functionality.
 
-## TailAdmin Vue Features
+## AmertaApp Vue Features
 
 **💎 High-quality, Premium Modern Design:**
 A thoughtfully designed dashboard template with a deep focus on UX/UI, already trusted and utilized by over 10K+ web
@@ -48,7 +48,7 @@ Easily integrate interactive vector maps with JSVectorMap.
 Frontend UI built on the powerful and versatile Tailwind CSS framework.
 
 **💫 TypeScript Support:**
-Write safer, maintainable code with TailAdmin Vue's TypeScript Support.
+Write safer, maintainable code with AmertaApp Vue's TypeScript Support.
 
 **✅ Linting and Formatting:**
 Maintain a clean codebase with built-in linting and formatting.
@@ -56,9 +56,9 @@ Maintain a clean codebase with built-in linting and formatting.
 **🗃️ State Management with Pinia:**
 Handle your app's state with Pinia for clean, organized code.
 
-### TailAdmin PRO vs TailAdmin FREE Comparison 📊
+### AmertaApp PRO vs AmertaApp FREE Comparison 📊
 
-#### [TailAdmin PRO](https://vue-demo.tailadmin.com/)
+#### [AmertaApp PRO](https://vue-demo.tailadmin.com/)
 
 - 4 Unique Dashboards: Analytics, Ecommerce, Marketing, and CRM (More will be added)
 - 120+ Dashboard UI Components
@@ -67,7 +67,7 @@ Handle your app's state with Pinia for clean, organized code.
 - All Essential Elements and Files
 - Full Figma Design Source - As Shown on Demo
 
-#### [TailAdmin Vue FREE](https://free-vue-demo.tailadmin.com/)
+#### [AmertaApp Vue FREE](https://free-vue-demo.tailadmin.com/)
 
 - 1 Unique Dashboard
 - 30+ Dashboard UI Components
@@ -85,13 +85,13 @@ ___
 
 ### [📄 Documentation](https://tailadmin.com/docs)
 
-### [🖌️ TailAdmin Figma Free Sample](https://www.figma.com/community/file/1214477970819985778)
+### [🖌️ AmertaApp Figma Free Sample](https://www.figma.com/community/file/1214477970819985778)
 
-### [👉 TailAdmin HTML Version](https://github.com/TailAdmin/tailadmin-free-tailwind-dashboard-template)
+### [👉 AmertaApp HTML Version](https://github.com/AmertaApp/tailadmin-free-tailwind-dashboard-template)
 
-### [👉 TailAdmin React Version](https://github.com/TailAdmin/free-react-tailwind-admin-dashboard)
+### [👉 AmertaApp React Version](https://github.com/AmertaApp/free-react-tailwind-admin-dashboard)
 
-### [👉 TailAdmin Next.js Version](https://github.com/TailAdmin/free-nextjs-admin-dashboard)
+### [👉 AmertaApp Next.js Version](https://github.com/AmertaApp/free-nextjs-admin-dashboard)
 
 ## Installation
 
@@ -125,7 +125,7 @@ development. 🚀
 **Vue.js** is a JavaScript framework specifically designed for creating user interfaces, while **Tailwind** is a CSS
 framework that focuses on utility-first styling approaches. 🛠️
 
-With **TailAdmin Vue**, you gain access to an extensive collection of **200+ essential UI components** built exclusively
+With **AmertaApp Vue**, you gain access to an extensive collection of **200+ essential UI components** built exclusively
 for Vue.js and styled using the powerful capabilities of Tailwind CSS. 🎨
 
 This comprehensive library covers various elements such as:
@@ -165,4 +165,4 @@ all your Vue.js dashboard development needs! 🎯
 
 ### Version 1.0.0 - Initial Release - [Jan 22, 2024]
 
-- Initial release of TailAdmin Vue."# amerta_Website" 
+- Initial release of AmertaApp Vue."# amerta_Website" 

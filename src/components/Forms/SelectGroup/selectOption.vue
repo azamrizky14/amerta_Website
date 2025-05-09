@@ -61,7 +61,7 @@ onClickOutside(dropdownRef, () => {
     <!-- Selected Item -->
     <div
       :class="props.disabled ? 'bg-whiter' : ''"
-      class="border-[1.5px] rounded-lg p-3 cursor-pointer text-black bg-transparent transition focus:border-primary dark:text-white dark:bg-form-input"
+      class="border-[1.5px] rounded-lg py-1.5 px-4 cursor-pointer text-black bg-transparent transition focus:border-primary dark:text-white dark:bg-form-input"
       @click="!props.disabled && (isOpen = !isOpen)"
     >
       <div>
@@ -85,7 +85,7 @@ onClickOutside(dropdownRef, () => {
         type="text"
         v-model="searchQuery"
         placeholder="Search..."
-        class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary dark:text-white dark:bg-form-input"
+        class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary dark:text-white dark:bg-form-input"
       />
 
       <!-- Options List -->

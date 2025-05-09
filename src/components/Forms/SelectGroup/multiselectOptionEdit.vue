@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import { onClickOutside } from '@vueuse/core';
+import { ref, computed, watch } from "vue";
+import { onClickOutside } from "@vueuse/core";
 
 interface Option {
   id: number;
@@ -16,10 +16,10 @@ let props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: Option[]): void;
+  (e: "update:modelValue", value: Option[]): void;
 }>();
 
-const searchQuery = ref(props.value || ''); // Search query
+const searchQuery = ref(props.value || ""); // Search query
 const isOpen = ref(false);
 const selectedOptions = ref<Option[]>([]); // Initialize empty
 
@@ -29,7 +29,6 @@ const updateSelectedOptions = () => {
     props.modelValue.some((selected) => selected.name === option.name)
   );
 };
-
 
 // Watch for changes in parent-provided modelValue and options
 watch(
@@ -59,9 +58,8 @@ const toggleSelection = (option: Option) => {
   } else {
     selectedOptions.value.push(option);
   }
-  emit('update:modelValue', selectedOptions.value);
+  emit("update:modelValue", selectedOptions.value);
 };
-
 
 // Check if an option is selected
 const isSelected = (option: Option) =>
@@ -79,7 +77,7 @@ onClickOutside(dropdownRef, () => {
     <!-- Selected Items -->
     <div
       :class="props.disabled ? 'bg-whiter' : ''"
-      class="border-[1.5px] rounded-lg p-3 cursor-pointer text-black bg-transparent transition focus:border-primary dark:text-white dark:bg-form-input"
+      class="border-[1.5px] rounded-lg py-1.5 px-4 cursor-pointer text-black bg-transparent transition focus:border-primary dark:text-white dark:bg-form-input"
       @click="isOpen = !isOpen"
     >
       <div class="flex flex-wrap gap-2">
@@ -109,7 +107,7 @@ onClickOutside(dropdownRef, () => {
         type="text"
         v-model="searchQuery"
         placeholder="Search..."
-        class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary dark:text-white dark:bg-form-input"
+        class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary dark:text-white dark:bg-form-input"
       />
 
       <!-- Options List -->

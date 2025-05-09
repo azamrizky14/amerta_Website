@@ -17,11 +17,10 @@ const pageTitle = ref("Evident - INFRA");
 const pageList = ref(["Work Order", "Evident", "INFRA"]);
 const dataHeader = ref([
   { name: "No.", class: "py-2 pl-3" },
-  { name: "Tgl. Dibuat", class: "min-w-[100px] py-2 px-4" },
+  { name: "Tgl. Dibuat", class: "min-w-[105px] py-2 px-4" },
   { name: "No. Logistik", class: "min-w-[150px] py-2 px-4" },
-  { name: "Id. User", class: "min-w-[100px] py-2 px-4" },
-  { name: "Nama. User", class: "min-w-[150px] py-2 px-4" },
-  { name: "Server", class: "py-2 px-4" },
+  { name: "Nama Project", class: "min-w-[150px] py-2 px-4" },
+  { name: "Titik Koordinat", class: "py-2 px-4" },
   { name: "Kategori", class: "py-2 px-4" },
   { name: "Tr Teknis", class: "py-2 px-4" },
 ]);
@@ -182,25 +181,20 @@ onMounted(async () => {
             </thead>
             <tbody>
               <tr v-for="(item, index) in paginatedData" :key="index" class="border">
-                <td class="pl-3 text-xs border">
+                <td class="pl-3 py-1.5 text-xs border align-top">
                   {{ index + 1 }}
                 </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-black dark:text-white text-xs text-center">
                     {{ item.Tr_teknis_created }}
                   </p>
                 </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-black dark:text-white text-xs text-center">
                     {{ item.Tr_teknis_logistik_id }}
                   </p>
                 </td>
-                <td class="py-1 px-4 border">
-                  <p class="text-xs text-black dark:text-white">
-                    {{ item.Tr_teknis_pelanggan_id }}
-                  </p>
-                </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <h5 class="font-medium text-black text-xs dark:text-white">
                     {{ item.Tr_teknis_pelanggan_nama }}
                   </h5>
@@ -215,13 +209,13 @@ onMounted(async () => {
                     {{ item.Tr_teknis_kategori }}
                   </h5>
                 </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <h5 class="font-medium text-black text-xs dark:text-white">
                     {{ item.Tr_teknis_user_updated }}
                   </h5>
                 </td>
-                <td class="py-1 px-4">
-                  <div class="flex items-center space-x-3.5 d-flex justify-center">
+                <td class="py-1 px-2 align-top">
+                  <div class="flex items-center space-x-2.5 d-flex justify-center">
                     <router-link
                       class="hover:text-primary"
                       :to="
@@ -233,8 +227,8 @@ onMounted(async () => {
                     >
                       <svg
                         class="fill-current"
-                        width="24"
-                        height="24"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -253,8 +247,8 @@ onMounted(async () => {
                     >
                       <svg
                         class="fill-current"
-                        width="24"
-                        height="24"
+                        width="20"
+                        height="20"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"

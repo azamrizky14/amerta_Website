@@ -1,26 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
-import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
-import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import { lokasi_getDataByType } from "@/stores/functionAPI";
-import {
-  mdiEyeOutline,
-  mdiMagnify,
-  mdiRefresh,
-  mdiPlusCircleOutline,
-  mdiSquareEditOutline,
-} from "@mdi/js";
+import BreadcrumbNoList from "@/components/Breadcrumbs/BreadcrumbNoList.vue";
+import { lokasi_getDataNonGudangByType } from "@/stores/functionAPI";
+import { mdiEyeOutline, mdiMagnify, mdiRefresh, mdiPlusCircleOutline } from "@mdi/js";
 import { useIndexStore } from "@/stores";
-import { formatDate } from "@/stores/date";
 
-const pageTitle = ref("Work Order - Gudang");
-const pageList = ref(["Work Order", "Gudang"]);
+const pageTitle = ref("List Ruang");
 const dataHeader = ref([
   { name: "No.", class: "py-2 pl-3" },
   { name: "Kode", class: "min-w-[75px] py-2 px-4" },
   { name: "Nama. Gudang", class: "min-w-[150px] py-2 px-4" },
   { name: "Alamat", class: "py-2 px-2" },
-  { name: "Tgl. Dibuat", class: "min-w-[100px] py-2 px-4" },
   { name: "Dibuat Oleh", class: "py-2 px-4" },
 ]);
 let dataTable = ref([]);
@@ -86,21 +76,37 @@ const changePage = (page: number) => {
   }
 };
 
-onMounted(async () => {
-  const data = await lokasi_getDataByType(indexStore.user.companyName, "gudang", "");
+const { location } = defineProps<{ location: string }>();
 
-  dataTable.value = await Promise.all(
-    data.data.map(async (lokasi) => ({
-      ...lokasi,
-      formattedDate: await formatDate(lokasi.lokasi_created, "dd-MM-yyyy"),
-    }))
+watch(
+  () => location,
+  async (newLocation) => {
+    if (newLocation) {
+      await getData(newLocation);
+    }
+  },
+  { immediate: true } // biar langsung jalan kalau `location` sudah ada saat mounted
+);
+
+const getData = async (lokasi: string) => {
+  const data = await lokasi_getDataNonGudangByType(
+    indexStore.user.companyName,
+    "ruang",
+    lokasi
   );
+
+  dataTable.value = data.data;
+};
+
+onMounted(async () => {
+  await getData(location);
 });
 </script>
 
 <template>
   <div>
     <!-- Search and Helper -->
+    <BreadcrumbNoList :pageTitle="pageTitle" />
     <div
       class="helper border-2 flex justify-between bg-gray-2 text-left dark:bg-meta-4 text-black dark:text-white py-2 px-4"
     >
@@ -175,15 +181,15 @@ onMounted(async () => {
         </thead>
         <tbody>
           <tr v-for="(lokasi, index) in paginatedData" :key="index" class="border">
-            <td class="pl-3 text-xs border">
+            <td class="pl-3 py-1.5 text-xs border align-top">
               {{ index + 1 }}
             </td>
-            <td class="py-1 px-4 border">
+            <td class="py-1.5 px-2 border align-top">
               <p class="text-black dark:text-white text-xs text-center">
                 {{ lokasi.lokasi_id }}
               </p>
             </td>
-            <td class="py-1 px-4 border">
+            <td class="py-1.5 px-2 border align-top">
               <p class="text-xs text-black dark:text-white">
                 {{ lokasi.lokasi_nama }}
               </p>
@@ -204,21 +210,16 @@ onMounted(async () => {
                 </span>
               </p>
             </td>
-            <td class="py-1 px-4 border">
-              <p class="text-black dark:text-white text-xs text-center">
-                {{ lokasi.formattedDate }}
-              </p>
-            </td>
-            <td class="py-1 px-4 border">
+            <td class="py-1.5 px-2 border align-top">
               <p class="text-xs text-black dark:text-white">
                 {{ lokasi.lokasi_user_created }}
               </p>
             </td>
-            <td class="py-1 px-4">
-              <div class="flex items-center space-x-3.5 d-flex justify-center">
+            <td class="py-1 px-4 align-top">
+              <div class="flex items-center space-x-2.5 d-flex justify-center">
                 <router-link
                   class="hover:text-primary"
-                  :to="'/modules/work-order/gudang/detail/' + lokasi._id"
+                  :to="'/modules/warehouse/gudang/detail/' + lokasi._id"
                 >
                   <svg
                     class="fill-current"
@@ -229,22 +230,6 @@ onMounted(async () => {
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path :d="mdiEyeOutline" fill="" />
-                  </svg>
-                </router-link>
-
-                <router-link
-                  class="hover:text-primary"
-                  :to="'/master/location/edit/' + lokasi._id"
-                >
-                  <svg
-                    class="fill-current"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path :d="mdiSquareEditOutline" fill="" />
                   </svg>
                 </router-link>
               </div>

@@ -19,8 +19,8 @@ import { getDateToday } from "@/stores/date";
 import { showLoading, successCreate, failedCreate } from "@/stores/swal";
 
 const indexStore = useIndexStore();
-const pageTitle = ref("Evident - Tambah PWS");
-const pageList = ref(["Work Order", "Evident", "PWS", "Tambah"]);
+const pageTitle = ref("Evident - Tambah PSN");
+const pageList = ref(["Work Order", "Evident", "PSN", "Tambah"]);
 
 const savedData = ref({
   Tr_teknis_pelanggan_id: "",
@@ -29,7 +29,7 @@ const savedData = ref({
   Tr_teknis_user_updated: "",
   Tr_teknis_keterangan: "",
   Tr_teknis_logistik_id: "",
-  Tr_teknis_jenis: "PWS",
+  Tr_teknis_jenis: "PSN",
   Tr_teknis_kategori: "",
   Tr_teknis_trouble: "",
   Tr_teknis_action: "",
@@ -88,7 +88,7 @@ onMounted(async () => {
 
   const options = await adminTeknis_GetDataByDomainAndDeletedAndTypeAndStatus(
     "N",
-    "PWS",
+    "PSN",
     "open",
     indexStore.company.companyCode,
     indexStore.user.hierarchyCode
@@ -157,6 +157,10 @@ const validateForm = () => {
     }
   });
 
+  const validatorMT = [
+    { key: "Tr_teknis_trouble", label: "Masalah" },
+    // { key: "Tr_teknis_action", label: "Solusi" },
+  ];
   if (savedData.value.Tr_teknis_kategori.label === "MT") {
     validatorMT.forEach((validator) => {
       if (
@@ -245,7 +249,7 @@ const submitData = async () => {
       await adminTeknis_CreateDataEvidentWithImages(sendData);
 
       await successCreate().then(() => {
-        router.push("/modules/work-order/evident/pws");
+        router.push("/modules/work-order/evident/psn");
       });
     } catch (error) {
       await failedCreate(error);
@@ -266,7 +270,7 @@ const cancelAdd = async () => {
   });
 
   if (result.isConfirmed) {
-    await router.push("/modules/work-order/evident/pws");
+    await router.push("/modules/work-order/evident/psn");
   }
 };
 </script>
@@ -322,7 +326,7 @@ const cancelAdd = async () => {
                 <input
                   type="text"
                   placeholder="Id Pelanggan"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_teknis_pelanggan_id"
                 />
               </div>
@@ -333,7 +337,7 @@ const cancelAdd = async () => {
                 <input
                   type="text"
                   placeholder="Server"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_teknis_pelanggan_server"
                 />
               </div>
@@ -346,7 +350,7 @@ const cancelAdd = async () => {
               <input
                 type="text"
                 placeholder="Nama Pelanggan"
-                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
+                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
                 v-model="savedData.Tr_teknis_pelanggan_nama"
               />
             </div>
@@ -358,7 +362,7 @@ const cancelAdd = async () => {
               <textarea
                 rows="3"
                 placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="savedData.Tr_teknis_trouble"
               ></textarea>
             </div>
@@ -369,7 +373,7 @@ const cancelAdd = async () => {
               <textarea
                 rows="3"
                 placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="savedData.Tr_teknis_action"
               ></textarea>
             </div>
@@ -381,7 +385,7 @@ const cancelAdd = async () => {
               <textarea
                 rows="3"
                 placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="savedData.Tr_teknis_keterangan"
               ></textarea>
               <textarea
@@ -389,7 +393,7 @@ const cancelAdd = async () => {
                 disabled
                 rows="3"
                 placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="logistikData.Tr_teknis_keterangan"
               ></textarea>
             </div>
@@ -465,7 +469,7 @@ const cancelAdd = async () => {
                   :disabled="!data.qtySisa"
                   type="text"
                   placeholder="SN"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.snNumber"
                 />
               </div>

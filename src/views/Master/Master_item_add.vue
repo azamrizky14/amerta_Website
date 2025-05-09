@@ -36,6 +36,9 @@ const options: Option[] = [
 const optionsType = [
   { label: "Material", value: "Material" },
   { label: "Aset", value: "Aset" },
+  { label: "Modem", value: "Modem" },
+  { label: "Kabel", value: "Kabel" },
+  { label: "Tiang", value: "Tiang" },
 ];
 
 const pageTitle = ref("Tambah Item");
@@ -222,8 +225,11 @@ const submitData = async () => {
           <div class="flex flex-col gap-2 p-6.5">
             <div class="flex flex-col gap-3 xl:flex-row">
               <div class="lg:w-1/3">
-                <div class="flex border flex-col items-center p-2 justify-end relative">
+                <div
+                  class="flex border flex-col items-center p-2 py-0 justify-end relative"
+                >
                   <inputImageWithPreview
+                    disabledLink
                     label="Gambar"
                     v-model="savedData.item_gambar"
                     @update:file="(file) => (savedData.item_gambar = file)"
@@ -237,7 +243,7 @@ const submitData = async () => {
                 <input
                   type="text"
                   placeholder="Masukan Kode Item"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.item_id"
                 />
                 <label
@@ -248,7 +254,7 @@ const submitData = async () => {
                 <input
                   type="text"
                   placeholder="Masukan Nama Item"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.item_nama"
                 />
               </div>
@@ -275,7 +281,7 @@ const submitData = async () => {
                 <input
                   type="text"
                   placeholder="Masukan Satuan Item"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.item_satuan"
                 />
               </div>
@@ -289,8 +295,8 @@ const submitData = async () => {
               </label>
               <input
                 type="text"
-                placeholder="Masukan Merk Item"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                placeholder="Masukan Jenis Item"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="savedData.item_brand"
               />
             </div>
@@ -316,7 +322,7 @@ const submitData = async () => {
                 <textarea
                   rows="3"
                   placeholder="Masukan keterangan disini!"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.item_keterangan"
                 ></textarea>
               </div>

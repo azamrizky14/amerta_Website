@@ -1,31 +1,39 @@
 <script setup lang="ts">
-import * as mdiIcons from '@mdi/js';
-import { useIndexStore } from '@/stores'
-import { useSidebarStore } from '@/stores/sidebar'
-import { onClickOutside } from '@vueuse/core'
-import { ref, onMounted } from 'vue'
-import SidebarItem from './SidebarItem.vue'
+import * as mdiIcons from "@mdi/js";
+import { useIndexStore } from "@/stores";
+import { useSidebarStore } from "@/stores/sidebar";
+import { onClickOutside } from "@vueuse/core";
+import { ref, onMounted } from "vue";
+import SidebarItem from "./SidebarItem.vue";
 
-const target = ref(null)
+const target = ref(null);
 
-const indexStore = useIndexStore()
-const sidebarStore = useSidebarStore()
-const pageData = ref([])
+const indexStore = useIndexStore();
+const sidebarStore = useSidebarStore();
+const pageData = ref([]);
 
-onMounted( async () => {
-  if (indexStore.user.userAccess) {
-  const data = await indexStore.getUtilPage();
-  if (indexStore.user.userAccess[0] === 'all') {
-    pageData.value = data.utilData
-  } else {
-    const filteredPages = data.utilData.filter(filterData =>
-    indexStore.user.userAccess.some(access => access.pageCode === filterData.pageCode));
+onMounted(async () => {
+  try {
+    if (indexStore.user.userAccess) {
+      let filteredPages;
+      const data = await indexStore.getUtilPage();
+      if (indexStore.user.userAccess[0] === "all") {
+        filteredPages = data.utilData;
+      } else {
+        filteredPages = data.utilData.filter((filterData) =>
+          indexStore.user.userAccess.some(
+            (access) => access.pageCode === filterData.pageCode
+          )
+        );
+      }
 
-    const newData = await groupPages(filteredPages)
-    pageData.value = newData
+      const newData = await groupPages(filteredPages);
+      pageData.value = newData;
+    }
+  } catch (error) {
+    console.error(error);
   }
-  }
-})
+});
 
 const groupPages = async (pages) => {
   const groups = [
@@ -36,18 +44,19 @@ const groupPages = async (pages) => {
 
   const data = await pages;
 
-  return groups.map(group => {
-    const filteredPages = data.filter(page => page.pageCode.startsWith(group.prefix));
-    const menuItems: any[] = [];
-    const groupedPages: Record<string, any> = {};
+  return groups
+    .map((group) => {
+      const filteredPages = data.filter((page) => page.pageCode.startsWith(group.prefix));
+      const menuItems: any[] = [];
+      const groupedPages: Record<string, any> = {};
 
-    filteredPages.forEach((page) => {
-      const { pageGroup, pageName, pageRoutes } = page;
+      filteredPages.forEach((page) => {
+        const { pageGroup, pageName, pageRoutes } = page;
 
-      // If `pageGroup` is empty, add it directly to `menuItems` without grouping
-      if (pageGroup === "") {
-        menuItems.push({
-          icon: `<svg
+        // If `pageGroup` is empty, add it directly to `menuItems` without grouping
+        if (pageGroup === "") {
+          menuItems.push({
+            icon: `<svg
             class="fill-current"
             width="${page.pageProps.iconWidth}"
             height="${page.pageProps.iconHeight}"
@@ -57,72 +66,72 @@ const groupPages = async (pages) => {
           >
             <path d="${mdiIcons[page.pageIcon]}" />
           </svg>`,
-          label: pageName,
-          route: pageRoutes || '#'
-        });
-        return;
-      }
-
-      // Extract main group and sub-groups
-      const [mainGroup, ...subGroups] = pageGroup.split('/');
-
-      // Create a structure for the main group if it doesn't exist
-      if (!groupedPages[mainGroup]) {
-        groupedPages[mainGroup] = {
-          icon: `<svg
-            class="fill-current"
-            width="${page.pageProps.iconWidth}"
-            height="${page.pageProps.iconHeight}"
-            viewBox="${page.pageProps.iconViewBox}"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="${mdiIcons[page.pageIcon]}" />
-          </svg>`,
-          label: mainGroup,
-          route: '#',
-          children: []
-        };
-      }
-
-      // Handle nested sub-groups
-      let currentGroup = groupedPages[mainGroup];
-      subGroups.forEach((subGroup) => {
-        let existingChild = currentGroup.children.find(child => child.label === subGroup);
-        if (!existingChild) {
-          existingChild = {
-            label: subGroup,
-            route: '#',
-            children: []
-          };
-          currentGroup.children.push(existingChild);
+            label: pageName,
+            route: pageRoutes || "#",
+          });
+          return;
         }
-        currentGroup = existingChild;
+
+        // Extract main group and sub-groups
+        const [mainGroup, ...subGroups] = pageGroup.split("/");
+
+        // Create a structure for the main group if it doesn't exist
+        if (!groupedPages[mainGroup]) {
+          groupedPages[mainGroup] = {
+            icon: `<svg
+            class="fill-current"
+            width="${page.pageProps.iconWidth}"
+            height="${page.pageProps.iconHeight}"
+            viewBox="${page.pageProps.iconViewBox}"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="${mdiIcons[page.pageIcon]}" />
+          </svg>`,
+            label: mainGroup,
+            route: "#",
+            children: [],
+          };
+        }
+
+        // Handle nested sub-groups
+        let currentGroup = groupedPages[mainGroup];
+        subGroups.forEach((subGroup) => {
+          let existingChild = currentGroup.children.find(
+            (child) => child.label === subGroup
+          );
+          if (!existingChild) {
+            existingChild = {
+              label: subGroup,
+              route: "#",
+              children: [],
+            };
+            currentGroup.children.push(existingChild);
+          }
+          currentGroup = existingChild;
+        });
+
+        // Add the current page to the appropriate group
+        currentGroup.children.push({
+          label: pageName,
+          route: pageRoutes || "#",
+        });
       });
 
-      // Add the current page to the appropriate group
-      currentGroup.children.push({
-        label: pageName,
-        route: pageRoutes || '#'
-      });
-    });
+      // Add grouped items to the final menuItems array
+      Object.values(groupedPages).forEach((group) => menuItems.push(group));
 
-    // Add grouped items to the final menuItems array
-    Object.values(groupedPages).forEach(group => menuItems.push(group));
-
-    return {
-      name: group.name,
-      menuItems
-    };
-  }).filter(group => group.menuItems.length > 0);
+      return {
+        name: group.name,
+        menuItems,
+      };
+    })
+    .filter((group) => group.menuItems.length > 0);
 };
 
-
-
-
 onClickOutside(target, () => {
-  sidebarStore.isSidebarOpen = false
-})
+  sidebarStore.isSidebarOpen = false;
+});
 
 // const menuGroups = ref([
 //   {
@@ -365,7 +374,7 @@ onClickOutside(target, () => {
     class="absolute left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0"
     :class="{
       'translate-x-0': sidebarStore.isSidebarOpen,
-      '-translate-x-full': !sidebarStore.isSidebarOpen
+      '-translate-x-full': !sidebarStore.isSidebarOpen,
     }"
     ref="target"
   >
@@ -398,7 +407,9 @@ onClickOutside(target, () => {
       <nav class="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
         <template v-for="menuGroup in pageData" :key="menuGroup.name">
           <div>
-            <h3 class="mb-4 ml-4 text-sm font-medium text-bodydark2">{{ menuGroup.name }}</h3>
+            <h3 class="mb-4 ml-4 text-sm font-medium text-bodydark2">
+              {{ menuGroup.name }}
+            </h3>
 
             <ul class="mb-6 flex flex-col gap-1.5">
               <SidebarItem
@@ -412,7 +423,6 @@ onClickOutside(target, () => {
         </template>
       </nav>
       <!-- Sidebar Menu -->
-
     </div>
   </aside>
 </template>

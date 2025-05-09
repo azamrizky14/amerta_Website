@@ -3,6 +3,7 @@ import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
 import DefaultTabs from "@/components/Forms/DefaultTabs.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
+import tableStockList from "@/views/Components/tableStockList.vue";
 import tableListRuang from "@/views/Components/tableListRuang.vue";
 
 import { getDateToday } from "@/stores/date";
@@ -17,13 +18,13 @@ const route = useRoute();
 
 const indexStore = useIndexStore();
 
-const optionsGudang = ref([]);
 const pageTitle = ref("Work Order - Detail Gudang");
 const pageList = ref(["Work Order", "Gudang", "Detail"]);
 
 const tabsData = ref([
   { name: "tab1", label: "List Barang" },
-  { name: "tab2", label: "Transaksi Harian" },
+  { name: "tab2", label: "List Ruang" },
+  { name: "tab3", label: "Transaksi Harian" },
 ]);
 
 // Saved Data
@@ -52,13 +53,13 @@ onMounted(async () => {
   const date = await getDateToday("yyyy-MM-dd");
   // savedData.value.Tr_teknis_tanggal = date;
 
-  const data = await lokasi_getDataByType(indexStore.user.companyName, "gudang", "");
-  if (data) {
-    optionsGudang.value = data.data.map((x, i) => ({
-      id: i,
-      name: x.lokasi_nama,
-    }));
-  }
+  console.log(savedData.value.lokasi_nama);
+  const data = await lokasi_getDataByType(
+    indexStore.user.companyName,
+    "ruang",
+    savedData.value.lokasi_nama
+  );
+  console.log(data);
 
   savedData.value.lokasi_created = date;
 });
@@ -78,8 +79,8 @@ onMounted(async () => {
         <DefaultCard cardTitle="Data Umum">
           <div class="grid gap-9 sm:grid-cols-2 p-6.5">
             <div class="flex flex-col">
-              <div class="flex flex-col gap-3">
-                <div>
+              <div class="flex flex-col gap-3 xl:flex-row">
+                <div class="lg:w-1/2">
                   <label
                     class="mb-3 block text-sm font-medium text-black dark:text-white"
                   >
@@ -89,11 +90,11 @@ onMounted(async () => {
                     disabled
                     type="text"
                     placeholder="Masukan Kode Lokasi"
-                    class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     v-model="savedData.lokasi_id"
                   />
                 </div>
-                <div>
+                <div class="lg:w-1/2">
                   <label
                     class="mb-3 block text-sm font-medium text-black dark:text-white"
                   >
@@ -103,7 +104,7 @@ onMounted(async () => {
                     disabled
                     type="text"
                     placeholder="Masukan Tipe Lokasi"
-                    class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     v-model="savedData.lokasi_tipe"
                   />
                 </div>
@@ -119,7 +120,7 @@ onMounted(async () => {
                     disabled
                     type="text"
                     placeholder="Masukan Nama Lokasi"
-                    class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                    class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     v-model="savedData.lokasi_nama"
                   />
                 </div>
@@ -143,7 +144,7 @@ onMounted(async () => {
                   disabled
                   type="text"
                   placeholder="Masukan Gudang"
-                  class="w-full mb-3 rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full mb-3 rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.lokasi_alamat.lokasi_alamat_gudang"
                 />
                 <!-- Input Ruang -->
@@ -153,7 +154,7 @@ onMounted(async () => {
                   disabled
                   type="text"
                   placeholder="Masukan Ruang"
-                  class="w-full mb-3 rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full mb-3 rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.lokasi_alamat.lokasi_alamat_ruang"
                 />
                 <!-- Input Rak -->
@@ -163,19 +164,19 @@ onMounted(async () => {
                   disabled
                   type="text"
                   placeholder="Masukan Rak"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.lokasi_alamat.lokasi_alamat_rak"
                 />
               </div>
               <div>
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                <label class="mb-2 block text-sm font-medium text-black dark:text-white">
                   Keterangan
                 </label>
                 <textarea
                   disabled
-                  rows="3"
+                  rows="1"
                   placeholder="Masukan keterangan disini!"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.lokasi_keterangan"
                 ></textarea>
               </div>
@@ -187,8 +188,14 @@ onMounted(async () => {
 
       <div class="flex flex-col gap-9 col-span-2">
         <DefaultTabs :tabs="tabsData">
-          <div id="tab1">(Konten untuk Tab 2)</div>
-          <div id="tab2">(Konten untuk Tab 3)</div>
+          <div id="tab1">
+            <tableStockList :location="savedData.lokasi_nama"></tableStockList>
+          </div>
+          <div id="tab2">
+            <!-- (Gudang ini belum memiliki ruangan) -->
+            <tableListRuang :location="savedData.lokasi_nama"></tableListRuang>
+          </div>
+          <div id="tab3">(Data Transaksi Kosong)</div>
         </DefaultTabs>
       </div>
 
@@ -197,7 +204,7 @@ onMounted(async () => {
         <DefaultCard>
           <div class="pb-6 px-4 grid gap-2">
             <router-link
-              to="/modules/work-order/gudang"
+              to="/modules/warehouse/gudang"
               class="flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90 col-span-2"
             >
               Kembali

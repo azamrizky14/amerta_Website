@@ -68,7 +68,7 @@ onMounted(async () => {
           </div>
           <div class="right-data flex items-center flex-row-reverse">
             <!-- Add Button -->
-            <router-link to="/modules/master/user-internal/add" class="px-1">
+            <router-link to="/master/user-internal/add" class="px-1">
               <svg class="fill-current hover:text-primary" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path :d="mdiPlusCircleOutline" fill="" />
               </svg>
@@ -93,21 +93,21 @@ onMounted(async () => {
             </thead>
             <tbody>
               <tr v-for="(item, index) in dataTable" :key="index" class="border">
-                <td class="pl-3 text-xs border">{{ index + 1 }}</td>
-                <td class="py-1 px-4 border">
+                <td class="pl-3 py-1.5 text-xs border align-top">{{ index + 1 }}</td>
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-black dark:text-white text-xs">{{ item.roleName }}</p>
                 </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-black dark:text-white text-xs">{{ item.roleType }}</p>
                 </td>
-                <td class="py-1 px-4 border">
+                <td class="py-1.5 px-2 border align-top">
                   <p class="text-xs text-black dark:text-white text-center">{{ item.hierarchyCode }}</p>
                 </td>
                 <td class="py-1 px-4 text-center border">
                   <h5 class="font-medium text-black text-xs dark:text-white">{{ item.formattedRoleAccess }}</h5>
                 </td>
-                <td class="py-1 px-4">
-                  <div class="flex items-center space-x-3.5 d-flex justify-center">
+                <td class="py-1 px-2 align-top">
+                  <div class="flex items-center space-x-2.5 d-flex justify-center">
                     <!-- Detail Button -->
                     <router-link :class="item.Tr_teknis_status === 'closed' ? 'cursor-default opacity-50' : 'hover:text-primary'" class="" :to="'/modules/work-order/evident/infra/detail/'+item.Tr_teknis_logistik_id+'/'+item._id">
                       <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

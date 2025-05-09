@@ -285,7 +285,7 @@ const submitData = async () => {
                   disabled
                   type="text"
                   placeholder="Nama Tas"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_teknis_logistik_id"
                 />
               </div>
@@ -297,7 +297,7 @@ const submitData = async () => {
                   disabled
                   type="text"
                   placeholder="Nama Tas"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_teknis_kategori"
                 />
               </div>
@@ -316,69 +316,32 @@ const submitData = async () => {
               </div>
             </div>
 
-            <div class="flex flex-col gap-6 xl:flex-row">
-              <div class="lg:w-2/3">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Id Pelanggan (Wajib Diisi)
-                </label>
-                <input
-                  disabled
-                  type="text"
-                  placeholder="Id Pelanggan"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.Tr_teknis_pelanggan_id"
-                />
-              </div>
-              <div class="lg:w-1/3">
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Server
-                </label>
-                <input
-                  disabled
-                  type="text"
-                  placeholder="Server"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                  v-model="savedData.Tr_teknis_pelanggan_server"
-                />
-              </div>
-            </div>
-
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Nama Pelanggan (Wajib Diisi)
+                Nama Project (Wajib Diisi)
               </label>
               <input
                 disabled
                 type="text"
-                placeholder="Nama Pelanggan"
-                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
+                placeholder="Nama Project"
+                class="w-full rounded-lg border-[1.5px] text-black bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:bg-form-input"
                 v-model="savedData.Tr_teknis_pelanggan_nama"
               />
             </div>
 
-            <div v-if="savedData.Tr_teknis_kategori === 'MT'">
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Masalah (Trouble)
-              </label>
-              <textarea
-                disabled
-                rows="3"
-                placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_trouble"
-              ></textarea>
-            </div>
-            <div v-if="savedData.Tr_teknis_kategori === 'MT'">
-              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                Solusi (Action)
-              </label>
-              <textarea
-                disabled
-                rows="3"
-                placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                v-model="savedData.Tr_teknis_action"
-              ></textarea>
+            <div class="flex flex-col gap-6">
+              <div>
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Titik Koordinat (Wajib Diisi)
+                </label>
+                <input
+                  disabled
+                  type="text"
+                  placeholder="Titik Koordinat"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_teknis_pelanggan_server"
+                />
+              </div>
             </div>
 
             <div>
@@ -389,7 +352,7 @@ const submitData = async () => {
                 disabled
                 rows="3"
                 placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="savedData.Tr_teknis_keterangan"
               ></textarea>
             </div>
@@ -467,7 +430,7 @@ const submitData = async () => {
                   disabled
                   type="text"
                   placeholder="SN"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="data.snNumber"
                 />
               </div>

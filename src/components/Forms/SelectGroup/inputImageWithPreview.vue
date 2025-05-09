@@ -5,6 +5,7 @@ const props = defineProps<{
   modelValue: string | File | null;
   url: string;
   label: string;
+  disabledLink: boolean;
 }>();
 
 const emits = defineEmits(["update:modelValue", "update:file"]);
@@ -97,12 +98,16 @@ watch(
     ref="fileInput"
     :key="imageSrc"
   />
-  <label :for="label" class="cursor-pointer px-4 py-2 rounded transition text-center">
+  <label
+    v-if="label"
+    :for="label"
+    class="cursor-pointer px-4 py-2 rounded transition text-center"
+  >
     {{ label }}
   </label>
 
   <!-- Image preview with placeholder support and click to change -->
-  <div class="mt-4">
+  <div :class="!props.disabledLink ? 'mt-4' : 'my-3'">
     <!-- Jika gambar berasal dari Google Drive, ubah ke direct link -->
     <img
       v-if="imageSrc"
@@ -128,7 +133,7 @@ watch(
   </div>
 
   <!-- Input URL -->
-  <div class="mt-2 flex gap-2">
+  <div class="mt-2 flex gap-2" v-if="!props.disabledLink">
     <input
       type="url"
       v-model="imageUrlInput"

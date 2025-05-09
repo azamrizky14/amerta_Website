@@ -14,13 +14,14 @@ import {
   po_CreatePO,
   item_getAllItemWithStatus,
   po_getDataById,
+  po_getDataByPO,
 } from "@/stores/functionAPI";
 import { useIndexStore } from "@/stores";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
 
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import router from "@/router";
 
 const indexStore = useIndexStore();
@@ -53,7 +54,8 @@ const savedData = ref({
   Tr_po_created: "",
   Tr_po_tanggal: "",
   Tr_po_deleted: "N",
-  Tr_po_domain: indexStore.user.companyName,
+  companyName: indexStore.user.companyName,
+  companyCode: indexStore.company.companyCode,
 });
 
 const materialData = ref<Row[]>([]);
@@ -61,7 +63,12 @@ const materialData = ref<Row[]>([]);
 const itemList = ref([]);
 
 onMounted(async () => {
-  const oldData = await po_getDataById(route.params.id);
+  let oldData;
+  if (route.params.id.startsWith("PO")) {
+    oldData = await po_getDataByPO(route.params.id);
+  } else {
+    oldData = await po_getDataById(route.params.id);
+  }
   savedData.value = oldData;
   // console.log("data nya: ", oldData);
   materialData.value = savedData.value.Tr_po_item;
@@ -76,8 +83,43 @@ onMounted(async () => {
   // savedData.value.Tr_po_created = date;
 });
 
+// Sub Total
+const subTotal = computed(() => {
+  const total = savedData.value.Tr_po_item.reduce(
+    (sum, item) => sum + item.item_jumlah * item.item_harga,
+    0
+  );
+  return total;
+});
+
+// Total Diskon
+const totalDiscount = computed(() => {
+  const total = savedData.value.Tr_po_item.reduce((sum, item) => {
+    const discount = item.item_disc
+      ? (item.item_jumlah * item.item_harga * item.item_disc) / 100
+      : 0;
+    return sum + discount;
+  }, 0);
+  return total;
+});
+
+// Total Pajak
+const totalTax = computed(() => {
+  const total = savedData.value.Tr_po_item.reduce((sum, item) => {
+    const discountRate = item.item_disc ? item.item_disc / 100 : 0;
+    const taxRate = item.item_tax ? item.item_tax / 100 : 0;
+
+    const taxableAmount = item.item_jumlah * item.item_harga * (1 - discountRate);
+    const taxAmount = taxableAmount * taxRate;
+
+    return sum + taxAmount;
+  }, 0);
+  return total;
+});
+
 // Fungsi untuk mengunduh PDF
 const downloadPDF = () => {
+  console.log("woi");
   if (!savedData.value) return;
 
   const doc = new jsPDF({
@@ -88,7 +130,7 @@ const downloadPDF = () => {
 
   // Tambahkan Logo
   const logoUrl =
-    "https://media.licdn.com/dms/image/v2/D4D0BAQHc2nCQIrQWow/company-logo_200_200/company-logo_200_200/0/1706151527607?e=2147483647&v=beta&t=W4yMuupaQ8ju8e1k7gpxlaJln0Dhh9eE59LKMhCbau8";
+    "https://media.licdn.com/dms/image/v2/D4D0BAQHc2nCQArQWow/company-logo_200_200/company-logo_200_200/0/1706151527607?e=2147483647&v=beta&t=W4yMuupaQ8ju8e1k7gpxlaJln0Dhh9eE59LKMhCbau8";
 
   doc.addImage(logoUrl, "JPEG", 15, 10, 20, 20);
 
@@ -140,11 +182,7 @@ const downloadPDF = () => {
     startY: startY,
     margin: { left: 182.5 },
     tableWidth: 100,
-    body: [
-      [
-        "Gg. Iddris rt.01 rw 07 kel. purwosari kec. purwosari aljksfnak asjkfbakh askjfban hjk",
-      ],
-    ],
+    body: [[savedData.value.Tr_po_lokasi]],
     styles: {
       cellPadding: 2,
       fontSize: 12,
@@ -192,7 +230,7 @@ const downloadPDF = () => {
   ];
   const rows = savedData.value.Tr_po_item.map((item) => [
     item.item_id,
-    item.item_nama,
+    item.item_nama + " - " + item.item_jenis,
     "", // Kosongkan kolom More Info agar tidak muncul teks bawaan
     item.item_jumlah,
     `Rp ${item.item_harga.toLocaleString()}`,
@@ -283,12 +321,7 @@ const downloadPDF = () => {
   doc.autoTable({
     startY: autoTableHeight,
     tableWidth: 143.75,
-    body: [
-      ["Description :"],
-      [
-        "Gg. Iddris rt.01 rw 07 kel. purwosari kec. purwosari aljksfnak asjkfbakh askjfban hjk jhasiujhnajfhafbafsk kasnfakbfhakskbf aksfjakf",
-      ],
-    ],
+    body: [["Description :"], [savedData.value.Tr_po_keterangan]],
     styles: {
       cellPadding: 2,
     },
@@ -322,8 +355,8 @@ const downloadPDF = () => {
     ["Sub Total", `Rp ${totalOrder.toLocaleString()}`],
     ["Discount", `Rp ${totalDiscount.toLocaleString()}`],
     ["Tax", `Rp ${totalTax.toLocaleString()}`],
-    ["Shipping", "Rp 0"],
-    ["Insurance", "Rp 0"],
+    // ["Shipping", "Rp 0"],
+    // ["Insurance", "Rp 0"],
     ["Total Order", `Rp ${(totalOrder - totalDiscount + totalTax).toLocaleString()}`],
   ];
 
@@ -364,7 +397,7 @@ const downloadPDF = () => {
 };
 
 const formatNumber = (value) => {
-  const data = value.toLocaleString("id-ID"); // Gunakan "id-ID" untuk format Indonesia
+  const data = Number(value).toLocaleString("id-ID"); // Gunakan "id-ID" untuk format Indonesia
   return data;
 };
 
@@ -455,7 +488,7 @@ interface Row {
   item_id: string;
   item_nama: string;
   item_satuan: string;
-  item_merk: string;
+  item_jenis: string;
   item_jumlah: number;
   item_harga: number;
   item_total: number;
@@ -479,12 +512,6 @@ const calculateTotal = (row: Row) => {
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="Detail Data">
-          <button
-            @click="downloadPDF"
-            class="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
-          >
-            Download PDF
-          </button>
           <div class="flex flex-col gap-2 p-6.5">
             <div class="flex flex-col gap-3 xl:flex-row">
               <div class="lg:w-1/2">
@@ -495,7 +522,7 @@ const calculateTotal = (row: Row) => {
                   type="text"
                   disabled
                   placeholder="Masukan Nama Supplier"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_po_id"
                 />
               </div>
@@ -507,14 +534,14 @@ const calculateTotal = (row: Row) => {
                   type="text"
                   disabled
                   placeholder="Masukan Nama Supplier"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_po_status"
                 />
               </div>
             </div>
 
-            <div class="flex flex-col gap-3">
-              <div class="">
+            <div class="flex flex-col gap-3 xl:flex-row">
+              <div class="lg:w-1/2">
                 <label
                   class="mb-3 mt-2 block text-sm font-medium text-black dark:text-white"
                 >
@@ -524,8 +551,37 @@ const calculateTotal = (row: Row) => {
                   type="text"
                   disabled
                   placeholder="Masukan Nama Supplier"
-                  class="w-full mb-2 rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full mb-2 rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_po_user_created"
+                />
+              </div>
+              <div class="lg:w-1/2">
+                <label
+                  class="mb-3 mt-2 block text-sm font-medium text-black dark:text-white"
+                >
+                  Supplier
+                </label>
+                <input
+                  type="text"
+                  disabled
+                  placeholder="Masukan Nama Supplier"
+                  class="w-full mb-2 rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_po_supplier"
+                />
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+              <div class="">
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Lokasi Tujuan
+                </label>
+                <input
+                  type="text"
+                  disabled
+                  placeholder="Masukan Nama Supplier"
+                  class="w-full mb-2 rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  v-model="savedData.Tr_po_lokasi"
                 />
               </div>
             </div>
@@ -535,7 +591,7 @@ const calculateTotal = (row: Row) => {
       </div>
       <div class="flex flex-col gap-9">
         <!-- Input Fields Start -->
-        <DefaultCard cardTitle="Data Tambahan">
+        <DefaultCard cardTitle="Data Tambahan" @download="downloadPDF" :download="true">
           <div class="flex flex-col gap-2 p-6.5">
             <div class="flex flex-col gap-3 xl:flex-row">
               <div class="lg:w-1/2">
@@ -546,7 +602,7 @@ const calculateTotal = (row: Row) => {
                   type="date"
                   disabled
                   placeholder="Masukan Nama Supplier"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_po_created"
                 />
               </div>
@@ -558,7 +614,7 @@ const calculateTotal = (row: Row) => {
                   type="date"
                   disabled
                   placeholder="Masukan Nama Supplier"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_po_tanggal"
                 />
               </div>
@@ -570,10 +626,10 @@ const calculateTotal = (row: Row) => {
                 Keterangan
               </label>
               <textarea
-                rows="1"
+                rows="4"
                 disabled
                 placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="savedData.Tr_po_keterangan"
               ></textarea>
             </div>
@@ -582,140 +638,254 @@ const calculateTotal = (row: Row) => {
         <!-- Input Fields End -->
       </div>
 
-      <DefaultCard cardTitle="List Item" class="col-span-2"
-        ><div class="overflow-auto" style="max-height: 300px">
-          <!-- Tabel -->
-          <div
-            class="grid gap-0 grid-cols-[35px_100px_140px_75px_100px_auto_75px_100px_110px]"
-          >
-            <!-- Header -->
+      <div class="col-span-2">
+        <DefaultCard cardTitle="List Item"
+          ><div class="overflow-auto" style="max-height: 300px">
+            <!-- Tabel -->
             <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10"
+              class="grid gap-0 grid-cols-[35px_140px_140px_75px_100px_auto_75px_75px_75px_110px_110px]"
             >
-              No.
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10"
-            >
-              ID Item
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10"
-            >
-              Nama Item
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10"
-            >
-              Satuan
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10"
-            >
-              Merk
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10"
-            >
-              Keterangan
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10"
-            >
-              Jumlah
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10"
-            >
-              Harga
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10"
-            >
-              Harga Total
-            </div>
+              <!-- Header -->
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                No.
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                ID Item
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Nama Item
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Satuan
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Jenis
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Keterangan
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Disc(%)
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Tax(%)
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Jumlah
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Harga Satuan
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Harga Total
+              </div>
 
-            <!-- Rows -->
-            <template v-for="(row, index) in materialData" :key="index">
-              <!-- No. -->
-              <div class="px-1 py-0 text-center border border-gray-300">
-                {{ index + 1 }}
-              </div>
-              <!-- ID Item -->
-              <div class="p-0 border border-gray-300">
-                <input
-                  disabled
-                  type="text"
-                  v-model="row.item_id"
-                  class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-              <!-- Nama Item -->
-              <div class="p-0 border border-gray-300">
-                <input
-                  disabled
-                  type="text"
-                  v-model="row.item_nama"
-                  class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-              <!-- Satuan -->
-              <div class="px-1 py-0 border border-gray-300">
-                <input
-                  disabled
-                  type="text"
-                  v-model="row.item_satuan"
-                  class="w-full px-2 py-0 text-xs text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-              <!-- Merk -->
-              <div class="px-1 py-0 border border-gray-300">
-                <input
-                  disabled
-                  type="text"
-                  v-model="row.item_merk"
-                  class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-              <!-- Merk -->
-              <div class="px-1 py-0 border border-gray-300">
-                <input
-                  disabled
-                  type="text"
-                  v-model="row.item_keterangan"
-                  class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-              <!-- Jumlah -->
-              <div class="px-1 py-0 pr-0 border border-gray-300">
-                <input
-                  disabled
-                  type="number"
-                  v-model="row.item_jumlah"
-                  @input="calculateTotal(row)"
-                  class="w-full px-2 py-0 text-xs text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-              <!-- Harga Satuan -->
-              <div class="px-1 py-0 pr-0 border border-gray-300">
-                <input
-                  disabled
-                  type="number"
-                  v-model="row.item_harga"
-                  @input="calculateTotal(row)"
-                  class="w-full px-2 py-0 text-xs text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-              <!-- Harga Total -->
-              <div class="w-full px-2 py-0 text-xs border border-gray-300">
-                <div class="h-full flex items-center justify-end">
-                  {{ formatNumber(row.item_total) }}
+              <!-- Rows -->
+              <template v-for="(row, index) in materialData" :key="index">
+                <!-- No. -->
+                <div class="px-1 py-0 text-center border border-gray-300">
+                  {{ index + 1 }}
                 </div>
+                <!-- ID Item -->
+                <div class="px-1 py-0 border border-gray-300">
+                  <input
+                    disabled
+                    type="text"
+                    v-model="row.item_id"
+                    class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Nama Item -->
+                <div class="px-1 py-0 border border-gray-300">
+                  <input
+                    disabled
+                    type="text"
+                    v-model="row.item_nama"
+                    class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Satuan -->
+                <div class="px-1 py-0 border border-gray-300">
+                  <input
+                    disabled
+                    type="text"
+                    v-model="row.item_satuan"
+                    class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Jenis -->
+                <div class="px-1 py-0 border border-gray-300">
+                  <input
+                    disabled
+                    type="text"
+                    v-model="row.item_jenis"
+                    class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Keterangan -->
+                <div class="px-1 py-0 border border-gray-300">
+                  <input
+                    disabled
+                    type="text"
+                    v-model="row.item_keterangan"
+                    class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Disc -->
+                <div class="px-1 py-0 pr-0 border border-gray-300">
+                  <input
+                    disabled
+                    type="number"
+                    v-model="row.item_disc"
+                    class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Tax -->
+                <div class="px-1 py-0 pr-0 border border-gray-300">
+                  <input
+                    disabled
+                    type="number"
+                    v-model="row.item_tax"
+                    class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Jumlah -->
+                <div class="px-1 py-0 pr-0 border border-gray-300">
+                  <input
+                    disabled
+                    type="number"
+                    v-model="row.item_jumlah"
+                    @input="calculateTotal(row)"
+                    class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Harga Satuan -->
+                <div class="px-1 py-0 pr-0 border border-gray-300 text-right">
+                  <div class="h-full flex items-center justify-end pr-1 text-sm">
+                    {{ formatNumber(row.item_harga) }}
+                  </div>
+                  <input
+                    disabled
+                    type="number"
+                    v-model="row.item_harga"
+                    @input="calculateTotal(row)"
+                    class="hidden w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Harga Total -->
+                <div
+                  class="w-full px-2 py-0 text-sm border border-gray-300 dark:text-white"
+                >
+                  <div class="h-full flex items-center justify-end">
+                    {{ formatNumber(row.item_total) }}
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </DefaultCard>
+        <div class="flex justify-end w-full bg-white dark:bg-boxdark">
+          <div class="grid gap-0 grid-cols-[175px_125px]">
+            <!-- Rows -->
+            <!-- Sub Total -->
+            <div
+              class="px-3 py-1 border border-gray-300 font-bold bg-white text-sm dark:text-white dark:bg-boxdark"
+            >
+              Sub Total
+            </div>
+            <div
+              class="w-full px-2 py-0 text-xs border border-gray-300 bg-white text-sm dark:text-white dark:bg-boxdark"
+            >
+              <div class="h-full flex items-center justify-end">
+                Rp. {{ formatNumber(subTotal) }}
               </div>
-            </template>
+            </div>
+            <!-- Discount -->
+            <div
+              class="px-3 py-1 border border-gray-300 font-bold bg-white text-sm dark:text-white dark:bg-boxdark"
+            >
+              Discount
+            </div>
+            <div
+              class="w-full px-2 py-0 text-xs border border-gray-300 bg-white text-sm dark:text-white dark:bg-boxdark"
+            >
+              <div class="h-full flex items-center justify-end">
+                Rp. {{ formatNumber(totalDiscount) }}
+              </div>
+            </div>
+            <!-- Tax -->
+            <div
+              class="px-3 py-1 border border-gray-300 font-bold bg-white text-sm dark:text-white dark:bg-boxdark"
+            >
+              Tax
+            </div>
+            <div
+              class="w-full px-2 py-0 text-xs border border-gray-300 bg-white text-sm dark:text-white dark:bg-boxdark"
+            >
+              <div class="h-full flex items-center justify-end">
+                Rp. {{ formatNumber(totalTax) }}
+              </div>
+            </div>
+            <!-- Shipping -->
+            <div
+              class="px-3 py-1 border border-gray-300 font-bold bg-white text-sm dark:text-white dark:bg-boxdark hidden"
+            >
+              Shipping
+            </div>
+            <div
+              class="w-full px-2 py-0 text-xs border border-gray-300 bg-white text-sm dark:text-white dark:bg-boxdark hidden"
+            >
+              <div class="h-full flex items-center justify-end">Rp. 0</div>
+            </div>
+            <!-- Insurance -->
+            <div
+              class="px-3 py-1 border border-gray-300 font-bold bg-white text-sm dark:text-white dark:bg-boxdark hidden"
+            >
+              Insurance
+            </div>
+            <div
+              class="w-full px-2 py-0 text-xs border border-gray-300 bg-white text-sm dark:text-white dark:bg-boxdark hidden"
+            >
+              <div class="h-full flex items-center justify-end">Rp. 0</div>
+            </div>
+            <!-- Total Order -->
+            <div
+              class="px-3 py-1 border border-gray-300 font-bold bg-white text-sm dark:text-white dark:bg-boxdark"
+            >
+              Total Order
+            </div>
+            <div
+              class="w-full px-2 py-0 text-xs border border-gray-300 bg-white text-sm dark:text-white dark:bg-boxdark"
+            >
+              <div class="h-full flex items-center justify-end">
+                Rp. {{ formatNumber(subTotal - totalDiscount + totalTax) }}
+              </div>
+            </div>
           </div>
         </div>
-      </DefaultCard>
+      </div>
 
       <div class="flex flex-col gap-9 col-span-2">
         <!-- Input Fields Start -->

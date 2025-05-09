@@ -47,22 +47,21 @@ const logCredentials = async () => {
         indexStore.setLoginTime(currentTime);
         indexStore.refreshUtilPage();
 
-        console.log(loginData);
+        // console.log(loginData);
         const company = await company_getDataByCode(
           JSON.stringify(loginData.user.companyCode)
         );
         indexStore.setCompany({
           companyCode: company.companyCode,
         });
+        router.push("/");
         Swal.fire({
           title: "Success",
           text: "Logged in successfully!",
           timer: 1000,
           icon: "success",
           showConfirmButton: false,
-        }).then(() => {
-          router.push("/");
-        });
+        }).then(() => {});
       } catch (error) {
         Swal.fire({
           title: "Error",

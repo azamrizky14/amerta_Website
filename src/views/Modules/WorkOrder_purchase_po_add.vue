@@ -10,14 +10,18 @@ import { getDateToday } from "@/stores/date";
 import { showLoading, confirmDelete, successCreate, failedCreate } from "@/stores/swal";
 import {
   po_GetPrefixByDate,
+  pp_GetPrefixByDate,
   po_CreatePO,
+  pp_CreatePP,
   item_getAllItemWithStatus,
   lokasi_getAllLocationWithStatus,
+  getUserExternalByRole,
 } from "@/stores/functionAPI";
 import { useIndexStore } from "@/stores";
 
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import router from "@/router";
+import { format } from "path";
 
 const indexStore = useIndexStore();
 
@@ -36,18 +40,21 @@ const savedData = ref({
   Tr_po_keterangan: "",
   Tr_po_lokasi: "",
   Tr_po_item: [],
+  Tr_po_supplier: "",
 
   Tr_po_user_created: indexStore.user.userName,
   Tr_po_created: "",
   Tr_po_tanggal: "",
   Tr_po_deleted: "N",
-  Tr_po_domain: indexStore.user.companyName,
+  companyName: indexStore.user.companyName,
+  companyCode: indexStore.company.companyCode,
 });
 
 const materialData = ref<Row[]>([]);
 
 const itemList = ref([]);
 const lokasiList = ref([]);
+const supplierList = ref([]);
 
 onMounted(async () => {
   const data = await item_getAllItemWithStatus(
@@ -62,6 +69,12 @@ onMounted(async () => {
     "N"
   );
   lokasiList.value = dataLokasi;
+  const dataSupplier = await getUserExternalByRole(
+    indexStore.user.companyName,
+    "Supplier"
+  );
+  supplierList.value = dataSupplier;
+
   const date = await getDateToday("yyyy-MM-dd");
   // savedData.value.Tr_po_created = date;
 
@@ -71,7 +84,7 @@ onMounted(async () => {
       item_id: "",
       item_nama: "",
       item_satuan: "",
-      item_merk: "",
+      item_jenis: "",
       item_supplier: "",
       item_keterangan: "",
       item_jumlah: 0,
@@ -83,13 +96,47 @@ onMounted(async () => {
   savedData.value.Tr_po_created = date;
 });
 
+// Sub Total
+const subTotal = computed(() => {
+  const total = materialData.value.reduce(
+    (sum, item) => sum + item.item_jumlah * item.item_harga,
+    0
+  );
+  return total;
+});
+
+// Total Diskon
+const totalDiscount = computed(() => {
+  const total = materialData.value.reduce((sum, item) => {
+    const discount = item.item_disc
+      ? (item.item_jumlah * item.item_harga * item.item_disc) / 100
+      : 0;
+    return sum + discount;
+  }, 0);
+  return total;
+});
+
+// Total Pajak
+const totalTax = computed(() => {
+  const total = materialData.value.reduce((sum, item) => {
+    const discountRate = item.item_disc ? item.item_disc / 100 : 0;
+    const taxRate = item.item_tax ? item.item_tax / 100 : 0;
+
+    const taxableAmount = item.item_jumlah * item.item_harga * (1 - discountRate);
+    const taxAmount = taxableAmount * taxRate;
+
+    return sum + taxAmount;
+  }, 0);
+  return total;
+});
+
 const formatNumber = (value) => {
-  const data = value.toLocaleString("id-ID"); // Gunakan "id-ID" untuk format Indonesia
+  const data = Number(value).toLocaleString("id-ID"); // Gunakan "id-ID" untuk format Indonesia
   return data;
 };
 
 const changeRowItem = (type, index, value) => {
-  console.log("tes", type, index, value);
+  // console.log("tes", type, index, value);
   let data;
   if (type === "id") {
     data = itemList.value.find((x) => x.item_id === value);
@@ -101,7 +148,8 @@ const changeRowItem = (type, index, value) => {
       item_id: data.item_id,
       item_nama: data.item_nama,
       item_satuan: data.item_satuan,
-      item_merk: "",
+      item_tipe: data.item_tipe,
+      item_jenis: "",
       item_supplier: "",
       item_keterangan: "",
       item_jumlah: 0,
@@ -114,7 +162,7 @@ const changeRowItem = (type, index, value) => {
       item_id: "",
       item_nama: "",
       item_satuan: "",
-      item_merk: "",
+      item_jenis: "",
       item_supplier: "",
       item_keterangan: "",
       item_jumlah: 0,
@@ -142,7 +190,7 @@ const cancelAdd = async () => {
 };
 
 // Validasi qtyKeluar tidak boleh kurang dari 1
-const validateQtyDisc = (index) => {
+const validateQtyDisc = (index, row) => {
   const data = materialData.value[index].item_disc;
   // Hanya lakukan validasi jika qtyKeluar tidak kosong
   if (data !== "" && (data < 0 || data > 100)) {
@@ -159,10 +207,11 @@ const validateQtyDisc = (index) => {
       materialData.value[index].item_disc = 0;
     });
   }
+  calculateTotal(row);
 };
 
 // Validasi qtyKeluar tidak boleh kurang dari 1
-const validateQtyTax = (index) => {
+const validateQtyTax = (index, row) => {
   // Hanya lakukan validasi jika qtyKeluar tidak kosong
   const data = materialData.value[index].item_tax;
   if (data !== "" && (data < 0 || data > 100)) {
@@ -179,6 +228,7 @@ const validateQtyTax = (index) => {
       materialData.value[index].item_tax = 0;
     });
   }
+  calculateTotal(row);
 };
 
 // Array validator untuk field wajib
@@ -190,7 +240,7 @@ const dataValidator = ref([
 const dataError = ref([]); // Array untuk menyimpan error
 
 const submitData = async () => {
-  console.log(savedData.value);
+  // console.log(savedData.value);
   // Clear previous errors
   dataError.value.splice(0, dataError.value.length);
 
@@ -233,9 +283,35 @@ const submitData = async () => {
           x.item_nama !== undefined
       );
       const prefix = await po_GetPrefixByDate(fixData.Tr_po_created);
+      const PPprefix = await pp_GetPrefixByDate(fixData.Tr_po_created);
       fixData.Tr_po_id = prefix.nextId;
 
+      const ppData = {
+        Tr_po_id: prefix.nextId,
+        Tr_pp_id: PPprefix.nextId,
+        Tr_pp_payment_date: "",
+        Tr_pp_payment_amount: subTotal.value - totalDiscount.value + totalTax.value,
+        Tr_pp_payment_detail: {
+          Tr_pp_payment_total: subTotal.value,
+          Tr_pp_payment_discount: totalDiscount.value,
+          Tr_pp_payment_tax: totalTax.value,
+          Tr_pp_payment_shipping: 0,
+          Tr_pp_payment_insurance: 0,
+        },
+        Tr_pp_status: "process",
+        Tr_pp_deleted: "N",
+        companyName: fixData.companyName,
+        companyCode: fixData.companyCode,
+        Tr_pp_created_date: fixData.Tr_po_created,
+        Tr_pp_user_created: fixData.Tr_po_user_created,
+        Tr_pp_user_paid: "",
+        Tr_pp_payment_method: "",
+      };
+      // console.log(fixData);
+      // console.log(ppData);
+
       await po_CreatePO(fixData);
+      await pp_CreatePP(ppData);
       await successCreate().then(() => {
         router.push("/modules/work-order/purchase/po");
       });
@@ -251,7 +327,7 @@ interface Row {
   item_id: string;
   item_nama: string;
   item_satuan: string;
-  item_merk: string;
+  item_jenis: string;
   item_jumlah: number;
   item_harga: number;
   item_total: number;
@@ -288,7 +364,7 @@ const calculateTotal = (row: Row) => {
                   :reduce="(item) => item.lokasi_nama"
                   label="lokasi_nama"
                   placeholder="Masukan Tujuan PO"
-                  class="w-full rounded-lg border-[1.5px] border-stroke bg-transparent py-2 px-5 font-normal outline-none transition disabled:cursor-default disabled:bg-whiter"
+                  class="w-full rounded-lg bg-transparent custom-v-select font-normal outline-none transition disabled:cursor-default disabled:bg-whiter"
                   @update:modelValue="(value) => changeRowItem('id', index, value)"
                 >
                   <template #selected-option>
@@ -306,7 +382,7 @@ const calculateTotal = (row: Row) => {
                 <input
                   type="date"
                   placeholder="Masukan Nama Supplier"
-                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                  class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_po_tanggal"
                 />
               </div>
@@ -321,12 +397,31 @@ const calculateTotal = (row: Row) => {
           <div class="flex flex-col gap-2 p-6.5">
             <div>
               <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                Supplier
+              </label>
+
+              <v-select
+                v-model="savedData.Tr_po_supplier"
+                :options="supplierList"
+                :reduce="(item) => item.userName"
+                label="userName"
+                placeholder="Masukan Supplier"
+                class="w-full rounded-lg bg-transparent custom-v-select font-normal outline-none transition disabled:cursor-default disabled:bg-whiter"
+                @update:modelValue="(value) => changeRowItem('id', index, value)"
+              >
+                <template #selected-option>
+                  <span class="dark:text-white">{{ savedData.Tr_po_supplier }}</span>
+                </template>
+              </v-select>
+            </div>
+            <div>
+              <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                 Keterangan
               </label>
               <textarea
                 rows="1"
                 placeholder="Masukan keterangan disini!"
-                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-3 px-5 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                 v-model="savedData.Tr_po_keterangan"
               ></textarea>
             </div>
@@ -335,181 +430,246 @@ const calculateTotal = (row: Row) => {
         <!-- Input Fields End -->
       </div>
 
-      <DefaultCard cardTitle="List Item" class="col-span-2"
-        ><div class="overflow-auto" style="height: 300px">
-          <!-- Tabel -->
-          <div
-            class="grid gap-0 grid-cols-[35px_140px_140px_75px_100px_75px_75px_auto_75px_100px_110px]"
-          >
-            <!-- Header -->
+      <div class="col-span-2">
+        <DefaultCard cardTitle="List Item"
+          ><div class="overflow-auto" style="height: 300px">
+            <!-- Tabel -->
             <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              class="grid gap-0 grid-cols-[35px_140px_140px_75px_100px_auto_75px_75px_75px_110px_110px]"
             >
-              No.
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
-            >
-              ID Item
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
-            >
-              Nama Item
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
-            >
-              Satuan
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
-            >
-              Merk
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
-            >
-              Disc(%)
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
-            >
-              Tax(%)
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
-            >
-              Keterangan
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
-            >
-              Jumlah
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
-            >
-              Harga
-            </div>
-            <div
-              class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
-            >
-              Harga Total
-            </div>
-
-            <!-- Rows -->
-            <template v-for="(row, index) in materialData" :key="index">
-              <!-- No. -->
+              <!-- Header -->
               <div
-                class="px-1 py-0 text-center border border-gray-300 text-xs flex justify-center items-center"
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
               >
-                {{ index + 1 }}
+                No.
               </div>
-              <!-- ID Item -->
-              <div class="p-0 border border-gray-300">
-                <v-select
-                  v-model="row.item_id"
-                  :options="itemList"
-                  :reduce="(item) => item.item_id"
-                  label="item_id"
-                  placeholder="Id Item"
-                  class="custom-select w-full text-xs border-gray-300 rounded-md shadow-sm"
-                  @update:modelValue="(value) => changeRowItem('id', index, value)"
-                >
-                  <template #selected-option>
-                    <span class="dark:text-white">{{ row.item_id }}</span>
-                  </template>
-                </v-select>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                ID Item
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Nama Item
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Satuan
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Jenis
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Keterangan
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Disc(%)
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Tax(%)
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Jumlah
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Harga Satuan
+              </div>
+              <div
+                class="p-2 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark"
+              >
+                Harga Total
               </div>
 
-              <!-- Nama Item -->
-              <div class="p-0 border border-gray-300">
-                <v-select
-                  v-model="row.item_nama"
-                  :options="itemList"
-                  :reduce="(item) => item.item_nama"
-                  label="item_nama"
-                  placeholder="Nama Item"
-                  class="custom-select w-full text-xs border-gray-300 rounded-md shadow-sm"
-                  @update:modelValue="(value) => changeRowItem('nama', index, value)"
+              <!-- Rows -->
+              <template v-for="(row, index) in materialData" :key="index">
+                <!-- No. -->
+                <div
+                  class="px-1 py-0 text-center border border-gray-300 text-xs flex justify-center items-center"
                 >
-                  <template #selected-option>
-                    <span class="dark:text-white">{{ row.item_nama }}</span>
-                  </template>
-                </v-select>
-              </div>
-              <!-- Satuan -->
-              <div class="px-1 py-0 border border-gray-300">
-                <input
-                  disabled
-                  type="text"
-                  v-model="row.item_satuan"
-                  class="w-full px-2 py-0 text-xs text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
-                />
-              </div>
-              <!-- Merk -->
-              <div class="px-1 py-0 border border-gray-300">
-                <input
-                  type="text"
-                  v-model="row.item_merk"
-                  class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
-                />
-              </div>
-              <!-- Disc -->
-              <div class="px-1 py-0 border border-gray-300">
-                <input
-                  type="number"
-                  v-model="row.item_disc"
-                  @change="validateQtyDisc(index)"
-                  class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
-                />
-              </div>
-              <!-- Tax -->
-              <div class="px-1 py-0 border border-gray-300">
-                <input
-                  type="number"
-                  v-model="row.item_tax"
-                  @change="validateQtyTax(index)"
-                  class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
-                />
-              </div>
-              <!-- Merk -->
-              <div class="px-1 py-0 border border-gray-300">
-                <input
-                  type="text"
-                  v-model="row.item_keterangan"
-                  class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
-                />
-              </div>
-              <!-- Jumlah -->
-              <div class="px-1 py-0 pr-0 border border-gray-300">
-                <input
-                  type="number"
-                  v-model="row.item_jumlah"
-                  @input="calculateTotal(row)"
-                  class="w-full px-2 py-0 text-xs text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
-                />
-              </div>
-              <!-- Harga Satuan -->
-              <div class="px-1 py-0 pr-0 border border-gray-300">
-                <input
-                  type="number"
-                  v-model="row.item_harga"
-                  @input="calculateTotal(row)"
-                  class="w-full px-2 py-0 text-xs text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
-                />
-              </div>
-              <!-- Harga Total -->
-              <div class="w-full px-2 py-0 text-xs border border-gray-300">
-                <div class="h-full flex items-center justify-end">
-                  {{ formatNumber(row.item_total) }}
+                  {{ index + 1 }}
                 </div>
+                <!-- ID Item -->
+                <div class="p-0 border border-gray-300">
+                  <v-select
+                    v-model="row.item_id"
+                    :options="itemList"
+                    :reduce="(item) => item.item_id"
+                    label="item_id"
+                    placeholder="Id Item"
+                    class="custom-select w-full text-xs border-gray-300 rounded-md shadow-sm"
+                    @update:modelValue="(value) => changeRowItem('id', index, value)"
+                  >
+                    <template #selected-option>
+                      <span class="dark:text-white">{{ row.item_id }}</span>
+                    </template>
+                  </v-select>
+                </div>
+
+                <!-- Nama Item -->
+                <div class="p-0 border border-gray-300">
+                  <v-select
+                    v-model="row.item_nama"
+                    :options="itemList"
+                    :reduce="(item) => item.item_nama"
+                    label="item_nama"
+                    placeholder="Nama Item"
+                    class="custom-select w-full text-xs border-gray-300 rounded-md shadow-sm"
+                    @update:modelValue="(value) => changeRowItem('nama', index, value)"
+                  >
+                    <template #selected-option>
+                      <span class="dark:text-white">{{ row.item_nama }}</span>
+                    </template>
+                  </v-select>
+                </div>
+                <!-- Satuan -->
+                <div class="px-1 py-0 border border-gray-300">
+                  <input
+                    disabled
+                    type="text"
+                    v-model="row.item_satuan"
+                    class="w-full px-2 py-0 text-xs text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Jenis -->
+                <div class="px-1 py-0 border border-gray-300">
+                  <input
+                    type="text"
+                    v-model="row.item_jenis"
+                    class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Jenis -->
+                <div class="px-1 py-0 border border-gray-300">
+                  <input
+                    type="text"
+                    v-model="row.item_keterangan"
+                    class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Disc -->
+                <div class="px-1 py-0 border border-gray-300">
+                  <input
+                    type="number"
+                    v-model="row.item_disc"
+                    @change="validateQtyDisc(index, row)"
+                    class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Tax -->
+                <div class="px-1 py-0 border border-gray-300">
+                  <input
+                    type="number"
+                    v-model="row.item_tax"
+                    @change="validateQtyTax(index, row)"
+                    class="w-full px-2 py-1 text-sm text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Jumlah -->
+                <div class="px-1 py-0 pr-0 border border-gray-300">
+                  <input
+                    type="number"
+                    v-model="row.item_jumlah"
+                    @input="calculateTotal(row)"
+                    class="w-full px-2 py-0 text-xs text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Harga Satuan -->
+                <div class="px-1 py-0 pr-0 border border-gray-300">
+                  <input
+                    type="number"
+                    v-model="row.item_harga"
+                    @input="calculateTotal(row)"
+                    class="w-full px-2 py-0 text-xs text-gray-800 bg-white focus:outline-none focus:ring-1 focus:ring-primary dark:bg-boxdark dark:text-white"
+                  />
+                </div>
+                <!-- Harga Total -->
+                <div class="w-full px-2 py-0 text-xs border border-gray-300">
+                  <div class="h-full flex items-center justify-end">
+                    {{ formatNumber(row.item_total) }}
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </DefaultCard>
+        <div class="flex justify-end w-full bg-white dark:bg-boxdark">
+          <div class="grid gap-0 grid-cols-[175px_125px]">
+            <!-- Rows -->
+            <!-- Sub Total -->
+            <div class="px-3 py-1 border border-gray-300 font-bold bg-white text-sm">
+              Sub Total
+            </div>
+            <div class="w-full px-2 py-0 text-xs border border-gray-300 bg-white text-sm">
+              <div class="h-full flex items-center justify-end">
+                Rp. {{ formatNumber(subTotal) }}
               </div>
-            </template>
+            </div>
+            <!-- Discount -->
+            <div class="px-3 py-1 border border-gray-300 font-bold bg-white text-sm">
+              Discount
+            </div>
+            <div class="w-full px-2 py-0 text-xs border border-gray-300 bg-white text-sm">
+              <div class="h-full flex items-center justify-end">
+                Rp. {{ formatNumber(totalDiscount) }}
+              </div>
+            </div>
+            <!-- Tax -->
+            <div class="px-3 py-1 border border-gray-300 font-bold bg-white text-sm">
+              Tax
+            </div>
+            <div class="w-full px-2 py-0 text-xs border border-gray-300 bg-white text-sm">
+              <div class="h-full flex items-center justify-end">
+                Rp. {{ formatNumber(totalTax) }}
+              </div>
+            </div>
+            <!-- Shipping -->
+            <div
+              class="px-3 py-1 border border-gray-300 font-bold bg-white text-sm hidden"
+            >
+              Shipping
+            </div>
+            <div
+              class="w-full px-2 py-0 text-xs border border-gray-300 bg-white text-sm hidden"
+            >
+              <div class="h-full flex items-center justify-end">Rp. 0</div>
+            </div>
+            <!-- Insurance -->
+            <div
+              class="px-3 py-1 border border-gray-300 font-bold bg-white text-sm hidden"
+            >
+              Insurance
+            </div>
+            <div
+              class="w-full px-2 py-0 text-xs border border-gray-300 bg-white text-sm hidden"
+            >
+              <div class="h-full flex items-center justify-end">Rp. 0</div>
+            </div>
+            <!-- Total Order -->
+            <div class="px-3 py-1 border border-gray-300 font-bold bg-white text-sm">
+              Total Order
+            </div>
+            <div class="w-full px-2 py-0 text-xs border border-gray-300 bg-white text-sm">
+              <div class="h-full flex items-center justify-end">
+                Rp. {{ formatNumber(subTotal - totalDiscount + totalTax) }}
+              </div>
+            </div>
           </div>
         </div>
-      </DefaultCard>
+      </div>
 
       <div class="flex flex-col gap-9 col-span-2">
         <!-- Input Fields Start -->
@@ -553,5 +713,9 @@ const calculateTotal = (row: Row) => {
 }
 .vs__clear path {
   @apply fill-current dark:text-white;
+}
+.custom-v-select .vs__dropdown-toggle {
+  padding: 0.3rem 1rem 0.45rem 1rem;
+  @apply border border-gray-400 dark:border-white;
 }
 </style>
