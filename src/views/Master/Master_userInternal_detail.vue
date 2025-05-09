@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
-import DefaultCardTable from "@/components/Forms/DefaultCardAccessPage.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import imageWithPreviewUser from "@/components/Forms/SelectGroup/imageWithPreviewUser.vue";
 
@@ -16,8 +15,20 @@ const route = useRoute();
 const indexStore = useIndexStore();
 const pageTitle = ref("Master - Detail User Internal");
 const pageList = ref(["Master", "User Internal", "Detail"]);
+<<<<<<< HEAD
 const imageUrl = "images/user_internal";
 let dataTable = ref([]);
+=======
+const dataHeader = ref([
+  {name: 'Nama Halaman', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Kode', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Kategori', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Tipe', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Grup', class: 'min-w-[100px] py-2 px-4'},
+  {name: 'Halaman Tujuan', class: 'min-w-[150px] py-2 px-4'},
+])
+let dataTable = ref([])
+>>>>>>> 74a796ef147c1fa737d33ebec5a368803f122d08
 
 const switcherToggle = ref<boolean>(false);
 // Saved Data
@@ -48,7 +59,9 @@ const savedData = ref({
 onMounted(async () => {
   const data = await getUserInternalById(route.params.id);
   savedData.value = data;
+
   const pageData = await indexStore.getUtilPage();
+<<<<<<< HEAD
   if (pageData && pageData.utilData) {
     if (savedData.value.userAccess && savedData.value.userAccess[0] === "all") {
       switcherToggle.value = true;
@@ -67,6 +80,106 @@ onMounted(async () => {
     }
   }
 });
+=======
+  console.log(pageData);
+
+  if (pageData && pageData.utilData) {
+    // Cek jika userAccess berisi "all"
+    if (savedData.value.userAccess.includes("all")) {
+      // Jika "all", tampilkan seluruh utilData
+      dataTable.value = pageData.utilData;
+    } else {
+      // Filter utilData berdasarkan pageCode yang ada di userAccess
+      const allowedPageCodes = savedData.value.userAccess.map(access => access.pageCode);
+      dataTable.value = pageData.utilData.filter(page => allowedPageCodes.includes(page.pageCode));
+    }
+  }
+});
+
+
+
+
+// Function to handle role selection
+const handleOptionChange = (selected: { label: string; value: string; hierarchyCode: string; roleAccess: string }) => {
+  if (selected) {
+    savedData.value.userRole = selected.value; // Set userRole from roleName
+    savedData.value.hierarchyCode = selected.hierarchyCode; // Set hierarchyCode from selected role
+    savedData.value.userAccess = selected.roleAccess; // Set userAccess from roleAccess
+  }
+};
+
+
+// Validators for required fields
+const dataValidator = ref([
+  { key: "userName", label: "Nama User" },
+  { key: "userRole", label: "Role User" },
+  { key: "hierarchyCode", label: "Kode Hirarki User" },
+  { key: "email", label: "Email User" },
+  { key: "userGender", label: "Gender User" },
+  { key: "userBirth", label: "Tanggal Lahir User" },
+  { key: "userPhone", label: "No Telp User" },
+  { key: "userAddress", label: "Alamat User" },
+]);
+
+const switcherToggle = ref<boolean>(false)
+
+
+const dataError = ref([]);
+
+// Helper function for validation
+const validateForm = () => {
+  dataError.value = [];
+  dataValidator.value.forEach((validator) => {
+    if (!savedData.value[validator.key]) {
+      dataError.value.push(`${validator.label} tidak boleh kosong!`);
+    }
+  });
+  return dataError.value.length === 0;
+};
+
+const submitData = async () => {
+  const isValid = validateForm();
+  if (!isValid) return;
+
+  const result = await Swal.fire({
+    title: "Tambah Data?",
+    text: "",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#10B981",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Tambah!",
+    cancelButtonText: "Batal",
+  });
+
+  if (result.isConfirmed) {
+    try {
+      showLoading();
+
+      const fixData = {...savedData.value}
+      fixData.userAccess = JSON.stringify(fixData.userAccess)
+      const formData = new FormData();
+
+      Object.keys(fixData).forEach((key) => {
+        formData.append(key, fixData[key]);
+      });
+
+      if (fixData.userImage) {
+        formData.append("userImage", fixData.userImage);
+      }
+
+      await createUser(formData);
+
+      await successCreate().then(() => {
+        router.push("/master/user-internal");
+      });
+    } catch (error) {
+      await failedCreate(error);
+    }
+  }
+};
+
+>>>>>>> 74a796ef147c1fa737d33ebec5a368803f122d08
 </script>
 
 <template>
@@ -281,6 +394,7 @@ onMounted(async () => {
         <!-- Textarea Fields End -->
       </div>
 
+<<<<<<< HEAD
       <div
         class="flex flex-col gap-9 col-span-2"
         :class="indexStore.user.hierarchyCode > 1.2 ? 'hidden' : ''"
@@ -307,6 +421,56 @@ onMounted(async () => {
               </div>
             </label>
           </template>
+=======
+<div class="flex flex-col gap-9 col-span-2">
+  <DefaultCard cardTitle="Akses Page">
+    
+    <div class="flex flex-col gap-10">
+    
+    <div
+      class="rounded-sm border border-stroke bg-white px-5 py-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5"
+    >
+    <div class="max-w-full overflow-x-auto">
+      <table class="w-full table-auto">
+        <thead>
+          <tr class="bg-gray-2 text-left dark:bg-meta-4">
+          <th v-for="data in dataHeader" :class="data.class" class="font-medium text-black dark:text-white text-center">
+          {{ data.name }}
+          </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, index) in dataTable" :key="index" class="border">
+            <td class="py-1 px-4 border">
+              <p class="font-medium text-black dark:text-white text-xs ">{{ item.pageName }}</p>
+            </td>
+            <td class="py-1 px-4 border">
+              <p class="font-medium text-black dark:text-white text-xs text-center">{{ item.pageCode }}</p>
+            </td>
+            <td class="py-1 px-4 border">
+              <p class="font-medium text-xs text-black dark:text-white text-center">{{ item.pageCategory }}</p>
+            </td>
+            <td class="py-1 px-4 border">
+              <h5 class="font-medium text-black text-xs dark:text-white text-center">{{ item.pageType }}</h5>
+              <!-- <p class="text-xs">{{ item.picId }}</p> -->
+            </td>
+            <td class="py-1 px-4 text-center border">
+              <h5 class="font-medium text-black text-xs dark:text-white text-left">{{ item.pageGroup }}</h5>
+              <!-- <p class="text-xs">{{ item }}</p> -->
+            </td>
+            <td class="py-1 px-4 border">
+              <h5 class="font-medium text-black text-xs dark:text-white">{{ item.pageRoutes }}</h5>
+              <!-- <p class="text-xs">{{ item.picId }}</p> -->
+            </td>
+          </tr> 
+        </tbody>
+      </table>
+    </div>
+    </div>
+    </div>
+    </DefaultCard>
+    </div>
+>>>>>>> 74a796ef147c1fa737d33ebec5a368803f122d08
 
           <div class="max-w-full overflow-x-auto">
             <table class="w-full table-auto">
