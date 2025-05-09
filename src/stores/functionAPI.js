@@ -136,18 +136,12 @@ export const createUserInternal = async (data) => {
   return suppData
 }
 
-<<<<<<< HEAD
 export const updateUserInternal = async (data, id) => {
   const response = await axios.put(API+'/api/userInternal/update/'+id, data)
-=======
-export const updateUser = async (data, id) => {
-  const response = await axios.put(API+'/api/userInternal/update/' + id, data)
->>>>>>> 74a796ef147c1fa737d33ebec5a368803f122d08
   var suppData = response.data;
   return suppData
 }
 
-<<<<<<< HEAD
 export const updateUserInternalJson = async (data, id) => {
   const response = await axios.put(API+'/api/userInternal/updateOne/'+id, data)
   var suppData = response.data;
@@ -155,9 +149,6 @@ export const updateUserInternalJson = async (data, id) => {
 }
 
 export const getUserInternalById = async (id) => {
-=======
-export const getUserById = async (id) => {
->>>>>>> 74a796ef147c1fa737d33ebec5a368803f122d08
   const response = await axios.get(API+'/api/userInternal/detail/' + id)
   var suppData = response.data;
   return suppData

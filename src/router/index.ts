@@ -576,11 +576,7 @@ const routes = [
     }
   },
   {
-<<<<<<< HEAD
     path: '/master/user-internal/edit/:id',
-=======
-    path: '/modules/master/user-internal/edit/:id',
->>>>>>> 74a796ef147c1fa737d33ebec5a368803f122d08
     name: 'userInternalEdit',
     component: () => import('@/views/Master/Master_userInternal_edit.vue'),
     meta: {
@@ -588,7 +584,6 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
-<<<<<<< HEAD
   
   // Master User Internal
   {
@@ -627,8 +622,6 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
-=======
->>>>>>> 74a796ef147c1fa737d33ebec5a368803f122d08
 
   // Master User Role
   {
