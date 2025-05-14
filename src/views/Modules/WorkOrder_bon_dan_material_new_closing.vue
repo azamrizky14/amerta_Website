@@ -241,17 +241,15 @@ const formatSendData = (data) => {
           item_properties_id: kabel.item_properties_id,
           item_properties_image: kabel.item_properties_image || "",
           item_properties_note: kabel.item_properties_note || "",
-          item_properties_qty: kabel.item_properties_qty_terpakai
-            ? kabel.item_properties_qty_terpakai
-            : 0,
+          item_properties_qty: kabel.item_properties_qty ? kabel.item_properties_qty : 0,
         };
         return dataKabel;
       });
-      // const qtyDipakai =
-      //   data.Sh_item_properties.filter((kabel) => kabel.item_properties_qty_sisa <= 0)
-      //     .length || 0;
+      const qtyDipakai =
+        data.Sh_item_properties.filter((kabel) => kabel.item_properties_qty > 0)
+          .length || 0;
 
-      const qtyDipakai = x.Sh_item_properties ? x.Sh_item_properties.length : 0;
+      // const qtyDipakai = x.Sh_item_properties ? x.Sh_item_properties.length : 0;
 
       data.Sh_item_qty = qtyDipakai;
 
@@ -261,10 +259,9 @@ const formatSendData = (data) => {
       delete data.qty;
       return data;
     } else {
-      const qtyDipakai = x.Sh_item_qty_dipakai ? x.Sh_item_qty_dipakai : 0;
+      const qtyDipakai = x.Sh_item_qty ? x.Sh_item_qty : 0;
       const data = { ...x };
       data.Sh_item_qty = qtyDipakai;
-      delete data.Sh_item_qty_dipakai;
       delete data.Sh_item_qty_sisa;
       delete data.qtySisa;
       delete data.qty;

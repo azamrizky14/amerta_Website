@@ -449,8 +449,20 @@ export const stock_getAllDataByLocation = async (company, deleted, location) => 
   var suppData = response.data;
   return suppData
 }
+
+export const stock_getAllDataSO = async (company, deleted) => {
+  const response = await axios.get(API+'/api/Stock/StockSo/getdata/'+company+'/'+deleted)
+  var suppData = response.data;
+  return suppData
+}
 export const stock_getDataForSO = async (company, deleted) => {
   const response = await axios.get(API+'/api/Stock/StockSo/getDataForSO/'+company+'/'+deleted)
+  var suppData = response.data;
+  return suppData
+}
+
+export const stock_SoGetDataById = async (id) => {
+  const response = await axios.get(API+'/api/Stock/StockSo/getdataById/detail/'+id)
   var suppData = response.data;
   return suppData
 }
@@ -466,7 +478,7 @@ export const stock_CreateSo = async (data) => {
   return suppData
 }
 
-export const stock_GetPrefixByDate = async (date) => {
+export const stock_SoGetPrefixByDate = async (date) => {
   const response = await axios.get(API+'/api/Stock/StockSo/getSoPrefix/'+date)
   var suppData = response.data;
   return suppData

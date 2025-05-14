@@ -136,7 +136,14 @@ onMounted(async () => {
             </div>
           </div>
           <div class="right-data flex items-center flex-row-reverse">
-            <router-link to="/modules/work-order/evident/infra/add" class="px-1">
+            <router-link
+              :to="
+                indexStore.user.companyCode.toString() === [0, 2].toString()
+                  ? '/modules/work-order/evident/infra-new/add'
+                  : '/modules/work-order/evident/infra/add'
+              "
+              class="px-1"
+            >
               <svg
                 class="fill-current hover:text-primary"
                 width="22"

@@ -97,7 +97,11 @@ const getData = async (lokasi: string) => {
     lokasi
   );
 
-  dataTable.value = data;
+  dataTable.value = data.slice().sort((a, b) => {
+    const idA = a.Sh_item_id;
+    const idB = b.Sh_item_id;
+    return idA.localeCompare(idB, undefined, { numeric: true });
+  });
 };
 
 onMounted(async () => {

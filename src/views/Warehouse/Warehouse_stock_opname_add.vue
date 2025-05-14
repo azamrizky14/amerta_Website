@@ -10,7 +10,7 @@ import { getDateToday } from "@/stores/date";
 import { showLoading, confirmDelete, successCreate, failedCreate } from "@/stores/swal";
 import {
   item_getAllItemWithStatus,
-  stock_GetPrefixByDate,
+  stock_SoGetPrefixByDate,
   lokasi_getAllLocationWithStatus,
   stock_getDataForSO,
   stock_CreateSo,
@@ -29,21 +29,7 @@ const pageTitle = ref("Tambah Stock Opname");
 const pageList = ref(["Warehouse", "Stock Opname", "Tambah"]);
 
 // Saved Data
-const savedData = ref({
-  Tr_po_id: "",
-  Tr_po_status: "open",
-  Tr_po_keterangan: "",
-  Tr_po_lokasi: "",
-  Tr_po_item: [],
-
-  Tr_po_created: "",
-  Tr_po_tanggal: "",
-  Tr_po_deleted: "N",
-  Tr_qa_inspection_date: "",
-  Tr_qa_user_created: indexStore.user.userName,
-  companyName: indexStore.user.companyName,
-  companyCode: indexStore.company.companyCode,
-});
+const savedData = ref("");
 
 const itemList = ref([]);
 
@@ -56,6 +42,7 @@ const itemsQty = ref("");
 const itemsKabelQty = ref({
   item_total: "",
   properties_qty: [],
+  list_kabel: [],
 });
 const itemsModemQty = ref({
   item_total: "",
@@ -70,7 +57,6 @@ const lokasiList = ref([]);
 const soList = ref([]);
 
 const changeRowItem = (type, index, value, cat) => {
-  // console.log("tes", type, index, value);
   let data;
   if (type === "id") {
     data = itemList.value.find((x) => x.item_id === value);
@@ -179,16 +165,57 @@ const convertSoItemsToStockLog = (data, baseFields) => {
     } = item;
 
     // Poin 4: Jika tipe adalah Kabel, update qty
+    const mergedInProps = [];
+    const mergedOutProps = [];
+
     if (Sh_item_tipe === "Kabel" && Array.isArray(Sh_item_properties)) {
       Sh_item_properties.forEach((prop) => {
-        if (
-          prop.item_properties_qty_akhir !== undefined &&
-          prop.item_properties_qty_akhir !== "" &&
-          !prop.is_deleted
-        ) {
-          prop.item_properties_qty = prop.item_properties_qty_akhir;
+        const awal = Number(prop.item_properties_qty || 0);
+        const akhir = Number(prop.item_properties_qty_akhir || 0);
+
+        if (awal !== akhir && akhir >= 0) {
+          const clonedProp = { ...prop };
+          clonedProp.item_properties_qty = akhir;
+          delete clonedProp.item_properties_qty_akhir;
+
+          if (akhir > awal) {
+            mergedInProps.push(clonedProp);
+          } else if (akhir < awal) {
+            mergedOutProps.push(clonedProp);
+          }
         }
       });
+
+      const pushHistory = (type, mergedProps) => {
+        let actualQty = 0;
+
+        if (type === "out") {
+          actualQty = mergedProps.filter((p) => Number(p.item_properties_qty) === 0)
+            .length;
+        } else if (type === "in") {
+          actualQty = mergedProps.filter((p) => {
+            const key = `${item.Sh_item_id}<>${item.Sh_item_jenis}<>${p.item_properties_id}`;
+            return !itemsKabelQty.value.list_kabel.includes(key);
+          }).length;
+        }
+
+        if (mergedProps.length > 0) {
+          history.push({
+            ...baseFields,
+            ...item,
+            Sh_type: type,
+            Sh_item_qty: actualQty,
+            Sh_item_properties: mergedProps,
+            Sh_location_from: type === "out" ? baseFields.Sh_location : "stock-opname",
+            Sh_location_to: type === "in" ? baseFields.Sh_location : "stock-opname",
+            companyCode: indexStore.user.companyCode,
+            companyName: indexStore.user.companyName,
+          });
+        }
+      };
+
+      pushHistory("in", mergedInProps);
+      pushHistory("out", mergedOutProps);
     }
 
     // Poin 1: Jika tidak ada properties
@@ -203,6 +230,8 @@ const convertSoItemsToStockLog = (data, baseFields) => {
           Sh_item_properties: [],
           Sh_location_from: "stock-opname",
           Sh_location_to: baseFields.Sh_location,
+          companyCode: indexStore.user.companyCode,
+          companyName: indexStore.user.companyName,
         });
       } else if (item_jumlah_akhir < item_jumlah) {
         const qty = item_jumlah - item_jumlah_akhir;
@@ -214,6 +243,8 @@ const convertSoItemsToStockLog = (data, baseFields) => {
           Sh_item_properties: [],
           Sh_location_from: baseFields.Sh_location,
           Sh_location_to: "stock-opname",
+          companyCode: indexStore.user.companyCode,
+          companyName: indexStore.user.companyName,
         });
       }
 
@@ -226,6 +257,8 @@ const convertSoItemsToStockLog = (data, baseFields) => {
           Sh_item_properties: [],
           Sh_location_from: baseFields.Sh_location,
           Sh_location_to: "stock-opname",
+          companyCode: indexStore.user.companyCode,
+          companyName: indexStore.user.companyName,
         });
       }
 
@@ -249,6 +282,8 @@ const convertSoItemsToStockLog = (data, baseFields) => {
           Sh_item_properties: propsIn,
           Sh_location_from: "stock-opname",
           Sh_location_to: baseFields.Sh_location,
+          companyCode: indexStore.user.companyCode,
+          companyName: indexStore.user.companyName,
         });
       }
     }
@@ -257,15 +292,6 @@ const convertSoItemsToStockLog = (data, baseFields) => {
     const deletedProps = Sh_item_properties.filter((p) => p.is_deleted);
     if (deletedProps.length > 0) {
       deletedProps.forEach((prop) => {
-        // Update qty jika tipe Kabel
-        if (
-          Sh_item_tipe === "Kabel" &&
-          prop.item_properties_qty_akhir !== undefined &&
-          prop.item_properties_qty_akhir !== ""
-        ) {
-          prop.item_properties_qty = prop.item_properties_qty_akhir;
-        }
-
         history.push({
           ...baseFields,
           ...item,
@@ -274,6 +300,8 @@ const convertSoItemsToStockLog = (data, baseFields) => {
           Sh_item_properties: [prop],
           Sh_location_from: baseFields.Sh_location,
           Sh_location_to: "stock-opname",
+          companyCode: indexStore.user.companyCode,
+          companyName: indexStore.user.companyName,
         });
       });
     }
@@ -290,6 +318,37 @@ const convertSoItemsToStockLog = (data, baseFields) => {
   });
 
   return history;
+};
+
+// Validasi qtyKeluar tidak boleh kurang dari 1
+const validateQtyKeluar = (jenis, index, qty, i) => {
+  if (jenis === "items" && qty < 0) {
+    Swal.fire({
+      title: "Error!",
+      text: "Jumlah tidak boleh kurang dari 0",
+      icon: "error",
+      position: "top-end",
+      timer: 1000,
+      showConfirmButton: false,
+      toast: true,
+    }).then(() => {
+      // Setelah SweetAlert muncul, ganti nilai qtyKeluar menjadi 1
+      items.value[index].item_jumlah_akhir = 0;
+    });
+  } else if (jenis === "kabel" && qty < 0) {
+    Swal.fire({
+      title: "Error!",
+      text: "Jumlah tidak boleh kurang dari 0",
+      icon: "error",
+      position: "top-end",
+      timer: 1000,
+      showConfirmButton: false,
+      toast: true,
+    }).then(() => {
+      // Setelah SweetAlert muncul, ganti nilai qtyKeluar menjadi 1
+      itemsKabel.value[index].Sh_item_properties[i].item_properties_qty_akhir = "";
+    });
+  }
 };
 
 const addRow = (type, index) => {
@@ -448,11 +507,6 @@ onMounted(async () => {
     "N"
   );
   itemList.value = data;
-  const dataSo = await stock_getDataForSO(
-    indexStore.user.companyCode,
-    indexStore.user.hierarchyCode
-  );
-  soList.value = dataSo;
 
   const dataLokasi = await lokasi_getAllLocationWithStatus(
     indexStore.company.companyCode,
@@ -461,6 +515,18 @@ onMounted(async () => {
   );
   lokasiList.value = dataLokasi;
 
+  const dataSo = await stock_getDataForSO(
+    indexStore.user.companyCode,
+    indexStore.user.hierarchyCode
+  );
+  soList.value = dataLokasi.map((item1) => {
+    const item2 = dataSo.find((item) => item.lokasi_nama === item1.lokasi_nama);
+    return {
+      ...item1,
+      lokasi_item: item2 ? item2.lokasi_item : [],
+    };
+  });
+
   const date = await getDateToday("yyyy-MM-dd");
   // savedData.value.Tr_po_created = date;
 
@@ -468,7 +534,6 @@ onMounted(async () => {
 });
 
 const filterSelectedSo = (value) => {
-  console.log(value);
   if (value === null || value === undefined) {
     savedData.value = {
       Tr_qa_user_created: indexStore.user.userName,
@@ -532,9 +597,13 @@ const filterSelectedSo = (value) => {
     if (Array.isArray(itemsKabel.value)) {
       itemsKabel.value.forEach((x) => {
         itemsKabelQty.value.properties_qty.push(x.Sh_item_properties.length);
+        x.Sh_item_properties.forEach((id) => {
+          itemsKabelQty.value.list_kabel.push(
+            x.Sh_item_id + "<>" + x.Sh_item_jenis + "<>" + id.item_properties_id
+          );
+        });
       });
     }
-    console.log("item kabel", itemsKabelQty);
     itemsModemQty.value.item_total = Array.isArray(itemsModem.value)
       ? itemsModem.value.length
       : 0;
@@ -543,7 +612,6 @@ const filterSelectedSo = (value) => {
         itemsModemQty.value.properties_qty.push(x.Sh_item_properties.length);
       });
     }
-    console.log("item modem", itemsModemQty);
     itemsTiangQty.value.item_total = Array.isArray(itemsTiang.value)
       ? itemsTiang.value.length
       : 0;
@@ -568,7 +636,7 @@ const cancelAdd = async () => {
   });
 
   if (result.isConfirmed) {
-    await router.push("/modules/work-order/warehouse/stock-opname");
+    await router.push("/modules/warehouse/stock-opname");
   }
 };
 
@@ -615,11 +683,11 @@ const submitData = async () => {
 
       const fixData = { ...savedData.value };
       const dateToday = await getDateToday("yyyy-MM-dd");
-      const QAprefix = await stock_GetPrefixByDate(dateToday);
+      const QAprefix = await stock_SoGetPrefixByDate(dateToday);
       const SoData = {
         So_id: QAprefix.nextId,
         So_tanggal: dateToday,
-        So_lokasi: fixData.lokasi_id,
+        So_lokasi: fixData.lokasi_nama,
         So_user: indexStore.user.userName,
         So_keterangan: fixData.Tr_qa_keterangan ? fixData.Tr_qa_keterangan : "",
         So_item: [...items.value],
@@ -629,26 +697,63 @@ const submitData = async () => {
       };
 
       itemsModem.value.forEach((data) => {
-        SoData.So_item.push(data);
+        SoData.So_item.push({
+          ...data,
+          Sh_item_properties:
+            data.Sh_item_properties && data.Sh_item_properties.length > 0
+              ? data.Sh_item_properties.map((x) => {
+                  const inside = { ...x };
+
+                  delete inside.is_deleted;
+                  return inside;
+                })
+              : [],
+        });
       });
       itemsKabel.value.forEach((data) => {
-        SoData.So_item.push(data);
+        SoData.So_item.push({
+          ...data,
+          Sh_item_properties:
+            data.Sh_item_properties && data.Sh_item_properties.length > 0
+              ? data.Sh_item_properties.map((x) => {
+                  const inside = { ...x };
+
+                  delete inside.is_deleted;
+                  return inside;
+                })
+              : [],
+        });
       });
       itemsTiang.value.forEach((data) => {
-        SoData.So_item.push(data);
+        SoData.So_item.push({
+          ...data,
+          Sh_item_properties:
+            data.Sh_item_properties && data.Sh_item_properties.length > 0
+              ? data.Sh_item_properties.map((x) => {
+                  const inside = { ...x };
+
+                  delete inside.is_deleted;
+                  return inside;
+                })
+              : [],
+        });
       });
 
-      const result = convertSoItemsToStockLog(SoData.So_item, {
+      const newData = JSON.parse(JSON.stringify(SoData.So_item)); // deep copy
+
+      const result = convertSoItemsToStockLog(newData, {
         Sh_source: "stock_opname",
         Sh_location: SoData.So_lokasi,
         Sh_user_created: SoData.So_user,
         Sh_created_date: SoData.So_tanggal,
         Sh_deleted: "N",
       });
+      // console.log("data so", SoData);
+      // console.log("data sh", result);
       await stock_CreateSo(SoData);
       await stock_CreateSh(result);
       await successCreate().then(() => {
-        router.push("/modules/work-order/purchase/qa");
+        router.push("/modules/warehouse/stock-opname");
       });
     } catch (error) {
       if (uploadedTempFiles) {
@@ -730,7 +835,7 @@ const submitData = async () => {
       </div>
 
       <!-- Item Material & Aset -->
-      <div class="col-span-2" v-if="items.length > 0">
+      <div class="col-span-2" v-if="savedData !== ''">
         <DefaultCard cardTitle="List Material & Aset">
           <div>
             <!-- Tabel -->
@@ -949,7 +1054,6 @@ const submitData = async () => {
                   :class="row.is_deleted ? 'bg-danger' : ''"
                 >
                   <input
-                    :disabled="index + 1 <= itemsQty"
                     disabled
                     type="number"
                     v-model="row.item_jumlah"
@@ -976,6 +1080,7 @@ const submitData = async () => {
                         ? 'bg-danger text-white'
                         : ' bg-white dark:bg-boxdark'
                     "
+                    @input="validateQtyKeluar('items', index, row.item_jumlah_akhir)"
                   />
                 </div>
 
@@ -1026,7 +1131,7 @@ const submitData = async () => {
       </div>
 
       <!-- Item Modem -->
-      <div class="col-span-2" v-if="itemsModem.length > 0">
+      <div class="col-span-2" v-if="savedData !== ''">
         <DefaultCard cardTitle="List Modem">
           <div>
             <!-- Tabel -->
@@ -1106,7 +1211,7 @@ const submitData = async () => {
                   "
                 >
                   <input
-                    v-if="index + 1 <= itemsQty"
+                    v-if="index + 1 <= itemsModemQty"
                     disabled
                     type="text"
                     v-model="row.Sh_item_id"
@@ -1119,7 +1224,7 @@ const submitData = async () => {
                   />
                   <v-select
                     v-else
-                    :disabled="index + 1 <= itemsQty"
+                    :disabled="index + 1 <= itemsModemQty"
                     v-model="row.Sh_item_id"
                     :options="itemList.filter((x) => x.item_tipe === 'Modem')"
                     :reduce="(item) => item.item_id"
@@ -1152,7 +1257,7 @@ const submitData = async () => {
                   "
                 >
                   <input
-                    v-if="index + 1 <= itemsQty"
+                    v-if="index + 1 <= itemsModemQty"
                     disabled
                     type="text"
                     v-model="row.Sh_item_nama"
@@ -1215,7 +1320,7 @@ const submitData = async () => {
                   "
                 >
                   <input
-                    :disabled="index + 1 <= itemsQty"
+                    :disabled="index + 1 <= itemsModemQty"
                     type="text"
                     v-model="row.Sh_item_jenis"
                     class="w-full px-2 py-0 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary dark:text-white"
@@ -1234,7 +1339,7 @@ const submitData = async () => {
                   "
                 >
                   <select
-                    :disabled="index + 1 <= itemsQty"
+                    :disabled="index + 1 <= itemsModemQty"
                     v-model="row.item_status"
                     class="w-full px-2 py-0 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary dark:text-white"
                     :class="
@@ -1372,7 +1477,7 @@ const submitData = async () => {
       </div>
 
       <!-- Item Tiang -->
-      <div class="col-span-2" v-if="itemsTiang.length > 0">
+      <div class="col-span-2" v-if="savedData !== ''">
         <DefaultCard cardTitle="List Tiang">
           <div>
             <!-- Tabel -->
@@ -1452,7 +1557,7 @@ const submitData = async () => {
                   "
                 >
                   <input
-                    v-if="index + 1 <= itemsQty"
+                    v-if="index + 1 <= itemsTiangQty"
                     disabled
                     type="text"
                     v-model="row.Sh_item_id"
@@ -1465,7 +1570,7 @@ const submitData = async () => {
                   />
                   <v-select
                     v-else
-                    :disabled="index + 1 <= itemsQty"
+                    :disabled="index + 1 <= itemsTiangQty"
                     v-model="row.Sh_item_id"
                     :options="itemList.filter((x) => x.item_tipe === 'Tiang')"
                     :reduce="(item) => item.item_id"
@@ -1498,7 +1603,7 @@ const submitData = async () => {
                   "
                 >
                   <input
-                    v-if="index + 1 <= itemsQty"
+                    v-if="index + 1 <= itemsTiangQty"
                     disabled
                     type="text"
                     v-model="row.Sh_item_nama"
@@ -1561,7 +1666,7 @@ const submitData = async () => {
                   "
                 >
                   <input
-                    :disabled="index + 1 <= itemsQty"
+                    :disabled="index + 1 <= itemsTiangQty"
                     type="text"
                     v-model="row.Sh_item_jenis"
                     class="w-full px-2 py-0 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary dark:text-white"
@@ -1580,7 +1685,7 @@ const submitData = async () => {
                   "
                 >
                   <select
-                    :disabled="index + 1 <= itemsQty"
+                    :disabled="index + 1 <= itemsTiangQty"
                     v-model="row.item_status"
                     class="w-full px-2 py-0 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary dark:text-white"
                     :class="
@@ -1720,7 +1825,7 @@ const submitData = async () => {
       <!-- Item Kabel -->
 
       <!-- Item Kabel -->
-      <div class="col-span-2" v-if="itemsKabel.length > 0">
+      <div class="col-span-2" v-if="savedData !== ''">
         <DefaultCard cardTitle="List Kabel">
           <div>
             <!-- Tabel -->
@@ -1761,7 +1866,7 @@ const submitData = async () => {
               <div
                 class="p-2 py-1 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark flex items-center justify-center"
               >
-                Serial Number (SN)
+                Detail Kabel
               </div>
               <div
                 class="p-1 text-center font-bold text-sm bg-gray-100 border border-gray-300 sticky top-0 z-10 dark:text-boxdark flex items-center justify-center cursor-pointer hover:bg-gray-200 hover:text-primary"
@@ -1800,7 +1905,7 @@ const submitData = async () => {
                   "
                 >
                   <input
-                    v-if="index + 1 <= itemsQty"
+                    v-if="index + 1 <= itemsKabelQty"
                     disabled
                     type="text"
                     v-model="row.Sh_item_id"
@@ -1813,7 +1918,7 @@ const submitData = async () => {
                   />
                   <v-select
                     v-else
-                    :disabled="index + 1 <= itemsQty"
+                    :disabled="index + 1 <= itemsKabelQty"
                     v-model="row.Sh_item_id"
                     :options="itemList.filter((x) => x.item_tipe === 'Kabel')"
                     :reduce="(item) => item.item_id"
@@ -1846,7 +1951,7 @@ const submitData = async () => {
                   "
                 >
                   <input
-                    v-if="index + 1 <= itemsQty"
+                    v-if="index + 1 <= itemsKabelQty"
                     disabled
                     type="text"
                     v-model="row.Sh_item_nama"
@@ -1909,7 +2014,7 @@ const submitData = async () => {
                   "
                 >
                   <input
-                    :disabled="index + 1 <= itemsQty"
+                    :disabled="index + 1 <= itemsKabelQty"
                     type="text"
                     v-model="row.Sh_item_jenis"
                     class="w-full px-2 py-0 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary dark:text-white"
@@ -1928,7 +2033,7 @@ const submitData = async () => {
                   "
                 >
                   <select
-                    :disabled="index + 1 <= itemsQty"
+                    :disabled="index + 1 <= itemsKabelQty"
                     v-model="row.item_status"
                     class="w-full px-2 py-0 text-xs text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary dark:text-white"
                     :class="
@@ -2035,6 +2140,14 @@ const submitData = async () => {
                             props.is_deleted
                               ? 'bg-danger text-white'
                               : ' bg-white dark:bg-boxdark dark:text-white'
+                          "
+                          @input="
+                            validateQtyKeluar(
+                              'kabel',
+                              index,
+                              props.item_properties_qty_akhir,
+                              i
+                            )
                           "
                         />
                       </div>

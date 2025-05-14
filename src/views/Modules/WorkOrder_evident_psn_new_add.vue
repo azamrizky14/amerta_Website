@@ -194,7 +194,8 @@ const handleOptionChange = async (selected) => {
       const targetItem = materialData.value.find(
         (item) => item.Sh_item_jenis === used.Sh_item_jenis
       );
-      if (!targetItem) return;z
+      if (!targetItem) return;
+      z;
 
       // Kurangi qty utama
       targetItem.Sh_item_qty -= used.Sh_item_qty || 0;
@@ -295,7 +296,7 @@ const formatForSh = (data) => {
       Sh_item_status: "intangible", // asumsi default
       Sh_type: "out", // asumsi default
       Sh_location_from: "floating-" + Tr_teknis_logistik_id, // contoh: "Gudang Pasuruan"
-      Sh_location_to: Tr_teknis_pelanggan_id, // asumsi default
+      Sh_location_to: "installed-" + Tr_teknis_pelanggan_id, // asumsi default
       Sh_source: "evident",
       Sh_source_id: Tr_teknis_logistik_id,
       companyName: indexStore.user.companyName,

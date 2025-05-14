@@ -512,6 +512,25 @@ const submitData = async () => {
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="Masukan Data">
           <div class="flex flex-col gap-2 p-6.5">
+            <div class="flex flex-col gap-3">
+              <div>
+                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Lokasi Barang
+                </label>
+                <v-select
+                  v-model="itemList"
+                  :options="soList"
+                  :clearable="false"
+                  label="lokasi_nama"
+                  placeholder="Pilih Lokasi Barang"
+                  class="w-full rounded-lg bg-transparent custom-v-select font-normal outline-none transition disabled:cursor-default disabled:bg-whiter"
+                >
+                  <template #selected-option>
+                    <span class="dark:text-white">{{ itemList.lokasi_nama }}</span>
+                  </template>
+                </v-select>
+              </div>
+            </div>
             <div class="flex flex-col gap-3 xl:flex-row">
               <div class="lg:w-1/3">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
@@ -546,25 +565,6 @@ const submitData = async () => {
                   class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                   v-model="savedData.Tr_teknis_item"
                 />
-              </div>
-            </div>
-            <div class="flex flex-col gap-3">
-              <div>
-                <label class="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Lokasi Barang
-                </label>
-                <v-select
-                  v-model="itemList"
-                  :options="soList"
-                  :clearable="false"
-                  label="lokasi_nama"
-                  placeholder="Pilih Lokasi Barang"
-                  class="w-full rounded-lg bg-transparent custom-v-select font-normal outline-none transition disabled:cursor-default disabled:bg-whiter"
-                >
-                  <template #selected-option>
-                    <span class="dark:text-white">{{ itemList.lokasi_nama }}</span>
-                  </template>
-                </v-select>
               </div>
             </div>
 

@@ -70,7 +70,7 @@ const ontData = ref([
 const logistikData = ref(null);
 const optionsType = ref([]);
 
-const optionsTeknisi: any[] = ref([]);
+const optionsTeknisi = ref([]);
 const evidentStart = ref(true);
 const evidentProgress = ref(true);
 const evidentEnd = ref(true);
@@ -106,23 +106,6 @@ onMounted(async () => {
 });
 
 // Function
-
-const handleChangeType = async () => {
-  const data = await getUserInternalByRole(
-    indexStore.user.companyName,
-    "Teknisi " + logistikData.Tr_teknis_jenis
-  );
-  console.log("list user", data);
-};
-const handleButtonClick = async () => {
-  alert("tes");
-};
-
-const handleRemoveMaterialTerpakai = async (index) => {
-  await confirmDelete(null, null, async () => {
-    materialData.value.splice(index, 1);
-  });
-};
 
 const handleInput = (index, number, child) => {
   const data = materialData.value[index];
@@ -178,7 +161,7 @@ const handleOptionChange = async (selected) => {
 
       materialData.value.push({
         ...data,
-        Sh_item_qty_terpakai: "",
+        Sh_item_qty_dipakai: "",
         Sh_item_qty: data.Sh_item_qty,
         Sh_item_properties: updatedProperties,
       });
@@ -195,6 +178,7 @@ const handleOptionChange = async (selected) => {
         (item) => item.Sh_item_jenis === used.Sh_item_jenis
       );
       if (!targetItem) return;
+      z;
 
       // Kurangi qty utama
       targetItem.Sh_item_qty -= used.Sh_item_qty || 0;
@@ -252,6 +236,90 @@ const handleOptionChange = async (selected) => {
       }
     });
   }
+};
+
+const shouldShowTypeLabel = (index) => {
+  const tipe = materialData.value[index].Sh_item_tipe?.toLowerCase();
+  if (tipe === "aset" || tipe === "material") return false;
+
+  if (index === 0) return true;
+  const currentType = materialData.value[index].Sh_item_tipe;
+  const previousType = materialData.value[index - 1].Sh_item_tipe;
+  return currentType !== previousType;
+};
+
+const formatForSh = (data) => {
+  const {
+    Tr_teknis_work_order_terpakai_material,
+    Tr_teknis_logistik_id,
+    Tr_teknis_tanggal,
+    Tr_teknis_user_updated,
+    Tr_teknis_pelanggan_id,
+  } = data;
+
+  const result = Tr_teknis_work_order_terpakai_material.filter(
+    (x) => x.Sh_item_qty > 0
+  ).map((item) => {
+    return {
+      Sh_item_id: item.Sh_item_id,
+      Sh_item_nama: item.Sh_item_nama,
+      Sh_item_jenis: item.Sh_item_jenis,
+      Sh_item_qty: item.Sh_item_qty,
+      Sh_item_satuan: item.Sh_item_satuan,
+      Sh_item_tipe: item.Sh_item_tipe,
+      Sh_item_properties: item.Sh_item_properties || [],
+      Sh_item_status: "intangible", // asumsi default
+      Sh_type: "out", // asumsi default
+      Sh_location_from: "floating-" + Tr_teknis_logistik_id, // contoh: "Gudang Pasuruan"
+      Sh_location_to: "installed-" + Tr_teknis_pelanggan_id, // asumsi default
+      Sh_source: "evident",
+      Sh_source_id: Tr_teknis_logistik_id,
+      companyName: indexStore.user.companyName,
+      companyCode: indexStore.user.companyCode,
+      Sh_keterangan: "",
+      Sh_created_date: Tr_teknis_tanggal,
+      Sh_user_created: Tr_teknis_user_updated,
+      Sh_deleted: "N",
+    };
+  });
+
+  return result;
+};
+
+const formatReturForSh = (data) => {
+  const {
+    Tr_teknis_work_order_retur,
+    Tr_teknis_logistik_id,
+    Tr_teknis_tanggal,
+    Tr_teknis_user_updated,
+    Tr_teknis_pelanggan_id,
+  } = data;
+
+  const result = Tr_teknis_work_order_retur.map((item) => {
+    return {
+      Sh_item_id: item.Sh_item_id,
+      Sh_item_nama: item.Sh_item_nama,
+      Sh_item_jenis: item.Sh_item_jenis,
+      Sh_item_qty: item.Sh_item_qty,
+      Sh_item_satuan: item.Sh_item_satuan,
+      Sh_item_tipe: item.Sh_item_tipe,
+      Sh_item_properties: item.Sh_item_properties || [],
+      Sh_item_status: "intangible", // asumsi default
+      Sh_type: "in", // asumsi default
+      Sh_location_from: Tr_teknis_pelanggan_id, // asumsi default
+      Sh_location_to: "floating-" + Tr_teknis_logistik_id, // contoh: "Gudang Pasuruan"
+      Sh_source: "evident",
+      Sh_source_id: Tr_teknis_logistik_id,
+      companyName: indexStore.user.companyName,
+      companyCode: indexStore.user.companyCode,
+      Sh_keterangan: "",
+      Sh_created_date: Tr_teknis_tanggal,
+      Sh_user_created: Tr_teknis_user_updated,
+      Sh_deleted: "N",
+    };
+  });
+
+  return result;
 };
 
 const cancelAdd = async () => {

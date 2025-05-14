@@ -364,6 +364,15 @@ const routes = [
     }
   },
   {
+    path: '/modules/work-order/evident/infra-new/add',
+    name: 'EvidentInfraNewAdd',
+    component: () => import('@/views/Modules/WorkOrder_evident_infra_new_add.vue'),
+    meta: {
+      title: 'Evident INFRA Add',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
     path: '/modules/work-order/evident/infra/detail/:logistikType/:logistikDate/:logistikNumber/:id',
     name: 'EvidentInfraDetail',
     component: () => import('@/views/Modules/WorkOrder_evident_infra_detail.vue'),
@@ -408,28 +417,28 @@ const routes = [
     name: 'woStockOpname',
     component: () => import('@/views/Warehouse/Warehouse_stock_opname.vue'),
     meta: {
-      title: 'Gudang',
+      title: 'Stock Opname',
       requiresAuth: true // Add this line to protect this route
     }
   },
   {
     path: '/modules/warehouse/stock-opname/add',
-    name: 'woStockOpnameDetail',
+    name: 'woStockOpnameAdd',
     component: () => import('@/views/Warehouse/Warehouse_stock_opname_add.vue'),
     meta: {
-      title: 'Gudang Create',
+      title: 'Stock Opname Create',
       requiresAuth: true // Add this line to protect this route
     }
   },
-  // {
-  //   path: '/modules/warehouse/stock-opname/detail/:id',
-  //   name: 'woStockOpnameDetail',
-  //   component: () => import('@/views/Warehouse/Warehouse_stock_opname_detail.vue'),
-  //   meta: {
-  //     title: 'Gudang Detail',
-  //     requiresAuth: true // Add this line to protect this route
-  //   }
-  // },
+  {
+    path: '/modules/warehouse/stock-opname/detail/:id',
+    name: 'woStockOpnameDetail',
+    component: () => import('@/views/Warehouse/Warehouse_stock_opname_detail.vue'),
+    meta: {
+      title: 'Stock Opname Detail',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
   
   // Purchase Order
   {

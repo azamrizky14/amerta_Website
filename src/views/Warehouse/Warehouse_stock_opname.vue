@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, watch } from "vue";
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
-import { lokasi_getDataByType } from "@/stores/functionAPI";
+import { stock_getAllDataSO } from "@/stores/functionAPI";
 import {
   mdiEyeOutline,
   mdiMagnify,
@@ -18,9 +18,8 @@ const pageList = ref(["Warehouse", "Stock Opname"]);
 const dataHeader = ref([
   { name: "No.", class: "py-2 pl-3" },
   { name: "Kode", class: "min-w-[75px] py-2 px-4" },
-  { name: "Nama. Gudang", class: "min-w-[150px] py-2 px-4" },
-  { name: "Alamat", class: "py-2 px-2" },
-  { name: "Tgl. Dibuat", class: "min-w-[105px] py-2 px-4" },
+  { name: "Lokasi Opname", class: "min-w-[150px] py-2 px-4" },
+  { name: "Tgl. Opname", class: "min-w-[105px] py-2 px-4" },
   { name: "Dibuat Oleh", class: "py-2 px-4" },
 ]);
 let dataTable = ref([]);
@@ -87,12 +86,15 @@ const changePage = (page: number) => {
 };
 
 onMounted(async () => {
-  const data = await lokasi_getDataByType(indexStore.user.companyName, "gudang");
+  const data = await stock_getAllDataSO(
+    indexStore.user.companyCode,
+    indexStore.user.hierarchyCode
+  );
 
   dataTable.value = await Promise.all(
-    data.data.map(async (lokasi) => ({
+    data.map(async (lokasi) => ({
       ...lokasi,
-      formattedDate: await formatDate(lokasi.lokasi_created, "dd-MM-yyyy"),
+      formattedDate: await formatDate(lokasi.So_tanggal, "dd-MM-yyyy"),
     }))
   );
 });
@@ -188,28 +190,12 @@ onMounted(async () => {
                 </td>
                 <td class="py-1.5 px-2 border align-top">
                   <p class="text-black dark:text-white text-xs text-center">
-                    {{ lokasi.lokasi_id }}
+                    {{ lokasi.So_id }}
                   </p>
                 </td>
                 <td class="py-1.5 px-2 border align-top">
                   <p class="text-xs text-black dark:text-white">
-                    {{ lokasi.lokasi_nama }}
-                  </p>
-                </td>
-                <td class="py-1 px-2 border">
-                  <p class="text-xs text-black dark:text-white">
-                    <span v-if="lokasi.lokasi_tipe === 'gudang'">
-                      {{ lokasi.lokasi_alamat.lokasi_alamat_gudang }}
-                    </span>
-                    <span v-else-if="lokasi.lokasi_tipe === 'ruang'">
-                      {{ lokasi.lokasi_alamat.lokasi_alamat_gudang }},
-                      {{ lokasi.lokasi_alamat.lokasi_alamat_ruang }}
-                    </span>
-                    <span v-else-if="lokasi.lokasi_tipe === 'rak'">
-                      {{ lokasi.lokasi_alamat.lokasi_alamat_gudang }},
-                      {{ lokasi.lokasi_alamat.lokasi_alamat_ruang }},
-                      {{ lokasi.lokasi_alamat.lokasi_alamat_rak }}
-                    </span>
+                    {{ lokasi.So_lokasi }}
                   </p>
                 </td>
                 <td class="py-1.5 px-2 border align-top">
@@ -219,14 +205,14 @@ onMounted(async () => {
                 </td>
                 <td class="py-1.5 px-2 border align-top">
                   <p class="text-xs text-black dark:text-white">
-                    {{ lokasi.lokasi_user_created }}
+                    {{ lokasi.So_user }}
                   </p>
                 </td>
                 <td class="py-1 px-2 align-top">
                   <div class="flex items-center space-x-2.5 d-flex justify-center">
                     <router-link
                       class="hover:text-primary"
-                      :to="'/modules/warehouse/gudang/detail/' + lokasi._id"
+                      :to="'/modules/warehouse/stock-opname/detail/' + lokasi._id"
                     >
                       <svg
                         class="fill-current"
