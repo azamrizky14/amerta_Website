@@ -139,7 +139,6 @@ const validateQtyKeluar = (index) => {
 };
 
 const submitData = async () => {
-  console.log(savedData.value);
   // Clear previous errors
   dataError.value.splice(0, dataError.value.length);
 

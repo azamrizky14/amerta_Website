@@ -224,12 +224,16 @@ onMounted(async () => {
                 <td class="py-1 px-2 align-top">
                   <div class="flex items-center space-x-2.5 d-flex justify-center">
                     <router-link
-                      class="hover:text-primary"
                       :to="
-                        '/modules/work-order/evident/infra/detail/' +
-                        item.Tr_teknis_logistik_id +
-                        '/' +
-                        item._id
+                        indexStore.user.companyCode.toString() === [0, 2].toString()
+                          ? '/modules/work-order/evident/infra-new/detail/' +
+                            item.Tr_teknis_logistik_id +
+                            '/' +
+                            item._id
+                          : '/modules/work-order/evident/infra/detail/' +
+                            item.Tr_teknis_logistik_id +
+                            '/' +
+                            item._id
                       "
                     >
                       <svg
@@ -246,10 +250,15 @@ onMounted(async () => {
                     <router-link
                       class="hover:text-primary"
                       :to="
-                        '/modules/work-order/evident/infra/edit/' +
-                        item.Tr_teknis_logistik_id +
-                        '/' +
-                        item._id
+                        indexStore.user.companyCode.toString() === [0, 2].toString()
+                          ? '/modules/work-order/evident/infra-new/edit/' +
+                            item.Tr_teknis_logistik_id +
+                            '/' +
+                            item._id
+                          : '/modules/work-order/evident/infra/edit/' +
+                            item.Tr_teknis_logistik_id +
+                            '/' +
+                            item._id
                       "
                     >
                       <svg

@@ -293,7 +293,6 @@ const alertPayment = async () => {
             total += num;
           }
         });
-        console.log(materialData);
         fixedData.Tr_pp_item = materialData.value.map((x) => ({
           ...x,
           item_jumlah_gr: x.item_jumlah,

@@ -78,63 +78,6 @@ const handleRemoveMaterialTerpakai = async (index) => {
   });
 };
 
-// Function to handle option change
-const handleOptionChange = (selected: { label: string; value: string }) => {
-  console.log("Selected option changed:", selected);
-  // Perform any additional actions here
-  materialData.value.splice(0, materialData.value.length);
-  if (selected.Tr_teknis_work_order_tersedia) {
-    savedData.value.Tr_teknis_logistik_id = selected.Tr_teknis_logistik_id;
-    // console.log('berhasil')
-    selected.Tr_teknis_work_order_tersedia.forEach((data) => {
-      materialData.value.push({
-        label: data.label,
-        qtySisa: data.qty,
-        qty: "",
-      });
-    });
-
-    // Step 2: Merge all Tr_teknis_work_order_terpakai_material and reduce qtySisa accordingly
-    if (
-      selected.Tr_teknis_work_order_terpakai &&
-      selected.Tr_teknis_work_order_terpakai.length > 0
-    ) {
-      const mergedMaterials = selected.Tr_teknis_work_order_terpakai.flatMap(
-        (item) => item.Tr_teknis_work_order_terpakai_material || []
-      );
-
-      // Deduct the qty from qtySisa in materialData if labels match
-      mergedMaterials.forEach((material) => {
-        const existingItem = materialData.value.find(
-          (item) => item.label === material.label
-        );
-        if (existingItem) {
-          existingItem.qtySisa -= material.qty; // Reduce qtySisa based on the merged qty
-          if (existingItem.qtySisa < 0) existingItem.qtySisa = 0; // Ensure qtySisa doesn't go below 0
-        }
-      });
-    }
-  }
-  // console.log('saved data: ', materialData.value)
-};
-
-const cancelAdd = async () => {
-  const result = await Swal.fire({
-    title: "Cancel Create?",
-    text: "are you sure to cancel add data?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#FF0000",
-    cancelButtonColor: "#",
-    confirmButtonText: "Cancel",
-    cancelButtonText: "Back",
-  });
-
-  if (result.isConfirmed) {
-    await router.push("/modules/work-order/evident/infra");
-  }
-};
-
 // Validators for required fields
 const dataValidator = ref([
   { key: "logistikData", label: "Kode Bon Material" },

@@ -62,9 +62,7 @@ let logistikData = ref([]);
 const dataTable = ref([]);
 
 const handleUpdate = (updateData) => {
-  console.log("Halaman awal:", dataTable.value);
   dataTable.value = updateData;
-  console.log("Halaman yang dipilih:", dataTable.value);
 };
 
 // Fetch roles and populate dropdown

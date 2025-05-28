@@ -5,6 +5,7 @@ import { onClickOutside } from "@vueuse/core";
 interface Option {
   label: string;
   [key: string]: any;
+  classList: String;
 }
 
 const props = defineProps<{
@@ -54,10 +55,10 @@ onClickOutside(dropdownRef, () => {
     <div
       @click="toggleDropdown"
       :class="[
-        'w-full rounded border-[1.5px] bg-transparent py-1.5 px-4 text-black transition dark:border-form-strokedark dark:bg-form-input dark:text-white',
+        'w-full rounded border-[1.5px] py-1.5 px-4 text-black transition dark:border-form-strokedark dark:bg-form-input dark:text-white',
         props.disabled
-          ? 'cursor-not-allowed bg-gray-200'
-          : 'cursor-pointer focus:border-primary active:border-primary',
+          ? 'cursor-not-allowed bg-whiter'
+          : 'cursor-pointer focus:border-primary active:border-primary bg-transparent',
       ]"
     >
       <span class="truncate block overflow-hidden whitespace-nowrap">

@@ -171,17 +171,20 @@ const convertSoItemsToStockLog = (data, baseFields) => {
     if (Sh_item_tipe === "Kabel" && Array.isArray(Sh_item_properties)) {
       Sh_item_properties.forEach((prop) => {
         const awal = Number(prop.item_properties_qty || 0);
-        const akhir = Number(prop.item_properties_qty_akhir || 0);
-
+        const akhir = Number(prop.item_properties_qty_akhir);
         if (awal !== akhir && akhir >= 0) {
           const clonedProp = { ...prop };
+          console.log("cek", clonedProp);
           clonedProp.item_properties_qty = akhir;
           delete clonedProp.item_properties_qty_akhir;
 
-          if (akhir > awal) {
-            mergedInProps.push(clonedProp);
-          } else if (akhir < awal) {
-            mergedOutProps.push(clonedProp);
+          if (akhir !== "" && akhir !== null && akhir !== undefined) {
+            if (akhir > awal) {
+              mergedInProps.push(clonedProp);
+            } else if (akhir < awal) {
+              clonedProp.item_properties_qty = awal - akhir;
+              mergedOutProps.push(clonedProp);
+            }
           }
         }
       });
@@ -266,7 +269,7 @@ const convertSoItemsToStockLog = (data, baseFields) => {
     }
 
     // Poin 2: Tambah properti yang in dari bawah
-    if (Sh_item_properties.length > item_jumlah) {
+    if (Sh_item_properties.length > item_jumlah && Sh_item_tipe !== "Kabel") {
       const selisih = Sh_item_properties.length - item_jumlah;
       const propsIn = [...Sh_item_properties]
         .reverse()
@@ -290,7 +293,7 @@ const convertSoItemsToStockLog = (data, baseFields) => {
 
     // Poin 3: Hapus yang is_deleted = true
     const deletedProps = Sh_item_properties.filter((p) => p.is_deleted);
-    if (deletedProps.length > 0) {
+    if (deletedProps.length > 0 && Sh_item_tipe !== "Kabel") {
       deletedProps.forEach((prop) => {
         history.push({
           ...baseFields,

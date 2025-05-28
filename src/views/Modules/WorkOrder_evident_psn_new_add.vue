@@ -72,7 +72,7 @@ const materialData = ref([]);
 const ontData = ref([
   {
     Sh_item_satuan: "pcs",
-    Sh_item_id: "240000",
+    Sh_item_id: "25015",
     Sh_item_nama: "ONT",
     Sh_item_tipe: "Modem",
     Sh_item_properties: [
@@ -195,7 +195,6 @@ const handleOptionChange = async (selected) => {
         (item) => item.Sh_item_jenis === used.Sh_item_jenis
       );
       if (!targetItem) return;
-      z;
 
       // Kurangi qty utama
       targetItem.Sh_item_qty -= used.Sh_item_qty || 0;
@@ -283,8 +282,15 @@ const formatForSh = (data) => {
   } = data;
 
   const result = Tr_teknis_work_order_terpakai_material.filter(
-    (x) => x.Sh_item_qty > 0
+    (x) =>
+      x.Sh_item_qty > 0 ||
+      (x.Sh_item_tipe === "Kabel" &&
+        x.Sh_item_properties.some((y) => y.item_properties_qty > 0))
   ).map((item) => {
+    let newItem = item.Sh_item_properties || [];
+    if (item.Sh_item_tipe === "Kabel") {
+      newItem = newItem.filter((x) => x.item_properties_qty > 0);
+    }
     return {
       Sh_item_id: item.Sh_item_id,
       Sh_item_nama: item.Sh_item_nama,
@@ -292,7 +298,7 @@ const formatForSh = (data) => {
       Sh_item_qty: item.Sh_item_qty,
       Sh_item_satuan: item.Sh_item_satuan,
       Sh_item_tipe: item.Sh_item_tipe,
-      Sh_item_properties: item.Sh_item_properties || [],
+      Sh_item_properties: newItem,
       Sh_item_status: "intangible", // asumsi default
       Sh_type: "out", // asumsi default
       Sh_location_from: "floating-" + Tr_teknis_logistik_id, // contoh: "Gudang Pasuruan"
@@ -331,7 +337,7 @@ const formatReturForSh = (data) => {
       Sh_item_properties: item.Sh_item_properties || [],
       Sh_item_status: "intangible", // asumsi default
       Sh_type: "in", // asumsi default
-      Sh_location_from: Tr_teknis_pelanggan_id, // asumsi default
+      Sh_location_from: "installed-" + Tr_teknis_pelanggan_id, // asumsi default
       Sh_location_to: "floating-" + Tr_teknis_logistik_id, // contoh: "Gudang Pasuruan"
       Sh_source: "evident",
       Sh_source_id: Tr_teknis_logistik_id,
@@ -411,7 +417,7 @@ const submitData = async () => {
           if (x.Sh_item_tipe === "Modem") {
             const data = { ...x };
 
-            data.Sh_item_properties = x.snNumber ? x.snNumber : x.Sh_item_properties;
+            data.Sh_item_properties = x.snNumber ? x.snNumber : [];
             data.Sh_item_qty_sisa = x.snNumber ? x.Sh_item_qty - 1 : x.Sh_item_qty;
             data.Sh_item_qty = x.snNumber ? 1 : 0;
 
@@ -441,12 +447,11 @@ const submitData = async () => {
                 item_properties_id: kabel.item_properties_id,
                 item_properties_image: kabel.item_properties_image || "",
                 item_properties_note: kabel.item_properties_note || "",
+                item_properties_qty_sisa:
+                  kabel.item_properties_qty - (kabel.item_properties_qty_terpakai || 0),
                 item_properties_qty: kabel.item_properties_qty_terpakai
                   ? kabel.item_properties_qty_terpakai
                   : 0,
-                item_properties_qty_sisa:
-                  kabel.item_properties_qty_sisa -
-                  (kabel.item_properties_qty_terpakai || 0),
               };
               return dataKabel;
             });
@@ -464,7 +469,6 @@ const submitData = async () => {
             delete data.qty;
             return data;
           } else {
-            console.log("awal", x);
             const qtyAwal = x.Sh_item_qty ? x.Sh_item_qty : 0;
             const qtyDipakai = x.Sh_item_qty_dipakai ? x.Sh_item_qty_dipakai : 0;
             const data = { ...x };
@@ -473,7 +477,6 @@ const submitData = async () => {
             delete data.Sh_item_qty_dipakai;
             delete data.qtySisa;
             delete data.qty;
-            console.log("akhir", data);
             return data;
           }
         });
@@ -553,7 +556,7 @@ const cancelAdd = async () => {
       <div class="flex flex-col gap-9">
         <DefaultCard cardTitle="Masukan Data">
           <div class="flex flex-col gap-2 p-6.5">
-            <div class="flex flex-col gap-6 xl:flex-row">
+            <div class="flex flex-col gap-2 xl:flex-row">
               <div class="w-2/3">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                   Kode Bon Material
@@ -588,7 +591,7 @@ const cancelAdd = async () => {
               />
             </div>
 
-            <div class="flex flex-col gap-6 xl:flex-row">
+            <div class="flex flex-col gap-2 xl:flex-row">
               <div class="lg:w-2/3">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                   Id Pelanggan (Wajib Diisi)

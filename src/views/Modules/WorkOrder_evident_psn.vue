@@ -231,15 +231,6 @@ onMounted(async () => {
                 <td class="py-1 px-2 align-top">
                   <div class="flex items-center space-x-2.5 d-flex justify-center">
                     <router-link
-                      class="px-1"
-                      :to="
-                        indexStore.user.companyCode.toString() === [0, 2].toString()
-                          ? '/modules/work-order/evident/psn-new/add'
-                          : '/modules/work-order/evident/psn/add'
-                      "
-                    >
-                    </router-link>
-                    <router-link
                       class="hover:text-primary"
                       :to="
                         indexStore.user.companyCode.toString() === [0, 2].toString()

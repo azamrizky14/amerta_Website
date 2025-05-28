@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import "vue-select/dist/vue-select.css"; // Import CSS untuk vue-select
+import vSelect from "vue-select";
 import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
@@ -53,7 +55,7 @@ const materialData = ref([]);
 const ontData = ref([
   {
     Sh_item_satuan: "pcs",
-    Sh_item_id: "240000",
+    Sh_item_id: "25015",
     Sh_item_nama: "ONT",
     Sh_item_tipe: "Modem",
     Sh_item_properties: [
@@ -80,7 +82,6 @@ onMounted(async () => {
     indexStore.user.companyName
     //  "Teknisi " + savedData.value.Tr_teknis_jenis
   );
-  console.log("list user", data);
   if (data) {
     optionsTeknisi.value = data.map((x, i) => ({
       id: i,
@@ -178,7 +179,6 @@ const handleOptionChange = async (selected) => {
         (item) => item.Sh_item_jenis === used.Sh_item_jenis
       );
       if (!targetItem) return;
-      z;
 
       // Kurangi qty utama
       targetItem.Sh_item_qty -= used.Sh_item_qty || 0;
@@ -258,8 +258,15 @@ const formatForSh = (data) => {
   } = data;
 
   const result = Tr_teknis_work_order_terpakai_material.filter(
-    (x) => x.Sh_item_qty > 0
+    (x) =>
+      x.Sh_item_qty > 0 ||
+      (x.Sh_item_tipe === "Kabel" &&
+        x.Sh_item_properties.some((y) => y.item_properties_qty > 0))
   ).map((item) => {
+    let newItem = item.Sh_item_properties || [];
+    if (item.Sh_item_tipe === "Kabel") {
+      newItem = newItem.filter((x) => x.item_properties_qty > 0);
+    }
     return {
       Sh_item_id: item.Sh_item_id,
       Sh_item_nama: item.Sh_item_nama,
@@ -267,7 +274,7 @@ const formatForSh = (data) => {
       Sh_item_qty: item.Sh_item_qty,
       Sh_item_satuan: item.Sh_item_satuan,
       Sh_item_tipe: item.Sh_item_tipe,
-      Sh_item_properties: item.Sh_item_properties || [],
+      Sh_item_properties: newItem,
       Sh_item_status: "intangible", // asumsi default
       Sh_type: "out", // asumsi default
       Sh_location_from: "floating-" + Tr_teknis_logistik_id, // contoh: "Gudang Pasuruan"
@@ -425,12 +432,13 @@ const submitData = async () => {
           if (x.Sh_item_tipe === "Modem") {
             const data = { ...x };
 
-            data.Sh_item_properties = x.snNumber ? x.snNumber : x.Sh_item_properties;
+            data.Sh_item_properties = x.snNumber ? x.snNumber : [];
             data.Sh_item_qty_sisa = x.snNumber ? x.Sh_item_qty - 1 : x.Sh_item_qty;
             data.Sh_item_qty = x.snNumber ? 1 : 0;
 
             delete data.qtySisa;
             delete data.snNumber;
+            delete data.Sh_item_qty_dipakai;
             delete data.qty;
             return data;
           } else if (x.Sh_item_tipe === "Tiang") {
@@ -443,6 +451,7 @@ const submitData = async () => {
             data.Sh_item_properties = x.snNumber ? x.snNumber : [];
 
             delete data.qtySisa;
+            delete data.Sh_item_qty_dipakai;
             delete data.snNumber;
             delete data.qty;
             return data;
@@ -453,10 +462,11 @@ const submitData = async () => {
                 item_properties_id: kabel.item_properties_id,
                 item_properties_image: kabel.item_properties_image || "",
                 item_properties_note: kabel.item_properties_note || "",
-                item_properties_qty: kabel.item_properties_qty_terpakai || 0,
                 item_properties_qty_sisa:
-                  kabel.item_properties_qty_sisa -
-                  (kabel.item_properties_qty_terpakai || 0),
+                  kabel.item_properties_qty - (kabel.item_properties_qty_terpakai || 0),
+                item_properties_qty: kabel.item_properties_qty_terpakai
+                  ? kabel.item_properties_qty_terpakai
+                  : 0,
               };
               return dataKabel;
             });
@@ -470,11 +480,12 @@ const submitData = async () => {
             data.Sh_item_qty = qtyDipakai;
 
             delete data.qtySisa;
+            delete data.Sh_item_qty_dipakai;
             delete data.qty;
             return data;
           } else {
             const qtyAwal = x.Sh_item_qty ? x.Sh_item_qty : 0;
-            const qtyDipakai = x.Sh_item_qty_dipakai ? x.Sh_item_qty_dipakai.length : 0;
+            const qtyDipakai = x.Sh_item_qty_dipakai ? x.Sh_item_qty_dipakai : 0;
             const data = { ...x };
             data.Sh_item_qty_sisa = qtyAwal - qtyDipakai;
             data.Sh_item_qty = qtyDipakai;
@@ -496,10 +507,12 @@ const submitData = async () => {
 
         return data;
       });
-      fixData.Tr_teknis_kategori = fixData.Tr_teknis_kategori.label;
 
       const dataForSh = await formatForSh(fixData);
       const dataReturForSh = await formatReturForSh(fixData);
+
+      console.log(fixData);
+      console.log(dataForSh);
 
       dataReturForSh.forEach((x) => {
         if (x) {
@@ -508,32 +521,20 @@ const submitData = async () => {
       });
 
       fixData.Tr_teknis_team = JSON.stringify(fixData.Tr_teknis_team.map((x) => x.name));
+      fixData.Tr_teknis_work_order_retur = JSON.stringify(
+        fixData.Tr_teknis_work_order_retur
+      );
 
       const sendData = new FormData();
 
-      // Function to append array data properly
-      const appendArrayData = (key: string, array: any[]) => {
-        array.forEach((item, index) => {
-          if (item instanceof File) {
-            sendData.append(`${key}[${index}]`, item);
-          } else if (typeof item === "string") {
-            sendData.append(`${key}[${index}]`, item);
-          } else {
-            sendData.append(`${key}[${index}]`, ""); // `{}` dikirim sebagai string kosong
-          }
-        });
-      };
-
-      // Append each field to FormData
       Object.keys(fixData).forEach((key) => {
         if (Array.isArray(fixData[key])) {
-          appendArrayData(key, fixData[key]);
+          sendData.append(key, JSON.stringify(fixData[key]));
         } else {
           sendData.append(key, fixData[key]);
         }
       });
 
-      // Kirim data ke API
       await adminTeknis_CreateDataEvidentWithImages(sendData);
       await stock_CreateSh(dataForSh);
 

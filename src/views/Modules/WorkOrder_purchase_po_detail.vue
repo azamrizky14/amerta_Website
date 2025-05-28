@@ -119,7 +119,6 @@ const totalTax = computed(() => {
 
 // Fungsi untuk mengunduh PDF
 const downloadPDF = () => {
-  console.log("woi");
   if (!savedData.value) return;
 
   const doc = new jsPDF({

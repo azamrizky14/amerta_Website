@@ -62,7 +62,6 @@ onMounted(async () => {
     indexStore.user.companyName
     //  "Teknisi " + savedData.value.Tr_teknis_jenis
   );
-  console.log("list user", data);
   if (data) {
     optionsTeknisi.value = data.map((x, i) => ({
       id: i,
@@ -94,7 +93,6 @@ const handleChangeType = async () => {
     indexStore.user.companyName,
     "Teknisi " + logistikData.Tr_teknis_jenis
   );
-  console.log("list user", data);
 };
 const handleButtonClick = async () => {
   alert("tes");
@@ -212,7 +210,6 @@ const validateForm = () => {
 };
 
 const submitData = async () => {
-  console.log(savedData.value);
   // Validate form before submission
   const isValid = validateForm();
 

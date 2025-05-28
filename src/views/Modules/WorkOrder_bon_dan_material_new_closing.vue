@@ -28,6 +28,7 @@ const pageList = ref(["Work Order", "Bon & Material", "Closing"]);
 
 const soList = ref([]);
 const itemList = ref([]);
+const isSubmitting = ref(false);
 
 // Saved Data
 const savedData = ref({
@@ -57,6 +58,48 @@ const savedData = ref({
   Tr_teknis_work_order_kembali: [],
 });
 
+const handleInput = (index, number, child) => {
+  console.log("halo", index, number, child);
+  const data = savedData.value.Tr_teknis_work_order_kembali[index];
+  // Validasi qtyKeluar tidak boleh kosong atau kurang dari 1
+  if (
+    child !== undefined &&
+    (data.Sh_item_properties[child].item_properties_qty_sisa < number || number < 0)
+  ) {
+    Swal.fire({
+      title: "Error!",
+      text:
+        number < 0
+          ? "Jumlah Input Tidak Boleh Kurang Dari 0!"
+          : "Jumlah Input Melebihi Stock!",
+      icon: "error",
+      position: "top-end",
+      timer: 1000,
+      showConfirmButton: false,
+      toast: true,
+    }).then(() => {
+      savedData.value.Tr_teknis_work_order_kembali[index].Sh_item_properties[
+        child
+      ].item_properties_qty = "";
+    });
+  } else if (child === undefined && (data.Sh_item_qty_sisa < number || number < 0)) {
+    Swal.fire({
+      title: "Error!",
+      text:
+        number < 0
+          ? "Jumlah Input Tidak Boleh Kurang Dari 0!"
+          : "Jumlah Input Melebihi Stock!",
+      icon: "error",
+      position: "top-end",
+      timer: 1000,
+      showConfirmButton: false,
+      toast: true,
+    }).then(() => {
+      savedData.value.Tr_teknis_work_order_kembali[index].Sh_item_qty = "";
+    });
+  }
+};
+
 const shouldShowTypeLabel = (index) => {
   const tipe = savedData.value.Tr_teknis_work_order_kembali[
     index
@@ -77,16 +120,16 @@ onMounted(async () => {
   savedData.value.Tr_teknis_work_order_kembali = savedData.value.Tr_teknis_work_order_tersedia.map(
     (x) => ({
       ...x,
-      Sh_item_qty: x.Sh_item_qty ?? 0, // sisa awal = qty tersedia
-      Sh_item_qty_sisa: 0, // default jumlah yang dipakai = 0
+      Sh_item_qty_sisa:
+        x.Sh_item_tipe === "Modem" ? x.Sh_item_properties?.length : x.Sh_item_qty, // default jumlah yang dipakai = 0
       Sh_item_properties:
         x.Sh_item_properties?.map((p) => ({
           ...p,
           item_properties_qty_sisa: p.item_properties_qty ?? 0,
         })) || [],
+      Sh_item_qty: 0, // sisa awal = qty tersedia
     })
   );
-
   // Step 2: Jika ada material yang sudah terpakai, kurangi qty_sisa dan isi qty (dipakai)
   if (
     savedData.value.Tr_teknis_work_order_tersedia &&
@@ -102,7 +145,7 @@ onMounted(async () => {
         (item) => item.Sh_item_jenis === material.Sh_item_jenis
       );
       if (existingItem) {
-        existingItem.Sh_item_qty_sisa += material.Sh_item_qty; // jumlah yang sudah dipakai
+        existingItem.Sh_item_qty_sisa -= material.Sh_item_qty; // jumlah yang sudah dipakai
         existingItem.Sh_item_qty -= material.Sh_item_qty_sisa; // kurangi sisa
 
         if (existingItem.Sh_item_qty < 0) {
@@ -118,7 +161,6 @@ onMounted(async () => {
           existingItem.Sh_item_properties.length === 0
         )
           return;
-
         const usedProps = Array.isArray(material.Sh_item_properties)
           ? material.Sh_item_properties
           : [material.Sh_item_properties];
@@ -169,6 +211,7 @@ onMounted(async () => {
     }
   });
 
+  console.log("after step 2", savedData.value.Tr_teknis_work_order_kembali);
   // Step 3: Set user dan tanggal close
   savedData.value.Tr_teknis_user_closed = indexStore.user.userName;
   const date = await getDateToday("yyyy-MM-dd");
@@ -180,11 +223,13 @@ onMounted(async () => {
     const returItems = item.Tr_teknis_work_order_retur || [];
 
     returItems.forEach((retur) => {
+      console.log("retur", retur);
       const existingItem = savedData.value.Tr_teknis_work_order_retur.find(
         (x) => x.Sh_item_id === retur.Sh_item_id && x.Sh_item_tipe === retur.Sh_item_tipe
       );
-
+      console.log("output", existingItem);
       if (existingItem) {
+        console.log("if");
         // Gabungkan qty
         existingItem.Sh_item_qty =
           (existingItem.Sh_item_qty || 0) + (retur.Sh_item_qty || 0);
@@ -199,6 +244,7 @@ onMounted(async () => {
 
         existingItem.Sh_item_properties = [...existingProps, ...newProps];
       } else {
+        console.log("else");
         savedData.value.Tr_teknis_work_order_retur.push({
           ...retur,
           Sh_item_properties: Array.isArray(retur.Sh_item_properties)
@@ -206,11 +252,12 @@ onMounted(async () => {
             : [],
           Sh_item_qty: retur.Sh_item_qty || 0,
         });
+        console.log(savedData.value);
       }
     });
   });
 
-  console.log(savedData.value);
+  console.log("after step 3", savedData.value.Tr_teknis_work_order_kembali);
 });
 
 // Array validator untuk field wajib
@@ -246,8 +293,8 @@ const formatSendData = (data) => {
         return dataKabel;
       });
       const qtyDipakai =
-        data.Sh_item_properties.filter((kabel) => kabel.item_properties_qty > 0)
-          .length || 0;
+        data.Sh_item_properties.filter((kabel) => kabel.item_properties_qty > 0).length ||
+        0;
 
       // const qtyDipakai = x.Sh_item_properties ? x.Sh_item_properties.length : 0;
 
@@ -351,7 +398,7 @@ const formatForSh = (data) => {
         Sh_item_tipe: item.Sh_item_tipe,
         Sh_item_properties: item.Sh_item_properties || [],
         Sh_item_status: "intangible", // asumsi default
-        Sh_type: "out", // asumsi default
+        Sh_type: "in", // asumsi default
         Sh_location_from: "floating-" + Tr_teknis_logistik_id, // contoh: "Gudang Pasuruan"
         Sh_location_to: itemList.value.lokasi_nama, // asumsi default
         Sh_source: "bon-material-closing",
@@ -395,7 +442,9 @@ const formatForSh = (data) => {
 };
 
 const submitData = async () => {
-  console.log(savedData.value);
+  if (isSubmitting.value) return; // kalau masih submit, jangan lanjut
+
+  isSubmitting.value = true; // set sedang submit
   // Clear previous errors
   dataError.value.splice(0, dataError.value.length);
 
@@ -411,6 +460,7 @@ const submitData = async () => {
   }
   // Jika ada error, tampilkan di halaman dan hentikan submit
   if (dataError.value.length > 0) {
+    isSubmitting.value = false; // reset
     return; // Jangan lanjutkan jika ada error
   }
 
@@ -439,10 +489,9 @@ const submitData = async () => {
       fixData.Tr_teknis_work_order_retur = formatSendData(
         fixData.Tr_teknis_work_order_retur
       );
-      console.log("data yang dikirim", fixData);
       const dataForSh = formatForSh(fixData);
-      console.log(dataForSh);
 
+      // console.log("data: ", dataForSh);
       await adminTeknis_UpdateData(fixData, route.params.id);
       await stock_CreateSh(dataForSh);
       await successCreate().then(() => {
@@ -450,7 +499,11 @@ const submitData = async () => {
       });
     } catch (error) {
       await failedCreate(error);
+    } finally {
+      isSubmitting.value = false; // reset saat sukses/gagal
     }
+  } else {
+    isSubmitting.value = false; // reset saat sukses/gagal
   }
 };
 </script>
@@ -668,7 +721,7 @@ const submitData = async () => {
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
                   v-if="index === 0 || shouldShowTypeLabel(index)"
                 >
-                  Terpakai
+                  Kembali
                 </label>
                 <template
                   v-if="data.Sh_item_tipe === 'Kabel'"
@@ -680,6 +733,7 @@ const submitData = async () => {
                     placeholder="Qty"
                     class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-3 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     :class="i > 0 ? 'mt-2' : ''"
+                    @input="handleInput(index, prop.item_properties_qty, i)"
                     v-model="prop.item_properties_qty"
                   />
                 </template>
@@ -690,7 +744,7 @@ const submitData = async () => {
                     placeholder="Qty"
                     class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-3 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     v-model="data.Sh_item_qty"
-                    @input="handleInput(index, data.Sh_item_qty_dipakai)"
+                    @input="handleInput(index, data.Sh_item_qty)"
                   />
                 </template>
               </div>
@@ -707,7 +761,7 @@ const submitData = async () => {
                   Kode Barang
                 </label>
                 <v-select
-                  :disabled="data.Sh_item_qty <= 0"
+                  :disabled="data.Sh_item_qty_sisa <= 0"
                   v-model="data.snNumber"
                   :clearable="false"
                   multiple
@@ -797,6 +851,7 @@ const submitData = async () => {
                   v-if="data.Sh_item_tipe === 'Kabel'"
                   v-for="(prop, i) in data.Sh_item_properties"
                 >
+                  c
                   <input
                     disabled
                     type="text"
@@ -807,6 +862,7 @@ const submitData = async () => {
                   />
                 </template>
                 <template v-else>
+                  d
                   <input
                     disabled
                     type="number"
@@ -826,7 +882,7 @@ const submitData = async () => {
                   class="mb-3 block text-sm font-medium text-black dark:text-white"
                   v-if="index === 0 || shouldShowTypeLabel(index)"
                 >
-                  Terpakai
+                  Kembali
                 </label>
                 <template
                   v-if="data.Sh_item_tipe === 'Kabel'"
@@ -848,7 +904,7 @@ const submitData = async () => {
                     placeholder="Qty"
                     class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-3 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
                     v-model="data.Sh_item_qty"
-                    @input="handleInput(index, data.Sh_item_qty_dipakai)"
+                    @input="handleInput(index, data.Sh_item_qty)"
                   />
                 </template>
               </div>
@@ -915,6 +971,7 @@ const submitData = async () => {
             </button>
             <button
               @click="submitData"
+              :disabled="isSubmitting"
               class="flex w-full justify-center rounded bg-primary p-3 font-medium text-gray hover:bg-opacity-90"
             >
               Closing Data

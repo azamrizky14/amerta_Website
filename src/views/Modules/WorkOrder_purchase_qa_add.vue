@@ -387,7 +387,6 @@ const submitData = async () => {
           x.item_jumlah > 0 &&
           (x.item_jumlah_lolos > 0 || x.item_jumlah_retur > 0 || x.item_jumlah_rusak > 0)
       );
-      console.log("data after", qaData);
 
       uploadedTempFiles = await uploadFilesInQAData(qaData);
 

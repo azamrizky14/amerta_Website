@@ -99,7 +99,6 @@ onMounted(async () => {
 
 // Function
 const handleAddMaterialTerpakai = async (type) => {
-  console.log(type);
   if (type === "kabelData") {
     await successCreate(null, null, "top-end");
     kabelData.value.push({ label: "", qty: "", kode: "" });
@@ -154,7 +153,7 @@ const getAvailableItems = (currentIndex, type) => {
 
   if (!itemList.value.lokasi_item || !sourceData) return [];
 
-  const usedItemIds = new Set();
+  const usedItemKeys = new Set(); // <== ganti dari usedItemIds
   const usedPropertyIds = new Set();
 
   sourceData.forEach((entry, idx) => {
@@ -163,7 +162,8 @@ const getAvailableItems = (currentIndex, type) => {
         entry.item?.Sh_item_tipe === "Material" ||
         entry.item?.Sh_item_tipe === "Aset"
       ) {
-        usedItemIds.add(entry.item.Sh_item_id);
+        const key = `${entry.item.Sh_item_id}|${entry.item.Sh_item_jenis}`;
+        usedItemKeys.add(key);
       } else if (entry.kode) {
         usedPropertyIds.add(entry.kode.item_properties_id);
       }
@@ -174,7 +174,8 @@ const getAvailableItems = (currentIndex, type) => {
     if (!currentTipeList.includes(item.Sh_item_tipe)) return false;
 
     if (item.Sh_item_tipe === "Material" || item.Sh_item_tipe === "Aset") {
-      return !usedItemIds.has(item.Sh_item_id);
+      const key = `${item.Sh_item_id}|${item.Sh_item_jenis}`;
+      return !usedItemKeys.has(key);
     }
 
     if (!Array.isArray(item.Sh_item_properties)) return false;
@@ -351,7 +352,6 @@ const validateQtyKeluar = (index, type) => {
       dataToValidate[index].qty = 1;
     });
   } else {
-    console.log(type);
     if (
       type === "materialData" &&
       dataToValidate[index].item.Sh_item_qty < dataToValidate[index].qty
@@ -458,23 +458,23 @@ const submitData = async () => {
       });
 
       // console.log("awawl", fixData);
-      fixData.Tr_teknis_work_order_tersedia = fixData.Tr_teknis_work_order_tersedia.map(
-        (x) => {
-          let data = {};
+      fixData.Tr_teknis_work_order_tersedia = fixData.Tr_teknis_work_order_tersedia.filter(
+        (x) => x.item?.Sh_item_id || x.Sh_item_id
+      ).map((x) => {
+        let data = {};
 
-          if (x.item) {
-            data = {
-              ...x.item,
-              Sh_item_qty: x.qty,
-            };
-          } else {
-            data = {
-              ...x,
-            };
-          }
-          return data;
+        if (x.item) {
+          data = {
+            ...x.item,
+            Sh_item_qty: x.qty,
+          };
+        } else {
+          data = {
+            ...x,
+          };
         }
-      );
+        return data;
+      });
 
       const prefix = await BonMaterial_GetPrefixByTypeAndDate(
         fixData.Tr_teknis_jenis.value,
@@ -586,7 +586,7 @@ const submitData = async () => {
         </DefaultCard>
         <!-- Input Fields End -->
       </div>
-      <div class="flex flex-col gap-4 col-span-2">
+      <div class="flex flex-col gap-4 col-span-2" v-if="Object.keys(itemList).length > 0">
         <!-- Input Fields Start -->
         <DefaultCard cardTitle="Masukan Material & Aset">
           <div class="p-6.5">
@@ -866,7 +866,7 @@ const submitData = async () => {
                       : []
                   "
                   :clearable="false"
-                  label="Sh_item_nama"
+                  label="item_properties_id"
                   placeholder="Pilih Kabel"
                   class="w-full rounded-lg bg-transparent custom-v-select font-normal outline-none transition disabled:cursor-default disabled:bg-whiter"
                 >

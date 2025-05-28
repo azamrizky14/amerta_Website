@@ -178,6 +178,15 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
+  {
+    path: '/modules/work-order/bon-dan-material-new/detail/:id',
+    name: 'woBonNewDetail',
+    component: () => import('@/views/Modules/WorkOrder_bon_dan_material_new_detail.vue'),
+    meta: {
+      title: 'Detail Bon & Material',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
   // Evident PSB
   {
     path: '/modules/work-order/evident/psb',
@@ -382,11 +391,248 @@ const routes = [
     }
   },
   {
+    path: '/modules/work-order/evident/infra-new/detail/:logistikType/:logistikDate/:logistikNumber/:id',
+    name: 'EvidentInfraNewDetail',
+    component: () => import('@/views/Modules/WorkOrder_evident_infra_new_detail.vue'),
+    meta: {
+      title: 'Evident INFRA Detail',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
     path: '/modules/work-order/evident/infra/edit/:logistikType/:logistikDate/:logistikNumber/:id',
     name: 'EvidentInfraEdit',
     component: () => import('@/views/Modules/WorkOrder_evident_infra_edit.vue'),
     meta: {
       title: 'Evident INFRA Edit',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  
+  // Pelayanan CRM
+  {
+    path: '/modules/Pelayanan/crm',
+    name: 'PelayananCrm',
+    component: () => import('@/views/Pelayanan/Pelayanan_crm.vue'),
+    meta: {
+      title: 'Pelayanan CRM',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/Pelayanan/crm/add',
+    name: 'PelayananCrmAdd',
+    component: () => import('@/views/Pelayanan/Pelayanan_crm_add.vue'),
+    meta: {
+      title: 'Tambah Pelayanan CRM',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/Pelayanan/crm/detail/:id',
+    name: 'PelayananCrmDetai;',
+    component: () => import('@/views/Pelayanan/Pelayanan_crm_detail.vue'),
+    meta: {
+      title: 'Detail Pelayanan CRM',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/Pelayanan/crm/edit/:id',
+    name: 'PelayananCrmEdit',
+    component: () => import('@/views/Pelayanan/Pelayanan_crm_edit.vue'),
+    meta: {
+      title: 'Edit Pelayanan CRM',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  
+  // Evident Ticket
+  {
+    path: '/modules/Pelayanan/ticket',
+    name: 'KoordinatorTicket',
+    component: () => import('@/views/Pelayanan/Pelayanan_ticket.vue'),
+    meta: {
+      title: 'Koordinator Ticket',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/Pelayanan/ticket/add',
+    name: 'KoordinatorTicketAdd',
+    component: () => import('@/views/Pelayanan/Pelayanan_ticket_add.vue'),
+    meta: {
+      title: 'Tambah Koordinator Ticket',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/Pelayanan/ticket/detail/:id',
+    name: 'KoordinatorTicketDetai;',
+    component: () => import('@/views/Pelayanan/Pelayanan_ticket_detail.vue'),
+    meta: {
+      title: 'Detail Koordinator Ticket',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/Pelayanan/ticket/edit/:id',
+    name: 'KoordinatorTicketEdit',
+    component: () => import('@/views/Pelayanan/Pelayanan_ticket_edit.vue'),
+    meta: {
+      title: 'Edit Koordinator Ticket',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+
+  // Pelayanan Announcement
+  {
+    path: '/modules/Pelayanan/announcement',
+    name: 'PelayananAnnouncement',
+    component: () => import('@/views/Pelayanan/Pelayanan_announcement.vue'),
+    meta: {
+      title: 'Pelayanan Announcement',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/Pelayanan/announcement/add',
+    name: 'PelayananAnnouncementAdd',
+    component: () => import('@/views/Pelayanan/Pelayanan_announcement_add.vue'),
+    meta: {
+      title: 'Tambah Pelayanan Announcement',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/Pelayanan/announcement/detail/:id',
+    name: 'PelayananAnnouncementDetai;',
+    component: () => import('@/views/Pelayanan/Pelayanan_announcement_detail.vue'),
+    meta: {
+      title: 'Detail Pelayanan Announcement',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/Pelayanan/announcement/edit/:id',
+    name: 'PelayananAnnouncementEdit',
+    component: () => import('@/views/Pelayanan/Pelayanan_announcement_edit.vue'),
+    meta: {
+      title: 'Edit Pelayanan Announcement',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+
+  // Evident PSB
+  {
+    path: '/modules/work-order/koordinator/psb',
+    name: 'koordinatorPsb',
+    component: () => import('@/views/Modules/WorkOrder_koordinator_psb.vue'),
+    meta: {
+      title: 'Koordinator PSB',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/koordinator/psb/add',
+    name: 'koordinatorPsbAdd',
+    component: () => import('@/views/Modules/WorkOrder_koordinator_psb_add.vue'),
+    meta: {
+      title: 'Tambah Koordinator PSB',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/koordinator/psb/detail/:id',
+    name: 'koordinatorPsbDetai;',
+    component: () => import('@/views/Modules/WorkOrder_koordinator_psb_detail.vue'),
+    meta: {
+      title: 'Detail Koordinator PSB',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/koordinator/psb/edit/:id',
+    name: 'koordinatorPsbEdit',
+    component: () => import('@/views/Modules/WorkOrder_koordinator_psb_edit.vue'),
+    meta: {
+      title: 'Edit Koordinator PSB',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+
+  // Evident MT
+  {
+    path: '/modules/work-order/koordinator/mt',
+    name: 'koordinatorMt',
+    component: () => import('@/views/Modules/WorkOrder_koordinator_mt.vue'),
+    meta: {
+      title: 'Koordinator MT',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/koordinator/mt/add',
+    name: 'koordinatorMtAdd',
+    component: () => import('@/views/Modules/WorkOrder_koordinator_mt_add.vue'),
+    meta: {
+      title: 'Tambah Koordinator MT',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/koordinator/mt/detail/:id',
+    name: 'koordinatorMtDetai;',
+    component: () => import('@/views/Modules/WorkOrder_koordinator_mt_detail.vue'),
+    meta: {
+      title: 'Detail Koordinator MT',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/koordinator/mt/edit/:id',
+    name: 'koordinatorMtEdit',
+    component: () => import('@/views/Modules/WorkOrder_koordinator_mt_edit.vue'),
+    meta: {
+      title: 'Edit Koordinator MT',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  
+  // Evident INFRA
+  {
+    path: '/modules/work-order/koordinator/infra',
+    name: 'koordinatorInfra',
+    component: () => import('@/views/Modules/WorkOrder_koordinator_infra.vue'),
+    meta: {
+      title: 'Koordinator INFRA',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/koordinator/infra/add',
+    name: 'koordinatorInfraAdd',
+    component: () => import('@/views/Modules/WorkOrder_koordinator_infra_add.vue'),
+    meta: {
+      title: 'Tambah Koordinator INFRA',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/koordinator/infra/detail/:id',
+    name: 'koordinatorInfraDetai;',
+    component: () => import('@/views/Modules/WorkOrder_koordinator_infra_detail.vue'),
+    meta: {
+      title: 'Detail Koordinator INFRA',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/koordinator/infra/edit/:id',
+    name: 'koordinatorInfraEdit',
+    component: () => import('@/views/Modules/WorkOrder_koordinator_infra_edit.vue'),
+    meta: {
+      title: 'Edit Koordinator INFRA',
       requiresAuth: true // Add this line to protect this route
     }
   },

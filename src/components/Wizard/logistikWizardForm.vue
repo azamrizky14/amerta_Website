@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import "vue-select/dist/vue-select.css"; // Import CSS untuk vue-select
+import vSelect from "vue-select";
 import { ref, onMounted } from "vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
 import { adminTeknis_GetDataById } from "@/stores/functionAPI";
@@ -39,89 +41,164 @@ const previousStep = () => {
   }
 };
 
+const ShowTypeLabelStart = (index) => {
+  const data = steps.value[currentStep.value].Tr_teknis_work_order_terpakai_material;
+  const tipe = data[index].Sh_item_tipe?.toLowerCase();
+  if (tipe === "aset" || tipe === "material") return false;
+
+  if (index === 0) return true;
+  const currentType = data[index].Sh_item_tipe;
+  const previousType = data[index - 1].Sh_item_tipe;
+  return currentType !== previousType;
+};
+
+const ShowTypeLabelEnd = (index) => {
+  const data = steps.value[currentStep.value].Tr_teknis_work_order_kembali;
+  const tipe = data[index].Sh_item_tipe?.toLowerCase();
+  if (tipe === "aset" || tipe === "material") return false;
+
+  if (index === 0) return true;
+  const currentType = data[index].Sh_item_tipe;
+  const previousType = data[index - 1].Sh_item_tipe;
+  return currentType !== previousType;
+};
+
 onMounted(async () => {
   const data = await adminTeknis_GetDataById(route.params.id);
-  console.log("ini data", data);
 
+  // Step 1: Salin data awal
   dataKembali.value = {
     Tr_teknis_work_order_terpakai: data.Tr_teknis_work_order_terpakai,
     Tr_teknis_work_order_tersedia: data.Tr_teknis_work_order_tersedia,
     Tr_teknis_work_order_kembali: data.Tr_teknis_work_order_kembali,
   };
 
-  // Update the `Tr_teknis_work_order_kembali` array with `qtyKembali`
+  // Step 2: Isi Sh_item_qty_hilang dari data tersedia (jika bukan Kabel)
   dataKembali.value.Tr_teknis_work_order_kembali.forEach((item) => {
-    // Find the matching material in `Tr_teknis_work_order_tersedia`
-    const matchingItem = dataKembali.value.Tr_teknis_work_order_tersedia.find(
-      (available) => available.label === item.label
+    const match = dataKembali.value.Tr_teknis_work_order_tersedia.find(
+      (available) =>
+        available.Sh_item_id === item.Sh_item_id &&
+        available.Sh_item_jenis === item.Sh_item_jenis
     );
-
-    // If a match is found, add `qtyKembali` with `qtySisa` value
-    if (matchingItem) {
-      item.qtySisa = matchingItem.qty;
+    if (match && match.Sh_item_tipe !== "Kabel") {
+      item.Sh_item_qty_hilang = match.Sh_item_qty;
     }
   });
 
-  // Merge Tr_teknis_work_order_terpakai with Tr_teknis_work_order_kembali
+  // Step 3: Siapkan mergedData
   const mergedData = {
-    ...data, // Spread the original data into the merged object
+    ...data,
     Tr_teknis_work_order_terpakai: data.Tr_teknis_work_order_terpakai.map((item) => ({
-      ...item, // Copy the properties of each item in Tr_teknis_work_order_terpakai
+      ...item,
     })),
   };
 
-  // If Tr_teknis_work_order_kembali exists, merge it with Tr_teknis_work_order_terpakai
+  // Step 4: Jika ada data kembali, tambahkan sebagai langkah tambahan
   if (data.Tr_teknis_work_order_kembali && data.Tr_teknis_work_order_kembali.length > 0) {
     mergedData.Tr_teknis_work_order_terpakai.push({
-      ...mergedData, // Add the full data object (as is) to Tr_teknis_work_order_terpakai
       Tr_teknis_work_order_kembali: data.Tr_teknis_work_order_kembali,
     });
   }
 
-  // Set steps.value to the merged array
+  // Step 5: Simpan hasil ke steps
   steps.value = mergedData.Tr_teknis_work_order_terpakai;
 
+  // Step 6: Inisialisasi Sh_item_qty_hilang di tersedia (jika bukan Kabel)
   dataKembali.value.Tr_teknis_work_order_tersedia = dataKembali.value.Tr_teknis_work_order_tersedia.map(
-    (x) => ({
-      ...x,
-      qtySisa: x.qty,
-    })
+    (x) => {
+      if (x.Sh_item_tipe === "Kabel") return x;
+      return {
+        ...x,
+        Sh_item_qty_hilang: x.Sh_item_qty,
+      };
+    }
   );
 
-  // Step 2: Merge all Tr_teknis_work_order_terpakai_material and reduce qtySisa accordingly
-  if (
-    dataKembali.value.Tr_teknis_work_order_tersedia &&
-    dataKembali.value.Tr_teknis_work_order_terpakai &&
-    dataKembali.value.Tr_teknis_work_order_terpakai.length > 0
-  ) {
-    const mergedMaterials = dataKembali.value.Tr_teknis_work_order_terpakai.flatMap(
+  // Step 7: Gabungkan semua material
+  const mergedMaterials = [
+    ...(dataKembali.value.Tr_teknis_work_order_terpakai?.flatMap(
       (item) => item.Tr_teknis_work_order_terpakai_material || []
+    ) || []),
+    ...(dataKembali.value.Tr_teknis_work_order_kembali || []),
+  ];
+
+  // Step 8: Kurangi Sh_item_qty_hilang berdasarkan material (jika bukan Kabel)
+  mergedMaterials.forEach((material) => {
+    const target = dataKembali.value.Tr_teknis_work_order_kembali.find(
+      (item) =>
+        item.Sh_item_id === material.Sh_item_id &&
+        item.Sh_item_jenis === material.Sh_item_jenis &&
+        item.Sh_item_tipe !== "Kabel"
     );
-
-    if (dataKembali.value.Tr_teknis_work_order_kembali) {
-      dataKembali.value.Tr_teknis_work_order_kembali.forEach((element) => {
-        mergedMaterials.push(element);
-      });
+    if (target && target.Sh_item_qty_hilang !== undefined) {
+      target.Sh_item_qty_hilang -= material.Sh_item_qty;
+      if (target.Sh_item_qty_hilang < 0) target.Sh_item_qty_hilang = 0;
     }
+  });
 
-    // Deduct the qty from qtySisa in materialData if labels match
-    mergedMaterials.forEach((material) => {
-      const existingItem = dataKembali.value.Tr_teknis_work_order_kembali.find(
-        (item) => item.label === material.label
-      );
-      if (existingItem) {
-        existingItem.qtySisa -= material.qty; // Reduce qtySisa based on the merged qty
-        if (existingItem.qtySisa < 0) existingItem.qtySisa = 0; // Ensure qtySisa doesn't go below 0
-      }
-    });
-  }
-
-  // Reduce `qtySisa` by `qty` for each object in `Tr_teknis_work_order_kembali`
+  // Step 9: Kurangi juga dengan qty dikembalikan (jika bukan Kabel)
   dataKembali.value.Tr_teknis_work_order_kembali.forEach((item) => {
-    if (item.qtySisa !== undefined && item.qty !== undefined) {
-      item.qtySisa -= item.qty;
-      if (item.qtySisa < 0) item.qtySisa = 0; // Ensure `qtySisa` doesn't go below 0
+    if (
+      item.Sh_item_tipe !== "Kabel" &&
+      item.Sh_item_qty_hilang !== undefined &&
+      item.Sh_item_qty !== undefined
+    ) {
+      item.Sh_item_qty_hilang -= item.Sh_item_qty;
+      if (item.Sh_item_qty_hilang < 0) item.Sh_item_qty_hilang = 0;
     }
+  });
+
+  // Step 10: Hitung item_properties_qty_hilang untuk tipe Kabel
+  dataKembali.value.Tr_teknis_work_order_kembali.forEach((kembaliItem) => {
+    if (kembaliItem.Sh_item_tipe !== "Kabel") return;
+
+    kembaliItem.Sh_item_properties?.forEach((kembaliProp) => {
+      const itemId = kembaliItem.Sh_item_id;
+      const itemJenis = kembaliItem.Sh_item_jenis;
+      const propId = kembaliProp.item_properties_id;
+
+      // 1. Ambil qty tersedia dari data Tr_teknis_work_order_tersedia
+      const tersediaItem = dataKembali.value.Tr_teknis_work_order_tersedia.find(
+        (item) =>
+          item.Sh_item_id === itemId &&
+          item.Sh_item_jenis === itemJenis &&
+          item.Sh_item_tipe === "Kabel"
+      );
+      const tersediaProp = tersediaItem?.Sh_item_properties?.find(
+        (prop) => prop.item_properties_id === propId
+      );
+      const qtyTersedia = tersediaProp?.item_properties_qty || 0;
+
+      // 2. Hitung total qty terpakai dari semua step
+      const qtyTerpakai = dataKembali.value.Tr_teknis_work_order_terpakai.flatMap(
+        (step) => step.Tr_teknis_work_order_terpakai_material || []
+      )
+        .filter(
+          (material) =>
+            material.Sh_item_tipe === "Kabel" &&
+            material.Sh_item_id === itemId &&
+            material.Sh_item_jenis === itemJenis
+        )
+        .flatMap((material) => material.Sh_item_properties || [])
+        .filter((prop) => prop.item_properties_id === propId)
+        .reduce((sum, prop) => sum + (prop.item_properties_qty || 0), 0);
+
+      // 3. Hitung total qty kembali dari semua item kembali
+      const qtyKembali = dataKembali.value.Tr_teknis_work_order_kembali.filter(
+        (item) =>
+          item.Sh_item_tipe === "Kabel" &&
+          item.Sh_item_id === itemId &&
+          item.Sh_item_jenis === itemJenis
+      )
+        .flatMap((item) => item.Sh_item_properties || [])
+        .filter((prop) => prop.item_properties_id === propId)
+        .reduce((sum, prop) => sum + (prop.item_properties_qty || 0), 0);
+
+      // 4. Hitung dan simpan ke dalam item KEMBALI
+      kembaliProp.item_properties_qty_hilang = qtyTersedia - qtyTerpakai - qtyKembali;
+      if (kembaliProp.item_properties_qty_hilang < 0)
+        kembaliProp.item_properties_qty_hilang = 0;
+    });
   });
 
   console.log("data akhir", dataKembali.value);
@@ -323,80 +400,150 @@ onMounted(async () => {
           "
           :class="index === 0 ? '' : 'pt-2'"
         >
-          <div class="w-6/12">
+          <!-- Nama Barang -->
+          <div class="w-7/12">
             <label
               class="mb-3 block text-sm font-medium text-black dark:text-white"
-              v-if="data.label.toLowerCase().includes('ont') && index > 0"
+              v-if="index === 0 || ShowTypeLabelStart(index)"
             >
-              ONT
+              {{ ShowTypeLabelStart(index) ? data.Sh_item_tipe : "Nama Barang" }}
             </label>
-            <label
-              class="mb-3 block text-sm font-medium text-black dark:text-white"
-              v-else-if="index === 0"
+            <template
+              v-if="data.Sh_item_tipe === 'Kabel'"
+              v-for="(prop, i) in data.Sh_item_properties"
             >
-              Nama Barang
-            </label>
-            <input
-              disabled
-              type="text"
-              placeholder="Nama Barang"
-              class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-              v-model="data.label"
-            />
+              <input
+                disabled
+                type="text"
+                placeholder="Nama Barang"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                :class="i > 0 ? 'mt-2' : ''"
+                :value="
+                  data.Sh_item_nama +
+                  ' - ' +
+                  data.Sh_item_jenis +
+                  ' (' +
+                  prop.item_properties_id +
+                  ')'
+                "
+              />
+            </template>
+            <template v-else>
+              <input
+                disabled
+                type="text"
+                placeholder="Nama Barang"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                :value="data.Sh_item_nama + ' - ' + data.Sh_item_jenis"
+              />
+            </template>
           </div>
-          <div class="w-3/12" v-if="!data.label.toLowerCase().includes('ont')">
+          <!-- Tersisa -->
+          <div
+            class="w-3/12"
+            v-if="data.Sh_item_tipe !== 'Modem' && data.Sh_item_tipe !== 'Tiang'"
+          >
             <label
               class="mb-3 block text-sm font-medium text-black dark:text-white"
-              v-if="index === 0"
+              v-if="index === 0 || ShowTypeLabelStart(index)"
             >
-              Qty. Dipakai
+              Tersedia
             </label>
-            <input
-              disabled
-              type="number"
-              placeholder="Qty"
-              class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-              v-model="data.qty"
-              @change="validateQtyKeluar(index)"
-            />
+
+            <template
+              v-if="data.Sh_item_tipe === 'Kabel'"
+              v-for="(prop, i) in data.Sh_item_properties"
+            >
+              <input
+                disabled
+                type="text"
+                placeholder="Nama Barang"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-3 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                :class="i > 0 ? 'mt-2' : ''"
+                :value="prop?.item_properties_qty_sisa + prop?.item_properties_qty"
+              />
+            </template>
+            <template v-else>
+              <input
+                disabled
+                type="number"
+                placeholder="Qty"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-3 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                :value="data.Sh_item_qty + data.Sh_item_qty_sisa"
+              />
+            </template>
           </div>
-          <div class="w-3/12" v-if="!data.label.toLowerCase().includes('ont')">
+
+          <!-- Dipakai -->
+          <div
+            class="w-3/12"
+            v-if="data.Sh_item_tipe !== 'Modem' && data.Sh_item_tipe !== 'Tiang'"
+          >
             <label
               class="mb-3 block text-sm font-medium text-black dark:text-white"
-              v-if="index === 0"
+              v-if="index === 0 || ShowTypeLabelStart(index)"
             >
-              Qty. Tersisa
+              Terpakai
             </label>
-            <input
-              disabled
-              type="number"
-              placeholder="Qty"
-              class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-              v-model="data.qtySisa"
-              @change="validateQtyKeluar(index)"
-            />
+            <template
+              v-if="data.Sh_item_tipe === 'Kabel'"
+              v-for="(prop, i) in data.Sh_item_properties"
+            >
+              <input
+                disabled
+                type="number"
+                placeholder="Qty"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-3 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                :class="i > 0 ? 'mt-2' : ''"
+                v-model="prop.item_properties_qty"
+              />
+            </template>
+            <template v-else>
+              <input
+                disabled
+                type="number"
+                placeholder="Qty"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-3 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="data.Sh_item_qty"
+              />
+            </template>
           </div>
-          <div class="w-6/12" v-else>
+
+          <!-- SN -->
+          <div
+            class="w-6/12"
+            v-if="data.Sh_item_tipe === 'Modem' || data.Sh_item_tipe === 'Tiang'"
+          >
             <label
               class="mb-3 block text-sm font-medium text-black dark:text-white"
-              v-if="index === 0"
+              v-if="index === 0 || ShowTypeLabelStart(index)"
             >
-              SN
+              Kode Barang
             </label>
-            <label
-              class="mb-3 block text-sm font-medium text-black dark:text-white"
-              v-else="data.label.toLowerCase().includes('ont')"
-            >
-              SN
-            </label>
-            <input
-              disabled
-              type="text"
-              placeholder="Qty"
-              class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-              v-model="data.snNumber"
-              @change="validateQtyKeluar(index)"
-            />
+            <template v-if="data.Sh_item_tipe === 'Modem'">
+              <v-select
+                disabled
+                v-model="data.Sh_item_properties"
+                :clearable="false"
+                :options="[]"
+                label="item_properties_id"
+                placeholder="Detail Modem"
+                class="w-full rounded-lg bg-transparent custom-v-select font-normal outline-none transition disabled:cursor-default disabled:bg-whiter"
+              >
+              </v-select>
+            </template>
+            <template v-if="data.Sh_item_tipe === 'Tiang'">
+              <v-select
+                disabled
+                v-model="data.Sh_item_properties"
+                :options="[]"
+                multiple
+                label="item_properties_id"
+                placeholder="List Tiang"
+                class="w-full rounded-lg bg-transparent custom-v-select font-normal outline-none transition disabled:cursor-default disabled:bg-whiter"
+              >
+              </v-select>
+            </template>
           </div>
         </div>
         <div v-else>Material Masih belum Digunakan!</div>
@@ -411,52 +558,150 @@ onMounted(async () => {
           v-if="dataKembali && dataKembali.Tr_teknis_work_order_kembali"
           :class="index === 0 ? '' : 'pt-2'"
         >
-          <div class="w-6/12">
+          <!-- Nama Barang -->
+          <div class="w-7/12">
             <label
               class="mb-3 block text-sm font-medium text-black dark:text-white"
-              v-if="index === 0"
+              v-if="index === 0 || ShowTypeLabelEnd(index)"
             >
-              Nama Barang
+              {{ ShowTypeLabelEnd(index) ? data.Sh_item_tipe : "Nama Barang" }}
             </label>
-            <input
-              disabled
-              type="text"
-              placeholder="Nama Barang"
-              class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-              v-model="data.label"
-            />
+            <template
+              v-if="data.Sh_item_tipe === 'Kabel'"
+              v-for="(prop, i) in data.Sh_item_properties"
+            >
+              <input
+                disabled
+                type="text"
+                placeholder="Nama Barang"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                :class="i > 0 ? 'mt-2' : ''"
+                :value="
+                  data.Sh_item_nama +
+                  ' - ' +
+                  data.Sh_item_jenis +
+                  ' (' +
+                  prop.item_properties_id +
+                  ')'
+                "
+              />
+            </template>
+            <template v-else>
+              <input
+                disabled
+                type="text"
+                placeholder="Nama Barang"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                :value="data.Sh_item_nama + ' - ' + data.Sh_item_jenis"
+              />
+            </template>
           </div>
-          <div class="w-3/12">
+
+          <!-- Dipakai -->
+          <div
+            class="w-3/12"
+            v-if="data.Sh_item_tipe !== 'Modem' && data.Sh_item_tipe !== 'Tiang'"
+          >
             <label
               class="mb-3 block text-sm font-medium text-black dark:text-white"
-              v-if="index === 0"
+              v-if="index === 0 || ShowTypeLabelEnd(index)"
             >
-              Qty. Kembali
+              Kembali
             </label>
-            <input
-              disabled
-              type="number"
-              placeholder="Qty"
-              class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-              v-model="data.qty"
-              @change="validateQtyKeluar(index)"
-            />
+            <template
+              v-if="data.Sh_item_tipe === 'Kabel'"
+              v-for="(prop, i) in data.Sh_item_properties"
+            >
+              <input
+                disabled
+                type="number"
+                placeholder="Qty"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-3 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                :class="i > 0 ? 'mt-2' : ''"
+                v-model="prop.item_properties_qty"
+              />
+            </template>
+            <template v-else>
+              <input
+                disabled
+                type="number"
+                placeholder="Qty"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-3 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                v-model="data.Sh_item_qty"
+              />
+            </template>
           </div>
-          <div class="w-3/12">
+
+          <!-- Tersisa -->
+          <div
+            class="w-3/12"
+            v-if="data.Sh_item_tipe !== 'Modem' && data.Sh_item_tipe !== 'Tiang'"
+          >
             <label
               class="mb-3 block text-sm font-medium text-black dark:text-white"
-              v-if="index === 0"
+              v-if="index === 0 || ShowTypeLabelEnd(index)"
             >
-              Qty. Hilang
+              Hilang
             </label>
-            <input
-              disabled
-              type="number"
-              placeholder="Qty"
-              class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1.5 px-4 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-              v-model="data.qtySisa"
-              @change="validateQtyKeluar(index)"
-            />
+
+            <template
+              v-if="data.Sh_item_tipe === 'Kabel'"
+              v-for="(prop, i) in data.Sh_item_properties"
+            >
+              <input
+                disabled
+                type="text"
+                placeholder="Nama Barang"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-3 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                :class="i > 0 ? 'mt-2' : ''"
+                :value="prop?.item_properties_qty_hilang"
+              />
+            </template>
+            <template v-else>
+              <input
+                disabled
+                type="number"
+                placeholder="Qty"
+                class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-3 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+                :value="data.Sh_item_qty_hilang"
+              />
+            </template>
+          </div>
+          <!-- SN -->
+          <div
+            class="w-6/12"
+            v-if="data.Sh_item_tipe === 'Modem' || data.Sh_item_tipe === 'Tiang'"
+          >
+            <label
+              class="mb-3 block text-sm font-medium text-black dark:text-white"
+              v-if="index === 0 || ShowTypeLabelEnd(index)"
+            >
+              Kode Barang
+            </label>
+            <template v-if="data.Sh_item_tipe === 'Modem'">
+              <v-select
+                disabled
+                v-model="data.Sh_item_properties"
+                :clearable="false"
+                :options="[]"
+                label="item_properties_id"
+                placeholder="Detail Modem"
+                class="w-full rounded-lg bg-transparent custom-v-select font-normal outline-none transition disabled:cursor-default disabled:bg-whiter"
+              >
+              </v-select>
+            </template>
+            <template v-if="data.Sh_item_tipe === 'Tiang'">
+              <v-select
+                disabled
+                v-model="data.Sh_item_properties"
+                :options="[]"
+                multiple
+                label="item_properties_id"
+                placeholder="List Tiang"
+                class="w-full rounded-lg bg-transparent custom-v-select font-normal outline-none transition disabled:cursor-default disabled:bg-whiter"
+              >
+              </v-select>
+            </template>
           </div>
         </div>
       </div>

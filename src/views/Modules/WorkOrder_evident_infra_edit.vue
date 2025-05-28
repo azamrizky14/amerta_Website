@@ -70,7 +70,6 @@ const logistikData = ref(null);
 const optionsType = ref([]);
 
 onMounted(async () => {
-  console.log("data", indexStore.user);
   try {
     const [data, listTeknisi] = await Promise.all([
       getUserInternalByRole(
@@ -94,12 +93,6 @@ onMounted(async () => {
   }
 });
 
-const isFile = (key: string) => {
-  const image = savedData.value.Tr_teknis_work_order_images?.[key];
-  console.log(image);
-  return image && image instanceof File;
-};
-
 const getData = async () => {
   const data = await adminTeknis_GetDataEvidentById(
     route.params.logistikType +
@@ -112,7 +105,6 @@ const getData = async () => {
   if (data.Tr_teknis_team) {
     data.Tr_teknis_team = data.Tr_teknis_team.map((x, i) => ({ id: i, name: x }));
   }
-  console.log("ini data", data);
   savedData.value = data;
 };
 
@@ -125,46 +117,6 @@ const handleRemoveMaterialTerpakai = async (index) => {
   await confirmDelete(null, null, async () => {
     materialData.value.splice(index, 1);
   });
-};
-
-// Function to handle option change
-const handleOptionChange = (selected: { label: string; value: string }) => {
-  console.log("Selected option changed:", selected);
-  // Perform any additional actions here
-  materialData.value.splice(0, materialData.value.length);
-  if (selected.Tr_teknis_work_order_tersedia) {
-    savedData.value.Tr_teknis_logistik_id = selected.Tr_teknis_logistik_id;
-    // console.log('berhasil')
-    selected.Tr_teknis_work_order_tersedia.forEach((data) => {
-      materialData.value.push({
-        label: data.label,
-        qtySisa: data.qty,
-        qty: "",
-      });
-    });
-
-    // Step 2: Merge all Tr_teknis_work_order_terpakai_material and reduce qtySisa accordingly
-    if (
-      selected.Tr_teknis_work_order_terpakai &&
-      selected.Tr_teknis_work_order_terpakai.length > 0
-    ) {
-      const mergedMaterials = selected.Tr_teknis_work_order_terpakai.flatMap(
-        (item) => item.Tr_teknis_work_order_terpakai_material || []
-      );
-
-      // Deduct the qty from qtySisa in materialData if labels match
-      mergedMaterials.forEach((material) => {
-        const existingItem = materialData.value.find(
-          (item) => item.label === material.label
-        );
-        if (existingItem) {
-          existingItem.qtySisa -= material.qty; // Reduce qtySisa based on the merged qty
-          if (existingItem.qtySisa < 0) existingItem.qtySisa = 0; // Ensure qtySisa doesn't go below 0
-        }
-      });
-    }
-  }
-  // console.log('saved data: ', materialData.value)
 };
 
 const cancelAdd = async () => {
@@ -206,13 +158,11 @@ const validateForm = () => {
     }
   });
 
-  console.log("list error", dataError.value);
   // Return true if no errors, false otherwise
   return dataError.value.length === 0;
 };
 
 const submitData = async () => {
-  console.log(savedData.value);
   // Validate form before submission
   const isValid = validateForm();
 

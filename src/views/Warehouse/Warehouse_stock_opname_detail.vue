@@ -94,7 +94,6 @@ onMounted(async () => {
   const newData = await stock_SoGetDataById(route.params.id);
   savedData.value = newData;
   filterSelectedSo(newData);
-  console.log("detail data:", newData);
   const data = await item_getAllItemWithStatus(
     indexStore.company.companyCode,
     indexStore.user.hierarchyCode,

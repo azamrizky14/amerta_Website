@@ -249,7 +249,11 @@ onMounted(async () => {
                   <div class="flex items-center space-x-2.5 d-flex justify-center">
                     <router-link
                       class="hover:text-primary"
-                      :to="'/modules/work-order/bon-dan-material/detail/' + item._id"
+                      :to="
+                        indexStore.user.companyCode.toString() === [0, 2].toString()
+                          ? '/modules/work-order/bon-dan-material-new/detail/' + item._id
+                          : '/modules/work-order/bon-dan-material/detail/' + item._id
+                      "
                     >
                       <svg
                         class="fill-current"

@@ -143,7 +143,6 @@ const formatNumber = (value) => {
 };
 
 const changeRowItem = (type, index, value) => {
-  console.log("tes", type, index, value);
   let data;
   if (type === "id") {
     data = itemList.value.find((x) => x.item_id === value);
@@ -246,7 +245,6 @@ const dataValidator = ref([
 const dataError = ref([]); // Array untuk menyimpan error
 
 const submitData = async () => {
-  console.log(savedData.value);
   // Clear previous errors
   dataError.value.splice(0, dataError.value.length);
 

@@ -286,7 +286,7 @@ const shouldShowTypeLabel = (index) => {
                     type="number"
                     placeholder="Qty"
                     class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-3 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                    :value="data.Sh_item_qty + data.Sh_item_qty"
+                    :value="data.Sh_item_qty + data.Sh_item_qty_sisa"
                   />
                 </template>
               </div>
@@ -321,8 +321,7 @@ const shouldShowTypeLabel = (index) => {
                     type="number"
                     placeholder="Qty"
                     class="w-full rounded-lg border-[1.5px] text-black border-stroke bg-transparent py-1 px-3 pr-1 font-normal outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:text-white dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
-                    v-model="data.Sh_item_qty_sisa"
-                    @input="handleInput(index, data.Sh_item_qty_dipakai)"
+                    v-model="data.Sh_item_qty"
                   />
                 </template>
               </div>
@@ -468,8 +467,8 @@ const shouldShowTypeLabel = (index) => {
             <div class="col-span-3 grid grid-cols-2">
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
-                  :url="imageUrl"
                   disabled
+                  :url="imageUrl"
                   label="Review Google"
                   v-if="savedData.Tr_teknis_work_order_images"
                   v-model="
@@ -480,8 +479,8 @@ const shouldShowTypeLabel = (index) => {
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
-                  :url="imageUrl"
                   disabled
+                  :url="imageUrl"
                   label="Kertas Form PSB"
                   v-if="savedData.Tr_teknis_work_order_images"
                   v-model="
@@ -497,8 +496,8 @@ const shouldShowTypeLabel = (index) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
-                  :url="imageUrl"
                   disabled
+                  :url="imageUrl"
                   label="ODP"
                   v-if="savedData.Tr_teknis_work_order_images"
                   v-model="
@@ -509,8 +508,8 @@ const shouldShowTypeLabel = (index) => {
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
-                  :url="imageUrl"
                   disabled
+                  :url="imageUrl"
                   label="ONT"
                   v-if="savedData.Tr_teknis_work_order_images"
                   v-model="
@@ -526,8 +525,8 @@ const shouldShowTypeLabel = (index) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
-                  :url="imageUrl"
                   disabled
+                  :url="imageUrl"
                   label="ONT (Tampak Depan)"
                   v-if="savedData.Tr_teknis_work_order_images"
                   v-model="
@@ -538,8 +537,8 @@ const shouldShowTypeLabel = (index) => {
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
-                  :url="imageUrl"
                   disabled
+                  :url="imageUrl"
                   label="ONT (Tampak Belakang)"
                   v-if="savedData.Tr_teknis_work_order_images"
                   v-model="
@@ -555,8 +554,8 @@ const shouldShowTypeLabel = (index) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
-                  :url="imageUrl"
                   disabled
+                  :url="imageUrl"
                   label="ODP (Tampak Depan)"
                   v-if="savedData.Tr_teknis_work_order_images"
                   v-model="
@@ -567,8 +566,8 @@ const shouldShowTypeLabel = (index) => {
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
-                  :url="imageUrl"
                   disabled
+                  :url="imageUrl"
                   label="PORT (Tampak Dalam)"
                   v-if="savedData.Tr_teknis_work_order_images"
                   v-model="
@@ -584,8 +583,8 @@ const shouldShowTypeLabel = (index) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
-                  :url="imageUrl"
                   disabled
+                  :url="imageUrl"
                   label="Dengan Pelanggan"
                   v-if="savedData.Tr_teknis_work_order_images"
                   v-model="
@@ -597,8 +596,8 @@ const shouldShowTypeLabel = (index) => {
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
-                  :url="imageUrl"
                   disabled
+                  :url="imageUrl"
                   label="Depan Rumah Pelanggan"
                   v-if="savedData.Tr_teknis_work_order_images"
                   v-model="
@@ -615,8 +614,8 @@ const shouldShowTypeLabel = (index) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
-                  :url="imageUrl"
                   disabled
+                  :url="imageUrl"
                   label="Start"
                   v-if="savedData.Tr_teknis_work_order_images"
                   v-model="
@@ -627,8 +626,8 @@ const shouldShowTypeLabel = (index) => {
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
-                  :url="imageUrl"
                   disabled
+                  :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   v-model="
                     savedData.Tr_teknis_work_order_images.Tr_teknis_evident_marking_dc_end
@@ -644,6 +643,7 @@ const shouldShowTypeLabel = (index) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Sebelum"
@@ -655,6 +655,7 @@ const shouldShowTypeLabel = (index) => {
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Kendala 1"
@@ -668,6 +669,7 @@ const shouldShowTypeLabel = (index) => {
             <div class="col-span-3 grid grid-cols-2">
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Kendala 2"
@@ -679,6 +681,7 @@ const shouldShowTypeLabel = (index) => {
 
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Kendala 3"
@@ -695,6 +698,7 @@ const shouldShowTypeLabel = (index) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Splicer - Proses Sambung"
@@ -711,6 +715,7 @@ const shouldShowTypeLabel = (index) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Sesudah"
@@ -721,6 +726,7 @@ const shouldShowTypeLabel = (index) => {
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Out ODP"
@@ -731,6 +737,7 @@ const shouldShowTypeLabel = (index) => {
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Redaman Pelanggan"
@@ -747,6 +754,7 @@ const shouldShowTypeLabel = (index) => {
               </p>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="Start"
@@ -758,6 +766,7 @@ const shouldShowTypeLabel = (index) => {
               </div>
               <div class="flex border flex-col items-center p-2 justify-end relative">
                 <imageWithPreview
+                  disabled
                   :url="imageUrl"
                   v-if="savedData.Tr_teknis_work_order_images"
                   label="End"

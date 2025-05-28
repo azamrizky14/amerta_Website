@@ -435,6 +435,144 @@ export const qa_CreateQA = async (data) => {
   return suppData
 }
 
+// Pelayanan CRM
+
+export const crm_GetAllData = async (domain, hierarchy, deleted) => {
+  const response = await axios.get(API+'/api/Tr_crm/getTrCrm/'+domain+'/'+hierarchy+'/'+deleted)
+  var suppData = response.data;
+  return suppData
+}
+
+export const crm_GetAllDataByDivisi = async (domain, hierarchy, divisi, deleted) => {
+  const response = await axios.get(API+'/api/Tr_crm/getTrCrmByDivisi/'+domain+'/'+hierarchy+'/'+divisi+'/'+deleted)
+  var suppData = response.data;
+  return suppData
+}
+
+export const crm_GetCrmById = async (id) => {
+  const response = await axios.get(API+'/api/Tr_crm/getTrCrmById/'+id)
+  var suppData = response.data;
+  return suppData
+}
+
+export const crm_GetPrefixByDate = async (type, date) => {
+  const response = await axios.get(API+'/api/Tr_crm/getTrCrmPrefix/'+type+'/'+date)
+  var suppData = response.data;
+  return suppData
+}
+
+export const crm_CreateCrm = async (data) => {
+  const response = await axios.post(API+'/api/Tr_crm/createTrCrm', data)
+  var suppData = response.data;
+  return suppData
+}
+
+export const crm_UpdateCrmById = async (data, id) => {
+  const response = await axios.put(API+'/api/Tr_crm/updateTrCrm/'+id, data)
+  var suppData = response.data;
+  return suppData
+}
+
+// Ticket
+
+export const tc_GetAllData = async (domain, hierarchy, deleted) => {
+  const response = await axios.get(API+'/api/Tr_Ticket/getTrTicket/'+domain+'/'+hierarchy+'/'+deleted)
+  var suppData = response.data;
+  return suppData
+}
+
+export const tc_GetAllDataByDivisi = async (domain, hierarchy, divisi, deleted) => {
+  const response = await axios.get(API+'/api/Tr_Ticket/getTrTicketByDivisi/'+domain+'/'+hierarchy+'/'+divisi+'/'+deleted)
+  var suppData = response.data;
+  return suppData
+}
+
+export const tc_GetTaskById = async (id) => {
+  const response = await axios.get(API+'/api/Tr_Ticket/getTrTicketById/'+id)
+  var suppData = response.data;
+  return suppData
+}
+
+export const tc_GetPrefixByDate = async (type, date) => {
+  const response = await axios.get(API+'/api/Tr_Ticket/getTicketPrefix/'+type+'/'+date)
+  var suppData = response.data;
+  return suppData
+}
+
+export const tc_CreateTask = async (data) => {
+  const response = await axios.post(API+'/api/Tr_Ticket/createTrTicket', data)
+  var suppData = response.data;
+  return suppData
+}
+
+export const tc_UpdateTaskById = async (data, id) => {
+  const response = await axios.put(API+'/api/Tr_Ticket/updateTrTicket/'+id, data)
+  var suppData = response.data;
+  return suppData
+}
+
+// Announcement
+
+export const announcement_GetAllData = async (domain, hierarchy, deleted) => {
+  const response = await axios.get(API+'/api/announcement/getAnnouncement/'+domain+'/'+hierarchy+'/'+deleted)
+  var suppData = response.data;
+  return suppData
+}
+
+export const announcement_GetPrefixByDate = async (type, date) => {
+  const response = await axios.get(API+'/api/announcement/getAnnouncementPrefix/'+type+'/'+date)
+  var suppData = response.data;
+  return suppData
+}
+
+export const announcement_GetAnnouncementById = async (id) => {
+  const response = await axios.get(API+'/api/announcement/getAnnouncementById/'+id)
+  var suppData = response.data;
+  return suppData
+}
+
+export const announcement_CreateAnnouncement = async (data) => {
+  const response = await axios.post(API+'/api/announcement/createAnnouncement', data)
+  var suppData = response.data;
+  return suppData
+}
+
+export const announcement_UpdateAnnouncementById = async (data, id) => {
+  const response = await axios.put(API+'/api/announcement/updateAnnouncement/'+id, data)
+  var suppData = response.data;
+  return suppData
+}
+
+// Team Leader
+export const tl_GetAllDataByDivisi = async (domain, hierarchy, divisi, deleted) => {
+  const response = await axios.get(API+'/api/Tr_task/getTrTaskByDivisi/'+domain+'/'+hierarchy+'/'+divisi+'/'+deleted)
+  var suppData = response.data;
+  return suppData
+}
+
+export const tl_GetTaskById = async (id) => {
+  const response = await axios.get(API+'/api/Tr_task/getTrTaskById/'+id)
+  var suppData = response.data;
+  return suppData
+}
+
+export const tl_GetPrefixByDate = async (type, date) => {
+  const response = await axios.get(API+'/api/Tr_task/getTaskPrefix/'+type+'/'+date)
+  var suppData = response.data;
+  return suppData
+}
+
+export const tl_CreateTask = async (data) => {
+  const response = await axios.post(API+'/api/Tr_task/createTrTask', data)
+  var suppData = response.data;
+  return suppData
+}
+
+export const tl_UpdateTaskById = async (data, id) => {
+  const response = await axios.put(API+'/api/Tr_task/updateTrTask/'+id, data)
+  var suppData = response.data;
+  return suppData
+}
 // Stock History
 
 // Quality Assurance

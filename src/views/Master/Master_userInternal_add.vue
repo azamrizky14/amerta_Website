@@ -58,7 +58,6 @@ onMounted(async () => {
   const date = await getDateToday("yyyy-MM-dd");
   savedData.value.user_created = date;
   const page = await indexStore.getUtilPage();
-  console.log(page);
 });
 
 // Function to handle role selection
@@ -135,7 +134,6 @@ const changeRowItem = (value) => {
 };
 
 const submitData = async () => {
-  console.log("data yg dikirim: ", savedData.value);
   const isValid = validateForm();
   if (!isValid) return;
 

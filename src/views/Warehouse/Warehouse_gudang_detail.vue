@@ -53,13 +53,11 @@ onMounted(async () => {
   const date = await getDateToday("yyyy-MM-dd");
   // savedData.value.Tr_teknis_tanggal = date;
 
-  console.log(savedData.value.lokasi_nama);
   const data = await lokasi_getDataByType(
     indexStore.user.companyName,
     "ruang",
     savedData.value.lokasi_nama
   );
-  console.log(data);
 
   savedData.value.lokasi_created = date;
 });

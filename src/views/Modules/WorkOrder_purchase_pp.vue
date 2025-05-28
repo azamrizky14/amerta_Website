@@ -107,7 +107,6 @@ const changePage = (page: number) => {
 };
 
 const totalPaid = (total, ship, ins) => {
-  console.log(total ? total : 0, ship ? ship : 0, ins ? ins : 0);
   const data = total ? total : 0 + ship ? ship : 0 + ins ? ins : 0;
 
   return data.toLocaleString();
@@ -509,7 +508,6 @@ const alertShipment = async (id, status) => {
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
-        console.log(shipmentDetail);
         await pp_updateDataById(savedData._id, { Tr_pp_shipment: shipmentDetail });
         await po_updateDataByPO(savedData.Tr_po_id, {
           Tr_po_shipment: {
@@ -555,7 +553,6 @@ const getData = async () => {
         : "",
     }))
   );
-  console.log(dataTable.value);
 };
 onMounted(async () => {
   await getData();

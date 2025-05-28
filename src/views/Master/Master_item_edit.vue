@@ -137,7 +137,6 @@ const validateQtyKeluar = (index) => {
 };
 
 const submitData = async () => {
-  console.log(savedData.value);
   // Clear previous errors
   dataError.value.splice(0, dataError.value.length);
 
@@ -225,13 +224,12 @@ const submitData = async () => {
         router.push("/master/item");
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       if (error.status === 400) await failedCreate(error.response.data.message);
       else await failedCreate(error);
     }
   }
 };
-
 </script>
 
 <template>

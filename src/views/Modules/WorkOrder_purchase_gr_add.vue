@@ -111,8 +111,7 @@ const handleFileUpload = (event) => {
   // console.log(savedData.value);
 };
 
-const filterSelectedPO = (value) => {
-  console.log(value);
+const filterSelectedPO = (value) => {\
   if (value.Tr_pp_item) {
     materialData.value = [...value.Tr_pp_item];
     savedData.value.Tr_pp_item = value.Tr_pp_item.filter(
@@ -234,7 +233,6 @@ const submitData = async () => {
           };
         });
 
-      console.log("data gr", grData);
       // console.log("data pp", updatedItems);
 
       const sendData = new FormData();

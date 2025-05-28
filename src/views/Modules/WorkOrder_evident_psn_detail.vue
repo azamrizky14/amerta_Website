@@ -55,7 +55,6 @@ onMounted(async () => {
   if (data.Tr_teknis_team) {
     data.Tr_teknis_team = data.Tr_teknis_team.map((x, i) => ({ id: i, name: x }));
   }
-  console.log(savedData);
   Object.assign(savedData.value, data);
 });
 </script>

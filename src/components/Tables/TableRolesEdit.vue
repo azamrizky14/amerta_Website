@@ -74,7 +74,7 @@ const selectedData = computed(() => checkedTable.value.filter((item) => item.che
 watch(
   () => props.dataPage,
   (newDataTable) => {
-    console.log("dataTable berubah:", newDataTable);
+    // console.log("dataTable berubah:", newDataTable);
 
     if (!newDataTable) return; // Hindari error jika dataTable belum tersedia
 

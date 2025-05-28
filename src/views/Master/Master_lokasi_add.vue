@@ -138,7 +138,6 @@ const dataValidator = ref([
 const dataError = ref([]); // Array untuk menyimpan error
 
 const submitData = async () => {
-  console.log(savedData.value);
   // Clear previous errors
   dataError.value.splice(0, dataError.value.length);
 
@@ -213,7 +212,6 @@ const submitData = async () => {
     }
   }
 };
-
 </script>
 
 <template>

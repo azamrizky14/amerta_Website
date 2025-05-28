@@ -91,10 +91,8 @@ const handleGetOldData = async () => {
   savedData.value = newData;
 
   const data = optionsType.find((x) => x.value === savedData.value.lokasi_tipe);
-  console.log("data", data);
   savedData.value.lokasi_tipe = data;
 
-  console.log(savedData.value.lokasi_tipe);
   if (savedData.value.lokasi_tipe && savedData.value.lokasi_tipe.id > 1) {
     const dataGudang = optionsGudang.value.find(
       (x) => x.name === savedData.value.lokasi_alamat.lokasi_alamat_gudang
@@ -179,7 +177,6 @@ const dataValidator = ref([
 const dataError = ref([]); // Array untuk menyimpan error
 
 const submitData = async () => {
-  console.log(savedData.value);
   // Clear previous errors
   dataError.value.splice(0, dataError.value.length);
 
