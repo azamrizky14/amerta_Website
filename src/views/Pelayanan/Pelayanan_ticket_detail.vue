@@ -220,7 +220,7 @@ onMounted(async () => {
         <DefaultCard>
           <div class="pb-6 px-4 grid gap-2">
             <router-link
-              to="/modules/pelayanan/ticket"
+              to="/modules/work-order/koordinator/ticket"
               class="flex w-full justify-center rounded bg-red p-3 font-medium text-gray hover:bg-opacity-90"
             >
               Kembali

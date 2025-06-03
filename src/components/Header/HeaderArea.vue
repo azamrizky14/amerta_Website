@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { useSidebarStore } from '@/stores/sidebar'
-import DarkModeSwitcher from './DarkModeSwitcher.vue'
-import DropdownMessage from './DropdownMessage.vue'
-import DropdownNotification from './DropdownNotification.vue'
-import DropdownUser from './DropdownUser.vue'
-import { mdiMagnify } from '@mdi/js';
+import { useSidebarStore } from "@/stores/sidebar";
+import DarkModeSwitcher from "./DarkModeSwitcher.vue";
+import DropdownMessage from "./DropdownMessage.vue";
+import DropdownNotification from "./DropdownNotification.vue";
+import DropdownUser from "./DropdownUser.vue";
+import { mdiMagnify } from "@mdi/js";
 
-const { toggleSidebar } = useSidebarStore()
-const sidebarStore = useSidebarStore()
+const { toggleSidebar } = useSidebarStore();
+const sidebarStore = useSidebarStore();
 </script>
 
 <template>
@@ -21,7 +21,7 @@ const sidebarStore = useSidebarStore()
           class="z-99999 block rounded-sm border border-stroke bg-white p-1.5 shadow-sm dark:border-strokedark dark:bg-boxdark lg:hidden"
           @click="
             () => {
-              toggleSidebar()
+              toggleSidebar();
             }
           "
         >
@@ -69,10 +69,7 @@ const sidebarStore = useSidebarStore()
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path
-                  :d="mdiMagnify"
-                  fill=""
-                />
+                <path :d="mdiMagnify" fill="" />
               </svg>
             </button>
 
@@ -98,7 +95,7 @@ const sidebarStore = useSidebarStore()
           <!-- Notification Menu Area -->
 
           <!-- Chat Notification Area -->
-          <DropdownMessage />
+          <!-- <DropdownMessage /> -->
           <!-- Chat Notification Area -->
         </ul>
 

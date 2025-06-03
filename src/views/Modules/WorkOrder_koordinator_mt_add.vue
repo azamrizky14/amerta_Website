@@ -91,7 +91,7 @@ onMounted(async () => {
   const dataTask = await tc_GetAllDataByDivisi(
     indexStore.company.companyCode,
     indexStore.user.hierarchyCode,
-    "MT",
+    "Complain",
     "Y"
   );
   listTask.value = dataTask;

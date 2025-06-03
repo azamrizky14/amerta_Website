@@ -408,6 +408,17 @@ const routes = [
       requiresAuth: true // Add this line to protect this route
     }
   },
+
+  // Progres PSB
+  {
+    path: '/modules/work-order/progres/psb',
+    name: 'ProgresPSB',
+    component: () => import('@/views/Modules/WorkOrder_progres_psb.vue'),
+    meta: {
+      title: 'Progres PSB',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
   
   // Pelayanan CRM
   {
@@ -449,7 +460,7 @@ const routes = [
   
   // Evident Ticket
   {
-    path: '/modules/Pelayanan/ticket',
+    path: '/modules/work-order/koordinator/ticket',
     name: 'KoordinatorTicket',
     component: () => import('@/views/Pelayanan/Pelayanan_ticket.vue'),
     meta: {
@@ -458,7 +469,7 @@ const routes = [
     }
   },
   {
-    path: '/modules/Pelayanan/ticket/add',
+    path: '/modules/work-order/koordinator/ticket/add',
     name: 'KoordinatorTicketAdd',
     component: () => import('@/views/Pelayanan/Pelayanan_ticket_add.vue'),
     meta: {
@@ -467,7 +478,7 @@ const routes = [
     }
   },
   {
-    path: '/modules/Pelayanan/ticket/detail/:id',
+    path: '/modules/work-order/koordinator/ticket/detail/:id',
     name: 'KoordinatorTicketDetai;',
     component: () => import('@/views/Pelayanan/Pelayanan_ticket_detail.vue'),
     meta: {
@@ -476,11 +487,49 @@ const routes = [
     }
   },
   {
-    path: '/modules/Pelayanan/ticket/edit/:id',
+    path: '/modules/work-order/koordinator/ticket/edit/:id',
     name: 'KoordinatorTicketEdit',
     component: () => import('@/views/Pelayanan/Pelayanan_ticket_edit.vue'),
     meta: {
       title: 'Edit Koordinator Ticket',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  
+  // Evident Ticket Gamas
+  {
+    path: '/modules/work-order/koordinator/ticket-gamas',
+    name: 'WorkOrderTicketGamas',
+    component: () => import('@/views/Pelayanan/Pelayanan_ticket_gamas.vue'),
+    meta: {
+      title: 'Work Order Ticket Gamas',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/koordinator/ticket-gamas/add',
+    name: 'WorkOrderTicketGamasAdd',
+    component: () => import('@/views/Pelayanan/Pelayanan_ticket_gamas_add.vue'),
+    meta: {
+      title: 'Tambah Work Order Ticket Gamas',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/koordinator/ticket-gamas/detail/:id',
+    name: 'WorkOrderTicketGamasDetai;',
+    component: () => import('@/views/Pelayanan/Pelayanan_ticket_gamas_detail.vue'),
+    meta: {
+      title: 'Detail Work Order Ticket Gamas',
+      requiresAuth: true // Add this line to protect this route
+    }
+  },
+  {
+    path: '/modules/work-order/koordinator/ticket-gamas/edit/:id',
+    name: 'WorkOrderTicketGamasEdit',
+    component: () => import('@/views/Pelayanan/Pelayanan_ticket_gamas_edit.vue'),
+    meta: {
+      title: 'Edit Work Order Ticket Gamas',
       requiresAuth: true // Add this line to protect this route
     }
   },

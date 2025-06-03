@@ -145,7 +145,7 @@ onMounted(async () => {
             </div>
           </div>
           <div class="right-data flex items-center flex-row-reverse">
-            <router-link class="px-1" to="/modules/pelayanan/ticket/add">
+            <router-link class="px-1" to="/modules/work-order/koordinator/ticket/add">
               <svg
                 class="fill-current hover:text-primary"
                 width="22"
@@ -223,15 +223,20 @@ onMounted(async () => {
                     <span
                       class="inline-flex rounded-full bg-opacity-10 pt-0 pb-1 px-3 text-xs font-medium"
                       :class="{
-                        'bg-danger text-danger':
-                          Number(item.Tr_ticket_status_completition) === 0,
-                        'bg-warning text-warning':
-                          Number(item.Tr_ticket_status_completition) > 0,
-                        'bg-success text-success':
-                          Number(item.Tr_ticket_status_completition) === 100,
+                        'bg-primary text-primary': item.Tr_ticket_status === 'Y',
+                        'bg-warning text-warning': item.Tr_ticket_status === 'B',
+                        'bg-success text-success': item.Tr_ticket_status === 'N',
                       }"
                     >
-                      {{ item.Tr_ticket_status_completition }}
+                      {{
+                        item.Tr_ticket_status === "Y"
+                          ? "Belum"
+                          : item.Tr_ticket_status === "B"
+                          ? "Outstanding"
+                          : item.Tr_ticket_status === "N"
+                          ? "Selesai"
+                          : ""
+                      }}
                     </span>
                   </h5>
                 </td>
@@ -239,7 +244,7 @@ onMounted(async () => {
                   <div class="flex items-center space-x-2.5 d-flex justify-center">
                     <router-link
                       class="hover:text-primary"
-                      :to="'/modules/pelayanan/ticket/detail/' + item._id"
+                      :to="'/modules/work-order/koordinator/ticket/detail/' + item._id"
                     >
                       <svg
                         class="fill-current"
@@ -254,7 +259,7 @@ onMounted(async () => {
                     </router-link>
                     <router-link
                       class="hover:text-primary"
-                      :to="'/modules/pelayanan/ticket/edit/' + item._id"
+                      :to="'/modules/work-order/koordinator/ticket/edit/' + item._id"
                     >
                       <svg
                         class="fill-current"

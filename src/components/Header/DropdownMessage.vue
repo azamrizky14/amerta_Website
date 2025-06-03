@@ -1,57 +1,57 @@
 <script setup lang="ts">
-import { onClickOutside } from '@vueuse/core'
-import { ref } from 'vue'
+import { onClickOutside } from "@vueuse/core";
+import { ref } from "vue";
 
-const target = ref(null)
-const dropdownOpen = ref(false)
-const notifying = ref(true)
+const target = ref(null);
+const dropdownOpen = ref(false);
+const notifying = ref(true);
 
 onClickOutside(target, () => {
-  dropdownOpen.value = false
-})
+  dropdownOpen.value = false;
+});
 
-import userOne from '@/assets/images/user/user-01.png'
-import userTwo from '@/assets/images/user/user-02.png'
-import userThree from '@/assets/images/user/user-03.png'
-import userFour from '@/assets/images/user/user-04.png'
+import userOne from "@/assets/images/user/user-01.png";
+import userTwo from "@/assets/images/user/user-02.png";
+import userThree from "@/assets/images/user/user-03.png";
+import userFour from "@/assets/images/user/user-04.png";
 
 const messagesList = ref([
   {
-    route: '#',
+    route: "#",
     userImg: userTwo,
-    name: 'Mariya Desoja',
-    message: 'I like your confidence 💪',
-    time: '2min ago'
+    name: "Mariya Desoja",
+    message: "I like your confidence 💪",
+    time: "2min ago",
   },
   {
-    route: '#',
+    route: "#",
     userImg: userOne,
-    name: 'Robert Jhon',
-    message: 'Can you share your offer?',
-    time: '10min ago'
+    name: "Robert Jhon",
+    message: "Can you share your offer?",
+    time: "10min ago",
   },
   {
-    route: '#',
+    route: "#",
     userImg: userThree,
-    name: 'Henry Dholi',
-    message: 'I cam across your profile and...',
-    time: '1day ago'
+    name: "Henry Dholi",
+    message: "I cam across your profile and...",
+    time: "1day ago",
   },
   {
-    route: '#',
+    route: "#",
     userImg: userFour,
-    name: 'Cody Fisher',
-    message: 'I’m waiting for you response!',
-    time: '5day ago'
+    name: "Cody Fisher",
+    message: "I’m waiting for you response!",
+    time: "5day ago",
   },
   {
-    route: '#',
+    route: "#",
     userImg: userTwo,
-    name: 'Mariya Desoja',
-    message: 'I like your confidence 💪',
-    time: '2min ago'
-  }
-])
+    name: "Mariya Desoja",
+    message: "I like your confidence 💪",
+    time: "2min ago",
+  },
+]);
 </script>
 
 <template>
@@ -118,7 +118,9 @@ const messagesList = ref([
               </div>
 
               <div>
-                <h6 class="text-sm font-medium text-black dark:text-white">{{ item.name }}</h6>
+                <h6 class="text-sm font-medium text-black dark:text-white">
+                  {{ item.name }}
+                </h6>
                 <p class="text-sm">{{ item.message }}</p>
                 <p class="text-xs">{{ item.time }}</p>
               </div>

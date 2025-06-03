@@ -187,7 +187,7 @@ const submitData = async () => {
       await tc_UpdateTaskById(fixData, route.params.id);
 
       await successCreate().then(() => {
-        router.push("/modules/pelayanan/ticket");
+        router.push("/modules/work-order/koordinator/ticket");
       });
     } catch (error) {
       await failedCreate(error);
@@ -208,7 +208,7 @@ const cancelAdd = async () => {
   });
 
   if (result.isConfirmed) {
-    await router.push("/modules/pelayanan/ticket");
+    await router.push("/modules/work-order/koordinator/ticket");
   }
 };
 </script>

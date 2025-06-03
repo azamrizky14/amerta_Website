@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import DataStatsOne from "@/components/DataStats/DataStatsOne.vue";
+import DataTicketMtOutstanding from "@/components/DataStats/DataTicketMtOutstanding.vue";
+import DataTicketPsbOutstanding from "@/components/DataStats/DataTicketPsbOutstanding.vue";
 import ChartOne from "@/components/Charts/ChartOne.vue";
 import ChartThree from "@/components/Charts/ChartThree.vue";
 import ChartTwo from "@/components/Charts/ChartTwo.vue";
@@ -19,6 +21,11 @@ const indexStore = useIndexStore();
       class="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5"
     >
       <DataStatsOne />
+    </div>
+
+    <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-2 xl:gap-6">
+      <DataTicketMtOutstanding />
+      <DataTicketPsbOutstanding />
     </div>
 
     <div class="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
@@ -42,7 +49,7 @@ const indexStore = useIndexStore();
       <!-- <div class="col-span-12 xl:col-span-8">
         <TableOne />
       </div> -->
-      <!-- ====== Table One End --> 
+      <!-- ====== Table One End -->
 
       <!-- ====== Chat Card Start -->
       <!-- <ChatCard /> -->

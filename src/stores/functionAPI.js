@@ -493,6 +493,12 @@ export const tc_GetTaskById = async (id) => {
   return suppData
 }
 
+export const tc_GetTaskByTeknisi = async (domain, hierarchy, name, deleted) => {
+  const response = await axios.get(API+'/api/Tr_Task/getTrTaskByTeknisi/'+domain+'/'+hierarchy+'/'+name+'/'+deleted)
+  var suppData = response.data;
+  return suppData
+}
+
 export const tc_GetPrefixByDate = async (type, date) => {
   const response = await axios.get(API+'/api/Tr_Ticket/getTicketPrefix/'+type+'/'+date)
   var suppData = response.data;

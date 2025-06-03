@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { adminTeknis_GetTotalDataPerMonth } from '@/stores/functionAPI'
-import { getDateToday } from '@/stores/date'
-import { mdiRouterWireless, mdiTools } from '@mdi/js'
-import { useIndexStore } from '@/stores'
+import { ref, onMounted } from "vue";
+import {
+  adminTeknis_GetTotalDataPerMonth,
+  lokasi_getDataByType,
+  stock_getAllDataByLocation,
+} from "@/stores/functionAPI";
+import { getDateToday } from "@/stores/date";
+import { mdiRouterWireless, mdiTools } from "@mdi/js";
+import { useIndexStore } from "@/stores";
 
-const indexStore = useIndexStore()
-const totalPSB = ref(0)
-const totalMT = ref(0)
-const date = new Date()
-const option = { month: 'long', year: 'numeric' };
-const formatted = date.toLocaleDateString('en-us', option);
+const indexStore = useIndexStore();
+const totalPSB = ref(0);
+const totalMT = ref(0);
+const totalAset = ref(0);
+const date = new Date();
+const option = { month: "long", year: "numeric" };
+const formatted = date.toLocaleDateString("en-us", option);
 const cardItems = ref([
   {
     icon: `<svg
@@ -26,10 +31,10 @@ const cardItems = ref([
             fill=""
           />
         </svg>`,
-    title: 'Total PSB',
+    title: "Total PSB",
     total: totalPSB.value,
     // growthRate: 0.43,
-    growthRate: formatted
+    growthRate: formatted,
   },
   {
     icon: `<svg
@@ -45,11 +50,10 @@ const cardItems = ref([
               fill=""
             />
           </svg>`,
-    title: 'Total MT',
+    title: "Total MT",
     total: totalMT.value,
     // growthRate: 4.35,
-    growthRate: formatted
-
+    growthRate: formatted,
   },
   {
     icon: `<svg
@@ -69,9 +73,9 @@ const cardItems = ref([
               fill=""
             />
           </svg>`,
-    title: 'Total Product',
-    total: '2.450',
-    growthRate: 2.59
+    title: "Total Aset",
+    total: totalAset.value,
+    growthRate: 2.59,
   },
   {
     icon: `<svg
@@ -95,28 +99,43 @@ const cardItems = ref([
               fill=""
             />
           </svg>`,
-    title: 'Total Users',
-    total: '3.456',
-    growthRate: -0.95
-  }
-])
+    title: "Total Users",
+    total: "3.456",
+    growthRate: -0.95,
+  },
+]);
 
 onMounted(async () => {
-  const date = await getDateToday('yyyy-MM')
+  const data = await lokasi_getDataByType(indexStore.user.companyName, "gudang");
+
+  const dataAset = await Promise.all(
+    data.data.map(async (x) => {
+      return await stock_getAllDataByLocation(
+        indexStore.company.companyCode,
+        indexStore.user.hierarchyCode,
+        x.lokasi_nama
+      );
+    })
+  );
+  const total = dataAset.flat().length;
+  totalAset.value = total;
+  cardItems.value[2].total = total; // <--- Tambahkan ini
+
+  const date = await getDateToday("yyyy-MM");
 
   cardItems.value[0].total = await adminTeknis_GetTotalDataPerMonth(
     indexStore.company.companyCode,
     indexStore.user.hierarchyCode,
-    'PSB',
+    "PSB",
     date
-  )
+  );
   cardItems.value[1].total = await adminTeknis_GetTotalDataPerMonth(
     indexStore.company.companyCode,
     indexStore.user.hierarchyCode,
-    'MT',
+    "MT",
     date
-  )
-})
+  );
+});
 </script>
 
 <template>
@@ -144,7 +163,7 @@ onMounted(async () => {
         :class="{
           'text-meta-5': typeof item.growthRate === 'string',
           'text-meta-3': item.growthRate > 0,
-          'text-meta-1': item.growthRate < 0
+          'text-meta-1': item.growthRate < 0,
         }"
       >
         {{ item.growthRate }} <span v-if="typeof item.growthRate !== 'string'"> %</span>

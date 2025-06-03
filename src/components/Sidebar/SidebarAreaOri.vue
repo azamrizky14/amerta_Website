@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { useSidebarStore } from '@/stores/sidebar'
-import { onClickOutside } from '@vueuse/core'
-import { ref } from 'vue'
-import SidebarItem from './SidebarItem.vue'
+import { useSidebarStore } from "@/stores/sidebar";
+import { onClickOutside } from "@vueuse/core";
+import { ref } from "vue";
+import SidebarItem from "./SidebarItem.vue";
 
-const target = ref(null)
+const target = ref(null);
 
-const sidebarStore = useSidebarStore()
+const sidebarStore = useSidebarStore();
 
 onClickOutside(target, () => {
-  sidebarStore.isSidebarOpen = false
-})
+  sidebarStore.isSidebarOpen = false;
+});
 
 const menuGroups = ref([
   {
-    name: 'MENU',
+    name: "MENU",
     menuItems: [
       {
         icon: `<svg
@@ -42,9 +42,9 @@ const menuGroups = ref([
                     fill=""
                   />
                 </svg>`,
-        label: 'Dashboard',
-        route: '#',
-        children: [{ label: 'eCommerce', route: '/' }]
+        label: "Dashboard",
+        route: "#",
+        children: [{ label: "eCommerce", route: "/" }],
       },
       {
         icon: `<svg
@@ -60,8 +60,8 @@ const menuGroups = ref([
                     fill=""
                   />
                 </svg>`,
-        label: 'Calendar',
-        route: '/calendar'
+        label: "Calendar",
+        route: "/calendar",
       },
       {
         icon: `<svg
@@ -81,8 +81,8 @@ const menuGroups = ref([
                     fill=""
                   />
                 </svg>`,
-        label: 'Profile',
-        route: '/profile'
+        label: "Profile",
+        route: "/profile",
       },
       {
         icon: `<svg
@@ -114,12 +114,12 @@ const menuGroups = ref([
                     fill="white"
                   />
                 </svg>`,
-        label: 'Forms',
-        route: '#',
+        label: "Forms",
+        route: "#",
         children: [
-          { label: 'Form Elements', route: '/forms/form-elements' },
-          { label: 'Form Layout', route: '/forms/form-layout' }
-        ]
+          { label: "Form Elements", route: "/forms/form-elements" },
+          { label: "Form Layout", route: "/forms/form-layout" },
+        ],
       },
       {
         icon: `<svg
@@ -142,8 +142,8 @@ const menuGroups = ref([
                     </clipPath>
                   </defs>
                 </svg>`,
-        label: 'Tables',
-        route: '/tables'
+        label: "Tables",
+        route: "/tables",
       },
       {
         icon: `<svg
@@ -179,14 +179,14 @@ const menuGroups = ref([
                     fill=""
                   />
                 </svg>`,
-        label: 'Pages',
-        route: '#',
-        children: [{ label: 'Settings', route: '/pages/settings' }]
-      }
-    ]
+        label: "Pages",
+        route: "#",
+        children: [{ label: "Settings", route: "/pages/settings" }],
+      },
+    ],
   },
   {
-    name: 'OTHERS',
+    name: "OTHERS",
     menuItems: [
       {
         icon: `<svg
@@ -213,9 +213,9 @@ const menuGroups = ref([
                     </clipPath>
                   </defs>
                 </svg>`,
-        label: 'Charts',
-        route: '#',
-        children: [{ label: 'Basic Chart', route: '/charts/basic-chart' }]
+        label: "Charts",
+        route: "#",
+        children: [{ label: "Basic Chart", route: "/charts/basic-chart" }],
       },
       {
         icon: `<svg
@@ -246,12 +246,12 @@ const menuGroups = ref([
                     </clipPath>
                   </defs>
                 </svg>`,
-        label: 'UI Elements',
-        route: '#',
+        label: "UI Elements",
+        route: "#",
         children: [
-          { label: 'Alerts', route: '/ui-elements/alerts' },
-          { label: 'Buttons', route: '/ui-elements/buttons' }
-        ]
+          { label: "Alerts", route: "/ui-elements/alerts" },
+          { label: "Buttons", route: "/ui-elements/buttons" },
+        ],
       },
       {
         icon: `<svg
@@ -278,17 +278,17 @@ const menuGroups = ref([
                     </clipPath>
                   </defs>
                 </svg>`,
-        label: 'Authentication',
-        route: '#',
+        label: "Authentication",
+        route: "#",
         children: [
-          { label: 'Sign In', route: '/auth/signin' },
-          { label: 'Log In', route: '/login' },
-          { label: 'Sign Up', route: '/auth/signup' }
-        ]
-      }
-    ]
-  }
-])
+          { label: "Sign In", route: "/auth/signin" },
+          { label: "Log In", route: "/login" },
+          { label: "Sign Up", route: "/auth/signup" },
+        ],
+      },
+    ],
+  },
+]);
 </script>
 
 <template>
@@ -296,14 +296,14 @@ const menuGroups = ref([
     class="absolute left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0"
     :class="{
       'translate-x-0': sidebarStore.isSidebarOpen,
-      '-translate-x-full': !sidebarStore.isSidebarOpen
+      '-translate-x-full': !sidebarStore.isSidebarOpen,
     }"
     ref="target"
   >
     <!-- SIDEBAR HEADER -->
     <div class="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
       <router-link to="/">
-        <img src="@/assets/images/logo/logo.svg" alt="Logo" />
+        <img class="max-w-50 w-4/5" src="@/assets/images/logo/logo.svg" alt="Logo" />
       </router-link>
 
       <button class="block lg:hidden" @click="sidebarStore.isSidebarOpen = false">
@@ -329,7 +329,9 @@ const menuGroups = ref([
       <nav class="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
         <template v-for="menuGroup in menuGroups" :key="menuGroup.name">
           <div>
-            <h3 class="mb-4 ml-4 text-sm font-medium text-bodydark2">{{ menuGroup.name }}</h3>
+            <h3 class="mb-4 ml-4 text-sm font-medium text-bodydark2">
+              {{ menuGroup.name }}
+            </h3>
 
             <ul class="mb-6 flex flex-col gap-1.5">
               <SidebarItem

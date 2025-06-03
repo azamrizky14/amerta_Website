@@ -5,21 +5,14 @@ import BreadcrumbDefault from "@/components/Breadcrumbs/BreadcrumbDefault.vue";
 import DefaultCard from "@/components/Forms/DefaultCard.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
 import SelectGroup from "@/components/Forms/SelectGroup/SelectGroup.vue";
-import ButtonDynamic from "@/components/Buttons/ButtonDynamic.vue";
 
 import { useIndexStore } from "@/stores";
-import {
-  tc_CreateTask,
-  getUserInternalByRole,
-  tc_GetPrefixByDate,
-  tc_GetAllDataByDivisi,
-} from "@/stores/functionAPI";
+import { tc_CreateTask, tc_GetPrefixByDate } from "@/stores/functionAPI";
 import { ref, onMounted } from "vue";
 import router from "@/router";
 import Swal from "sweetalert2";
-import { getDateToday } from "@/stores/date";
+import { getDateToday, formatDate } from "@/stores/date";
 import { showLoading, successCreate, failedCreate, confirmDelete } from "@/stores/swal";
-import { mdiPlusCircleOutline, mdiTrashCanOutline } from "@mdi/js";
 
 const indexStore = useIndexStore();
 const pageTitle = ref("Koordinator Ticket - Tambah");
@@ -106,11 +99,9 @@ const dataPelanggan = [
   },
 ];
 
-const optionsTeknisi = ref([]);
-
 const options = [
   { label: "PSB", value: "PSB" },
-  { label: "Complain", value: "Complain" },
+  { label: "Complain", value: "MT" },
 ];
 
 onMounted(async () => {
@@ -176,7 +167,13 @@ const submitData = async () => {
 
       const fixData = { ...savedData.value };
 
-      fixData.Tr_ticket_kategori = fixData.Tr_ticket_kategori.value;
+      const dateForPrefix = await formatDate(fixData.Tr_ticket_created, "yy-MM-dd");
+      const prefix = await tc_GetPrefixByDate(
+        fixData.Tr_ticket_kategori.value,
+        dateForPrefix
+      );
+
+      fixData.Tr_ticket_kategori = fixData.Tr_ticket_kategori.label;
       if (Object.keys(savedData.value.Tr_ticket_data_pelanggan).length > 0) {
         fixData.Tr_ticket_data_pelanggan = {
           Tr_ticket_data_pelanggan_id: fixData.Tr_ticket_data_pelanggan.data_pelanggan_id,
@@ -195,10 +192,6 @@ const submitData = async () => {
             : "",
         };
       }
-      const prefix = await tc_GetPrefixByDate(
-        fixData.Tr_ticket_kategori,
-        fixData.Tr_ticket_created
-      );
       if (prefix) {
         fixData.Tr_ticket_id = prefix.nextId;
       } else {
@@ -244,7 +237,7 @@ const cancelAdd = async () => {
         <DefaultCard cardTitle="Masukan Data">
           <div class="flex flex-col gap-2 p-6.5">
             <div class="flex flex-col gap-2 xl:flex-row">
-              <div class="w-3/4">
+              <div class="w-2/3">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                   *Detail Tiket
                 </label>
@@ -255,7 +248,7 @@ const cancelAdd = async () => {
                   v-model="savedData.Tr_ticket_name"
                 />
               </div>
-              <div class="w-1/4">
+              <div class="w-1/3">
                 <label class="mb-3 block text-sm font-medium text-black dark:text-white">
                   *Kategori
                 </label>
